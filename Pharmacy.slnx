@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Pharmacy.API/Pharmacy.API.csproj" Id="17a2f24d-81b2-412e-bede-124ed674dd14" />
+    <Project Path="Pharmacy.Core/Pharmacy.Core.csproj" Id="89819509-a268-420f-8ad4-884448d8b0ee" />
+    <Project Path="Pharmacy.Infrastructure/Pharmacy.Infrastructure.csproj" Id="3cdc7f1d-ce10-4d1c-8dfb-501cf7be9c9d" />
+  </Folder>
+</Solution>
