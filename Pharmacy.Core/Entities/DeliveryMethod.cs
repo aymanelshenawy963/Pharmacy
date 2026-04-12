@@ -4,11 +4,10 @@ using System.Text;
 
 namespace Pharmacy.Core.Entities;
 
-public class Category : BaseEntity<string>
+public class DeliveryMethod : BaseEntity<int>
 {
     public string Name { get; set; }
     public string Description { get; set; }
-
-    // Navigation
-    public ICollection<Product> Products { get; set; } = new HashSet<Product>();
+    public decimal Price { get; set; }
+    public string DeliveryTime { get; set; }
 }

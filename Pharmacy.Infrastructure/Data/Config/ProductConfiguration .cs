@@ -8,18 +8,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.Property(p => p.Name)
-               .IsRequired()
-               .HasMaxLength(50);
-
-        builder.Property(p => p.Description)
-               .HasMaxLength(1000);
-
-        builder.Property(p => p.Price)
-               .HasColumnType("decimal(18,2)");
-
-        builder.Property(p => p.Image)
-               .HasMaxLength(500);
+        builder.Property(x => x.Name).IsRequired();
+        builder.Property(x => x.Description).IsRequired();
+        builder.Property(x => x.NewPrice).HasColumnType("decimal(18,2)");
+        builder.Property(x => x.OldPrice).HasColumnType("decimal(18,2)");
 
         builder.Property(p => p.Stock)
                .HasDefaultValue(0);

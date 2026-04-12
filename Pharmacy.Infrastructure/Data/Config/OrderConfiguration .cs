@@ -8,23 +8,30 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
     public void Configure(EntityTypeBuilder<Order> builder)
     {
-        builder.Property(o => o.TotalPrice)
+        builder.Property(o => o.BuyerEmail)
+               .IsRequired();
+
+        builder.Property(o => o.SubTotal)
                .HasColumnType("decimal(18,2)");
 
-        builder.Property(o => o.Address)
-               .IsRequired()
-               .HasMaxLength(300);
-
         builder.Property(o => o.Status)
-               .HasConversion<string>(); // 🔥 Enum
+               .HasConversion<string>();
 
-        builder.HasOne(o => o.User)
-               .WithMany(u => u.Orders)
-               .HasForeignKey(o => o.UserId);
+        // DeliveryMethod
+        builder.HasOne(o => o.DeliveryMethod)
+               .WithMany()
+               .HasForeignKey(o => o.DeliveryMethodId)
+               .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(o => o.OrderItems)
-               .WithOne(oi => oi.Order)
-               .HasForeignKey(oi => oi.OrderId)
-               .OnDelete(DeleteBehavior.Cascade);
+        // ShippingAddress (Value Object)
+        builder.OwnsOne(o => o.ShippingAddress, sa =>
+        {
+            sa.Property(a => a.FirstName).IsRequired();
+            sa.Property(a => a.LastName).IsRequired();
+            sa.Property(a => a.City).IsRequired();
+            sa.Property(a => a.Street).IsRequired();
+            sa.Property(a => a.State).IsRequired();
+            sa.Property(a => a.ZipCode).IsRequired();
+        });
     }
 }
