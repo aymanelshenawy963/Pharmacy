@@ -1,26 +1,22 @@
-﻿//using AutoMapper;
-//using Ecom.Core.DTO;
-//using Ecom.Core.Entites.Product;
+﻿
+using AutoMapper;
+using Pharmacy.Core.DTO;
+using Pharmacy.Core.Entities;
 
 namespace Pharmacy.Core.Mapping;
 
 
-//public class ProductMapping : Profile
-//{
-//    public ProductMapping()
-//    {
-//        CreateMap<Product, ProductDTO > ()
-//            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-//            .ReverseMap();
+public class ProductMapping : Profile
+{
+    public ProductMapping()
+    {
+        // Mapping from Product to ProductToReturnDto
+        CreateMap<Product, ProductToReturnDTO>()
+            .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
+            .ForMember(d => d.Images, o => o.MapFrom(s => s.Photos.Select(p => p.ImageName)));
 
-//        CreateMap<Photo, PhotoDTO>().ReverseMap();
+        // Reverse mapping for ProductDto to Product
+        CreateMap<ProductDTO, Product>();
 
-//        CreateMap<AddProductDTO, Product>()
-//            .ForMember(m=>m.Photos, opt=> opt.Ignore())
-//            .ReverseMap();
-//        CreateMap<UpdateProductDTO, Product>()
-//            .ForMember(m=>m.Photos, opt=> opt.Ignore())
-//            .ReverseMap();
-
-//    }
-//}
+    }
+}

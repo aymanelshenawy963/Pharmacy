@@ -6,8 +6,6 @@ using Pharmacy.Core.interfaces;
 
 namespace Pharmacy.API.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
 public class CategoriesController : BaseController
 {
     public CategoriesController(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)

@@ -35,6 +35,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 Stock = 100,
                 RequiresPrescription = false,
                 HasStrips = false,
+                StripCount = null,
                 TopSelling = true,
                 CategoryId = 1
             },
@@ -48,6 +49,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 Stock = 50,
                 RequiresPrescription = true,
                 HasStrips = false,
+                StripCount = null,
                 TopSelling = true,
                 CategoryId = 1
             }

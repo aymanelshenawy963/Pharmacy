@@ -45,7 +45,8 @@ public class UnitOfWork : IUnitOfWork
         //    _auth = auth;
 
             CategoryRepository = new CategoryRepository(_context);
-            //ProductRepository = new ProductRepository(_context, _mapper, _imageMangementService);
+            ProductRepository = new ProductRepository(_context);
+        //ProductRepository = new ProductRepository(_context, /*_mapper, _imageMangementService*/);
             PhotoRepository = new PhotoRepository(_context);
             //CustomerBasket = new CustomerBasketRepository(_redis);
             //Auth = new AuthRepository(_userManager, _emailService, _signInManager, _token, _context, _mapper);
