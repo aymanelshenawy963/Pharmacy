@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Pharmacy.API.Helpers;
 using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.interfaces;
@@ -17,11 +18,8 @@ public class CategoriesController : BaseController
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
 
-        if (categories == null || !categories.Any())
-            return NotFound("No categories found");
-
      var result = _mapper.Map<IReadOnlyList<CategoryToReturnDTO>>(categories);
-       return Ok(result);
+       return Ok(new ResponseAPI(200, data: result));
     }
 
     [HttpGet("{id}")]
@@ -29,30 +27,30 @@ public class CategoriesController : BaseController
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
         if (category == null)
-            return NotFound($"Category with ID {id} not found");
+            return NotFound(new ResponseAPI(404, $"Category with ID {id} not found"));
+
         var result = _mapper.Map<CategoryToReturnDTO>(category);
-        return Ok(result);
+        return Ok(new ResponseAPI(200, data: result));
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CategoryDTO categoryDto)
     {
-        if (categoryDto == null)
-            return BadRequest("Category data is required");
         var newCategory = _mapper.Map<Category>(categoryDto);
         await _unitOfWork.CategoryRepository.AddAsync(newCategory);
         var result = _mapper.Map<CategoryToReturnDTO>(newCategory);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, new ResponseAPI(201,data: result));
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CategoryDTO categoryDto)
     {
-        if (categoryDto == null)
-            return BadRequest("Category data is required");
+
         var existingCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
+
         if (existingCategory == null)
-            return NotFound($"Category with ID {id} not found");
+            return NotFound(new ResponseAPI(404, $"Category with ID {id} not found"));
+
         _mapper.Map(categoryDto, existingCategory);
         await _unitOfWork.CategoryRepository.UpdateAsync(existingCategory);
         return NoContent();
@@ -64,7 +62,7 @@ public class CategoriesController : BaseController
     {
         var existingCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
         if (existingCategory == null)
-            return NotFound($"Category with ID {id} not found");
+            return NotFound(new ResponseAPI(404, $"Category with ID {id} not found"));
         await _unitOfWork.CategoryRepository.DeleteAsync(id);
         return NoContent();
     }
