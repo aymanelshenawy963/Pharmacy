@@ -32,14 +32,15 @@ public class GenericRepositry<T> : IGenericRepositry<T> where T : class
         return await query.ToListAsync();
     }
 
-    public async Task<T> GetByIdAsync(int id)
+    public async Task<T?> GetByIdAsync(int id)
     {
         var entity = await _context.Set<T>().FindAsync(id);
+
         return entity;
 
     }
 
-    public async Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] inculdes)
+    public async Task<T?> GetByIdAsync(int id, params Expression<Func<T, object>>[] inculdes)
     {
         IQueryable<T> query = _context.Set<T>();
         foreach (var item in inculdes)
@@ -47,6 +48,7 @@ public class GenericRepositry<T> : IGenericRepositry<T> where T : class
             query = query.Include(item);
         }
         var entity = await query.FirstOrDefaultAsync(x => EF.Property<int>(x, "Id") == id);
+
         return entity;
     }
 
@@ -67,6 +69,9 @@ public class GenericRepositry<T> : IGenericRepositry<T> where T : class
     public async Task DeleteAsync(int id)
     {
         var entity = await _context.Set<T>().FindAsync(id);
+        if (entity == null)
+            throw new KeyNotFoundException("Entity not found");
+
         _context.Set<T>().Remove(entity);
         await _context.SaveChangesAsync();
     }

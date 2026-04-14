@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using Pharmacy.Core.Mapping;
 using Pharmacy.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(cfg => { }, typeof(MappingAssemblyMarker).Assembly);
 
 builder.Services.InfrastructureConfiguration(builder.Configuration);
 
@@ -17,6 +22,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

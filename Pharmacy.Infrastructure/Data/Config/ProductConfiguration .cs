@@ -22,5 +22,35 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                .WithMany(c => c.Products)
                .HasForeignKey(p => p.CategoryId)
                .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.HasData(
+            new Product
+            {
+                Id = 1,
+                Name = "Aspirin",
+                Description = "Pain reliever and anti-inflammatory medication.",
+                NewPrice = 9.99m,
+                OldPrice = 14.99m,
+                Stock = 100,
+                RequiresPrescription = false,
+                HasStrips = false,
+                TopSelling = true,
+                CategoryId = 1
+            },
+            new Product
+            {
+                Id = 2,
+                Name = "Amoxicillin",
+                Description = "Antibiotic used to treat bacterial infections.",
+                NewPrice = 19.99m,
+                OldPrice = 24.99m,
+                Stock = 50,
+                RequiresPrescription = true,
+                HasStrips = false,
+                TopSelling = true,
+                CategoryId = 1
+            }
+        );
     }
 }

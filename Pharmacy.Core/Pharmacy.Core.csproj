@@ -8,9 +8,13 @@
 
 
 	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="*" />
+
 		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
 		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.11.8" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.7" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.7" />
 	</ItemGroup>
 	
 
