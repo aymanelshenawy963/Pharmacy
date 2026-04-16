@@ -19,11 +19,6 @@
 	
 
   <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-	
-
-  <ItemGroup>
     <None Include="Entities\BasketItem.cs" />
   </ItemGroup>
 

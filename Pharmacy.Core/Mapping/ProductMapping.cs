@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities;
 
@@ -12,11 +11,12 @@ public class ProductMapping : Profile
     {
         // Mapping from Product to ProductToReturnDto
         CreateMap<Product, ProductToReturnDTO>()
-            .ForMember(d => d.CategoryName, o => o.MapFrom(s => s.Category.Name))
-            .ForMember(d => d.Images, o => o.MapFrom(s => s.Photos.Select(p => p.ImageName)));
+            .ForMember(dis => dis.CategoryName, o => o.MapFrom(src => src.Category.Name))
+            .ForMember(d => d.Photos, o => o.MapFrom(s => s.Photos.Select(p => p.ImageName)));
 
         // Reverse mapping for ProductDto to Product
-        CreateMap<ProductDTO, Product>();
+        CreateMap<ProductDTO, Product>()
+            .ForMember(d=>d.Photos,op=>op.Ignore());
 
     }
 }

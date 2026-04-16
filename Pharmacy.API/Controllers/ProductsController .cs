@@ -42,29 +42,24 @@ public class ProductsController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] ProductDTO productDto)
+    public async Task<IActionResult> Create([FromForm] ProductDTO productDto)
     {
-        var product = _mapper.Map<Product>(productDto);
-        await _unitOfWork.ProductRepository.AddAsync(product);
+        var result = await _unitOfWork.ProductRepository.AddAsync(productDto);
 
-        var productWithIncludes = await _unitOfWork.ProductRepository
-            .GetByIdAsync(product.Id, p => p.Category, p => p.Photos);
-
-        var productToReturn = _mapper.Map<ProductToReturnDTO>(productWithIncludes);
-        return CreatedAtAction(nameof(GetById), new { id = product.Id }, new ResponseAPI(201, data: productToReturn));
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = result.Id },
+            new ResponseAPI(201, data: result)
+        );
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ProductDTO productDto)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromForm] ProductDTO productDto)
     {
-        var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
+        var result = await _unitOfWork.ProductRepository.UpdateAsync(id, productDto);
 
-        if (product == null)
+        if (!result)
             return NotFound(new ResponseAPI(404));
-
-        _mapper.Map(productDto, product);
-
-        await _unitOfWork.ProductRepository.UpdateAsync(product);
 
         return NoContent();
     }
@@ -77,7 +72,7 @@ public class ProductsController : BaseController
         if (product == null)
             return NotFound(new ResponseAPI(404));
 
-        await _unitOfWork.ProductRepository.DeleteAsync(id);
+        await _unitOfWork.ProductRepository.DeleteAsync(product);
 
         return NoContent();
     }

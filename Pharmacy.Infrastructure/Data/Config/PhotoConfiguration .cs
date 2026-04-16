@@ -15,5 +15,9 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photo>
                .WithMany(p => p.Photos)
                .HasForeignKey(p => p.ProductId)
                .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasData(
+            new Photo { Id=1,ImageName="test",ProductId=1}
+            );
     }
 }
