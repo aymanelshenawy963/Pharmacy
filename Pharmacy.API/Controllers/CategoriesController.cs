@@ -19,7 +19,7 @@ public class CategoriesController : BaseController
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
 
      var result = _mapper.Map<IReadOnlyList<CategoryToReturnDTO>>(categories);
-       return Ok(new ResponseAPI(200, data: result));
+       return Ok(result);
     }
 
     [HttpGet("{id}")]
@@ -30,7 +30,7 @@ public class CategoriesController : BaseController
             return NotFound(new ResponseAPI(404, $"Category with ID {id} not found"));
 
         var result = _mapper.Map<CategoryToReturnDTO>(category);
-        return Ok(new ResponseAPI(200, data: result));
+        return Ok(result);
     }
 
     [HttpPost]
@@ -39,7 +39,7 @@ public class CategoriesController : BaseController
         var newCategory = _mapper.Map<Category>(categoryDto);
         await _unitOfWork.CategoryRepository.AddAsync(newCategory);
         var result = _mapper.Map<CategoryToReturnDTO>(newCategory);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, new ResponseAPI(201,data: result));
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpPut("{id}")]

@@ -22,7 +22,7 @@ public class ProductsController : BaseController
 
         var productsDto = _mapper.Map<List<ProductToReturnDTO>>(products);
 
-        return Ok(new ResponseAPI(200, data: productsDto));
+        return Ok(productsDto);
 
     }
 
@@ -37,7 +37,7 @@ public class ProductsController : BaseController
 
         var productDto = _mapper.Map<ProductToReturnDTO>(product);
 
-        return Ok(new ResponseAPI(200, data: productDto));
+        return Ok(productDto);
 
     }
 
@@ -49,7 +49,7 @@ public class ProductsController : BaseController
         return CreatedAtAction(
             nameof(GetById),
             new { id = result.Id },
-            new ResponseAPI(201, data: result)
+            result
         );
     }
 

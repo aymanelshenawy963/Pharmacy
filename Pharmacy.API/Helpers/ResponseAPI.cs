@@ -4,13 +4,11 @@ public class ResponseAPI
 {
     public int StatusCode { get; set; }
     public string? Message { get; set; }
-    public object? Data { get; set; }
 
-    public ResponseAPI(int statusCode, string? message = null, object? data = null)
+    public ResponseAPI(int statusCode, string? message = null)
     {
         StatusCode = statusCode;
         Message = message ?? GetMessageFromStatusCode(statusCode);
-        Data = data;
     }
 
     private static string GetMessageFromStatusCode(int statusCode)
