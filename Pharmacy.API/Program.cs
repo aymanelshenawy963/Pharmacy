@@ -6,6 +6,18 @@ using Pharmacy.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactAppPolicy", policy =>
+    {
+        policy.AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .WithOrigins("https://localhost:3000");// Replace with your React app's URL;
+    });
+});
+
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -27,6 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("ReactAppPolicy");
 app.UseMiddleware<ExceptionsMiddleware>();
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");

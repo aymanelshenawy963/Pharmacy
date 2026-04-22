@@ -4,6 +4,7 @@ using Pharmacy.API.Helpers;
 using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.interfaces;
+using Pharmacy.Core.Sharing;
 
 namespace Pharmacy.API.Controllers;
 
@@ -15,14 +16,14 @@ public class ProductsController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] ProductParams productParams)
     {
         var products = await _unitOfWork.ProductRepository
-          .GetAllAsync(p => p.Category, p => p.Photos);
+          .GetAllAsync(productParams);
 
-        var productsDto = _mapper.Map<List<ProductToReturnDTO>>(products);
+        var totalCount = await _unitOfWork.ProductRepository.CountAsync();
 
-        return Ok(productsDto);
+        return Ok(new Pagination<ProductToReturnDTO>(productParams.PageNumber,productParams.PageSize,totalCount,products));
 
     }
 

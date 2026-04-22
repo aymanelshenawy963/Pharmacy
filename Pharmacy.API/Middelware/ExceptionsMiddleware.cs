@@ -11,7 +11,7 @@ public class ExceptionsMiddleware
     private readonly IMemoryCache _memoryCache;
     private readonly TimeSpan _rateLimitWindow = TimeSpan.FromSeconds(30);
 
-    public ExceptionsMiddleware(RequestDelegate next, IHostEnvironment environment, IMemoryCache memoryCache = null!)
+    public ExceptionsMiddleware(RequestDelegate next, IHostEnvironment environment, IMemoryCache memoryCache)
     {
         _next = next;
         _environment = environment;
@@ -26,7 +26,7 @@ public class ExceptionsMiddleware
 
             if (!IsRequestAllowed(context))
             {
-                context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                context.Response.StatusCode = 429; // Too Many Requests
                 context.Response.ContentType = "application/json";
 
                 var response = new ApiExceptions(
@@ -44,7 +44,7 @@ public class ExceptionsMiddleware
         }
         catch (Exception ex)
         {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
 
             var response = _environment.IsDevelopment()
@@ -59,9 +59,9 @@ public class ExceptionsMiddleware
 
     private bool IsRequestAllowed(HttpContext context)
     {
-        var clientIp = context.Connection.RemoteIpAddress?.ToString();
+        var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unKnown";
         var cacheKey = $"RateLimit_{clientIp}";
-        var dateNow = DateTime.Now;
+        var dateNow = DateTime.UtcNow;
 
         var (timestamp, count) = _memoryCache.GetOrCreate(cacheKey, entry =>
         {

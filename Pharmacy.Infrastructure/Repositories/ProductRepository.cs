@@ -4,6 +4,7 @@ using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.Interfaces;
 using Pharmacy.Core.Services;
+using Pharmacy.Core.Sharing;
 using Pharmacy.Infrastructure.Data;
 
 
@@ -22,6 +23,52 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
     }
 
 
+    public async Task<List<ProductToReturnDTO>> GetAllAsync(ProductParams productParams)
+    {
+        var query = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Photos)
+            .AsNoTracking();
+
+        //filtering by word in name or description
+        if (!string.IsNullOrEmpty(productParams.Search))
+        {
+            var searchWords = productParams.Search.Split(' ');
+            foreach (var word in searchWords)
+            {
+                var temp = word.Trim().ToLower();
+                query = query.Where(x => x.Name.ToLower().Contains(temp) || x.Description.ToLower().Contains(temp));
+            }
+        }
+
+
+        //filtering by category Id
+        if (productParams.CategoryId.HasValue) 
+            query = query.Where(x=>x.CategoryId == productParams.CategoryId);
+
+        if (!string.IsNullOrEmpty(productParams.Sort))
+        {
+            query = productParams.Sort.ToLower() switch
+            {
+                "priceasc" => query.OrderBy(p => p.NewPrice),
+                "pricedesc" => query.OrderByDescending(p => p.NewPrice),
+                "nameasc" => query.OrderBy(p => p.Name),
+                "namedesc" => query.OrderByDescending(p => p.Name),
+                _ => query
+            };
+        }
+
+
+        query = query.Skip((productParams.PageNumber - 1) * productParams.PageSize)
+                     .Take(productParams.PageSize);
+
+
+
+        var products = await query.ToListAsync();
+
+        return _mapper.Map<List<ProductToReturnDTO>>(products);
+    }
+
     public async Task<ProductToReturnDTO> AddAsync(ProductDTO productDTO)
     {
         var product = _mapper.Map<Product>(productDTO);
@@ -30,28 +77,28 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
         await _context.SaveChangesAsync();
 
         // 🟢 رفع الصور
-        var imagePaths = await _imageMangementService
-            .AddImageAsync(productDTO.Photos, productDTO.Name);
-
-        var photos = imagePaths.Select(path => new Photo
+        if (productDTO.Photos != null && productDTO.Photos.Count > 0)
         {
-            ImageName = path,
-            ProductId = product.Id
-        }).ToList();
+            var imagePaths = await _imageMangementService
+                .AddImageAsync(productDTO.Photos, productDTO.Name);
 
-        await _context.Photos.AddRangeAsync(photos);
-        await _context.SaveChangesAsync();
+            var photos = imagePaths.Select(path => new Photo
+            {
+                ImageName = path,
+                ProductId = product.Id
+            }).ToList();
 
-        // 🟢 رجّع المنتج بالـ includes
+            await _context.Photos.AddRangeAsync(photos);
+            await _context.SaveChangesAsync();
+        }
+
         var productWithIncludes = await _context.Products
             .Include(p => p.Category)
             .Include(p => p.Photos)
             .FirstOrDefaultAsync(p => p.Id == product.Id);
 
-        // 🟢 mapping
         return _mapper.Map<ProductToReturnDTO>(productWithIncludes);
     }
-
 
 
     public async Task<bool> UpdateAsync(int id, ProductDTO productDTO)
@@ -68,25 +115,30 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
         _mapper.Map(productDTO, product);
 
         // 🟢 حذف الصور القديمة من السيرفر
-        foreach (var photo in product.Photos)
+        if (product.Photos != null && product.Photos.Any())
         {
-            _imageMangementService.DeleteImage(photo.ImageName);
+            foreach (var photo in product.Photos)
+            {
+                _imageMangementService.DeleteImage(photo.ImageName);
+            }
+
+            _context.Photos.RemoveRange(product.Photos);
         }
 
-        // 🟢 حذف من DB
-        _context.Photos.RemoveRange(product.Photos);
-
         // 🟢 رفع الصور الجديدة
-        var imagePaths = await _imageMangementService
-            .AddImageAsync(productDTO.Photos, productDTO.Name);
-
-        var newPhotos = imagePaths.Select(path => new Photo
+        if (productDTO.Photos != null && productDTO.Photos.Count > 0)
         {
-            ImageName = path,
-            ProductId = product.Id
-        }).ToList();
+            var imagePaths = await _imageMangementService
+                .AddImageAsync(productDTO.Photos, productDTO.Name);
 
-        await _context.Photos.AddRangeAsync(newPhotos);
+            var newPhotos = imagePaths.Select(path => new Photo
+            {
+                ImageName = path,
+                ProductId = product.Id
+            }).ToList();
+
+            await _context.Photos.AddRangeAsync(newPhotos);
+        }
 
         await _context.SaveChangesAsync();
 
