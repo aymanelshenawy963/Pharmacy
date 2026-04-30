@@ -23,7 +23,7 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
     }
 
 
-    public async Task<List<ProductToReturnDTO>> GetAllAsync(ProductParams productParams)
+    public async Task<ProductsToReturnDTO> GetAllAsync(ProductParams productParams)
     {
         var query = _context.Products
             .Include(p => p.Category)
@@ -41,7 +41,6 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
             }
         }
 
-
         //filtering by category Id
         if (productParams.CategoryId.HasValue) 
             query = query.Where(x=>x.CategoryId == productParams.CategoryId);
@@ -58,15 +57,20 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
             };
         }
 
+        ProductsToReturnDTO productsToReturnDTO = new ProductsToReturnDTO
+        {
+            TotalCount = await query.CountAsync()
+        };
+
 
         query = query.Skip((productParams.PageNumber - 1) * productParams.PageSize)
                      .Take(productParams.PageSize);
 
-
-
         var products = await query.ToListAsync();
 
-        return _mapper.Map<List<ProductToReturnDTO>>(products);
+        productsToReturnDTO.Products = _mapper.Map<List<ProductToReturnDTO>>(products);
+
+        return productsToReturnDTO;
     }
 
     public async Task<ProductToReturnDTO> AddAsync(ProductDTO productDTO)

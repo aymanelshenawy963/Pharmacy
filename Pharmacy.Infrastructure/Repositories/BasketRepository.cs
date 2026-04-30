@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Pharmacy.Core.interfaces;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,27 +7,24 @@ using System.Text.Json;
 
 namespace Pharmacy.Infrastructure.Repositories;
 
-public class BasketRepository
+public class BasketRepository(IConnectionMultiplexer redis) : IBasketRepository
 {
-    private readonly IDatabase _database;
+    private readonly IDatabase _database = redis.GetDatabase();
 
-    public BasketRepository(IConnectionMultiplexer redis)
-    {
-        _database = redis.GetDatabase();
-    }
-    public async Task<Basket> GetBasketAsync(string id)
+    public async Task<Basket?> GetBasketAsync(string id)
     {
         var result = await _database.StringGetAsync(id);
 
-        if (result.IsNullOrEmpty) return null;
+        if (!result.IsNullOrEmpty)
+            return JsonSerializer.Deserialize<Basket>(result.ToString());
 
-        return JsonSerializer.Deserialize<Basket>(result.ToString());
+        return null;
     }
-    public async Task<Basket> UpdateBasketAsync(Basket basket)
+    public async Task<Basket?> UpdateBasketAsync(Basket basket)
     {
-        var _basket = await _database.StringSetAsync(basket.Id, JsonSerializer.Serialize(basket), TimeSpan.FromDays(3));
+        var isStored = await _database.StringSetAsync(basket.Id, JsonSerializer.Serialize(basket), TimeSpan.FromDays(3));
 
-        if (_basket)
+        if (isStored)
         {
             return await GetBasketAsync(basket.Id);
         }

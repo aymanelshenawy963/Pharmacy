@@ -9,7 +9,7 @@ namespace Pharmacy.Core.Interfaces;
 
 public interface IProductRepository : IGenericRepositry<Product>
 {
-    Task<List<ProductToReturnDTO>> GetAllAsync(ProductParams productParams);
+    Task<ProductsToReturnDTO> GetAllAsync(ProductParams productParams);
     Task<ProductToReturnDTO> AddAsync(ProductDTO productDTO);
     Task<bool> UpdateAsync(int id, ProductDTO productDTO);
     Task<bool> DeleteAsync(Product product);

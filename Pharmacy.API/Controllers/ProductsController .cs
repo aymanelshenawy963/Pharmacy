@@ -21,9 +21,7 @@ public class ProductsController : BaseController
         var products = await _unitOfWork.ProductRepository
           .GetAllAsync(productParams);
 
-        var totalCount = await _unitOfWork.ProductRepository.CountAsync();
-
-        return Ok(new Pagination<ProductToReturnDTO>(productParams.PageNumber,productParams.PageSize,totalCount,products));
+        return Ok(new Pagination<ProductToReturnDTO>(productParams.PageNumber,productParams.PageSize,products.TotalCount,products.Products));
 
     }
 

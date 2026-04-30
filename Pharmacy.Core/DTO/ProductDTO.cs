@@ -37,3 +37,10 @@ public class ProductToReturnDTO
     public string CategoryName { get; set; }
     public List<string> Photos { get; set; }
 }
+
+public class ProductsToReturnDTO
+{
+    public List<ProductToReturnDTO> Products { get; set; }
+    public int TotalCount { get; set; }
+
+}

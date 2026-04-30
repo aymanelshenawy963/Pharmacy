@@ -2,10 +2,20 @@
 
 public class Basket
 {
-    public string Id { get; set; }
+    public Basket()
+    {
 
-    public string PaymentIntentId { get; set; }
-    public string ClientSecret { get; set; }
+    }
 
-    public List<BasketItem> BasketItems { get; set; } = new();
+    public Basket(string id)
+    {
+        Id = id;
+    }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    public string? PaymentIntentId { get; set; }
+    public string? ClientSecret { get; set; }
+
+
+    public List<BasketItem> Items { get;  set; } = new();
 }

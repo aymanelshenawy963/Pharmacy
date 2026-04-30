@@ -14,7 +14,7 @@ builder.Services.AddCors(options =>
         policy.AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()
-              .WithOrigins("https://localhost:3000");// Replace with your React app's URL;
+              .WithOrigins("http://localhost:3000");// Replace with your React app's URL;
     });
 });
 
@@ -41,6 +41,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("ReactAppPolicy");
 app.UseMiddleware<ExceptionsMiddleware>();
+app.UseStaticFiles();
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 

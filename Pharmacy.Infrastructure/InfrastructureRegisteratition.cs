@@ -13,6 +13,7 @@ using Pharmacy.Infrastructure.Data;
 using Pharmacy.Infrastructure.Repositories;
 using Pharmacy.Infrastructure.Repositriers;
 using Pharmacy.Infrastructure.Repositriers.Service;
+using StackExchange.Redis;
 using Stripe.Climate;
 
 namespace Pharmacy.Infrastructure;
@@ -25,10 +26,15 @@ public static class InfrastructureRegisteratition
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IImageMangementService, ImageMangementService>();
         services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
-        //services.AddScoped<IEmailService, EmailService>();
-        //services.AddScoped<IGenerateToken, GenerateToken>();
-        //services.AddScoped<IOrderService, OrderService>();
-        //services.AddScoped<IPaymentService, PaymentService>();
+
+        //apply redis connection
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var redisConnection = configuration.GetConnectionString("Redis")
+                                  ?? throw new InvalidOperationException("Redis connection string not found");
+            var configurationOptions = ConfigurationOptions.Parse(redisConnection);
+            return ConnectionMultiplexer.Connect(configurationOptions);
+        });
 
         // applyDbContext
         services.AddDbContext<AppDbContext>(op =>
