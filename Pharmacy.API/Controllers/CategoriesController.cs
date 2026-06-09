@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pharmacy.API.Helpers;
+using Pharmacy.Core.Consts;
 using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.interfaces;
 
 namespace Pharmacy.API.Controllers;
 
+[Authorize(Roles = DefaultRoles.Admin)]
 public class CategoriesController : BaseController
 {
     public CategoriesController(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
@@ -22,7 +25,7 @@ public class CategoriesController : BaseController
        return Ok(result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}")] 
     public async Task<IActionResult> GetById(int id)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);

@@ -1,19 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Pharmacy.Core.Entities.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Pharmacy.Core.Entities;
 
-public class User : IdentityUser
+public sealed class User : IdentityUser
 {
-    public string DisplayName { get; set; }
-    public Address Address { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
 
-    public UserRole Role { get; set; } = UserRole.User;
+    public bool IsDisabled { get; set; }
 
-    public bool IsActive { get; set; } = true;
+    public Address? Address { get; set; }
 
-
+    public List<RefreshToken> RefreshTokens { get; set; } = [];
 }

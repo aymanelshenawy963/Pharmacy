@@ -6,15 +6,26 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<None Update="Templates\EmailConfirmation.html">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Templates\ForgetPassword.html">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="*" />
 
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.1" />
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.11.8" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.1.7" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+
 	</ItemGroup>
 	
 

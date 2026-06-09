@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pharmacy.API.Controllers;
 using Pharmacy.API.Helpers;
+using Pharmacy.Core.Consts;
 using Pharmacy.Core.interfaces;
 
+[Authorize(Roles = DefaultRoles.Customer)]
 public class BasketsController : BaseController
 {
     public BasketsController(IUnitOfWork unitOfWork, IMapper mapper)

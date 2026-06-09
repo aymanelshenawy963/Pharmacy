@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Http;
-namespace Pharmacy.Core.Services;
+namespace Pharmacy.Core.Interfaces.Services;
 
 public interface IImageMangementService
 {

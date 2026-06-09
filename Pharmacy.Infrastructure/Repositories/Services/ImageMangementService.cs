@@ -1,6 +1,6 @@
-﻿using Pharmacy.Core.Services;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using Pharmacy.Core.Interfaces.Services;
 
 
 namespace Pharmacy.Infrastructure.Repositriers.Service;

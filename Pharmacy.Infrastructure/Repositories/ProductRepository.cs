@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.Interfaces;
-using Pharmacy.Core.Services;
+using Pharmacy.Core.Interfaces.Services;
 using Pharmacy.Core.Sharing;
 using Pharmacy.Infrastructure.Data;
 

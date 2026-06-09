@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Pharmacy.Api.Middelware;
 using Pharmacy.Core.Mapping;
 using Pharmacy.Infrastructure;
