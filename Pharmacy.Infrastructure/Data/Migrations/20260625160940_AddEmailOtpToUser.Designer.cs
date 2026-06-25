@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pharmacy.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Pharmacy.Infrastructure.Data;
 namespace Pharmacy.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260625160940_AddEmailOtpToUser")]
+    partial class AddEmailOtpToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -746,6 +749,28 @@ namespace Pharmacy.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Pharmacy.Core.Entities.User", b =>
                 {
+                    b.OwnsOne("Pharmacy.Core.Entities.EmailOtp", "EmailOtp", b1 =>
+                        {
+                            b1.Property<string>("UserId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("Code")
+                                .HasMaxLength(6)
+                                .HasColumnType("nvarchar(6)")
+                                .HasColumnName("EmailOtpCode");
+
+                            b1.Property<DateTime?>("ExpiresOn")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("EmailOtpExpiresOn");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("AspNetUsers");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
                     b.OwnsMany("Pharmacy.Core.Entities.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("UserId")
@@ -778,53 +803,7 @@ namespace Pharmacy.Infrastructure.Data.Migrations
                                 .HasForeignKey("UserId");
                         });
 
-                    b.OwnsOne("Pharmacy.Core.Entities.EmailOtp", "EmailOtp", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Code")
-                                .HasMaxLength(6)
-                                .HasColumnType("nvarchar(6)")
-                                .HasColumnName("EmailOtpCode");
-
-                            b1.Property<DateTime?>("ExpiresOn")
-                                .HasColumnType("datetime2")
-                                .HasColumnName("EmailOtpExpiresOn");
-
-                            b1.HasKey("UserId");
-
-                            b1.ToTable("AspNetUsers");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
-                    b.OwnsOne("Pharmacy.Core.Entities.EmailOtp", "PasswordResetOtp", b1 =>
-                        {
-                            b1.Property<string>("UserId")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("Code")
-                                .HasMaxLength(6)
-                                .HasColumnType("nvarchar(6)")
-                                .HasColumnName("PasswordResetOtpCode");
-
-                            b1.Property<DateTime?>("ExpiresOn")
-                                .HasColumnType("datetime2")
-                                .HasColumnName("PasswordResetOtpExpiresOn");
-
-                            b1.HasKey("UserId");
-
-                            b1.ToTable("AspNetUsers");
-
-                            b1.WithOwner()
-                                .HasForeignKey("UserId");
-                        });
-
                     b.Navigation("EmailOtp");
-
-                    b.Navigation("PasswordResetOtp");
 
                     b.Navigation("RefreshTokens");
                 });

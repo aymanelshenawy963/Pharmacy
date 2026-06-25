@@ -1,4 +1,4 @@
-﻿using Pharmacy.Core.DTO;
+using Pharmacy.Core.DTO;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +12,7 @@ public interface IAuthService
     Task<bool> RevokeRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken);
     Task<(bool IsSuccess, string? Error)> RegisterAsync(RegisterDTO registerDTO, CancellationToken cancellationToken);
     Task<(bool IsSuccess, string? Error)> ConfirmEmailAsync(ConfirmEmailDTO requst);
+    Task<(bool IsSuccess, string? Error)> ConfirmEmailByOtpAsync(ConfirmEmailOtpDTO request);
     Task<(bool IsSuccess, string? Error)> ResendConfirmationEmailAsync(ResendConfirmEmailDTO request);
     Task<(bool IsSuccess, string? Error)> SendResetPasswordCodeasync(string email);
     Task<(bool IsSuccess, string? Error)> ResetPasswordAsync(ResetPasswordDTO request);

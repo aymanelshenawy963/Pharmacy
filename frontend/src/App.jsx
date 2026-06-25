@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import PageLoader from './components/PageLoader';
+import AuthHeader from './components/AuthHeader';
 
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
@@ -20,19 +21,28 @@ const TermsConditions = lazy(() => import('./pages/TermsConditions'));
 const CancelOrder = lazy(() => import('./pages/CancelOrder'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+// Auth Pages
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const ConfirmEmail = lazy(() => import('./pages/ConfirmEmail'));
+const ResendConfirmationEmail = lazy(() => import('./pages/ResendConfirmationEmail'));
+const CheckEmail = lazy(() => import('./pages/CheckEmail'));
+
+import ProtectedRoute from './routes/ProtectedRoute';
+
 function ScrollToTop() {
     const location = useLocation();
-
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [location.pathname]);
-
     return null;
 }
 
+// ── Full site layout (with Navbar + Footer) ───────────────────────────────────
 function Layout() {
     const location = useLocation();
-
     return (
         <div className="min-h-screen bg-hero-gradient text-slate-900">
             <ScrollToTop />
@@ -59,22 +69,63 @@ function Layout() {
     );
 }
 
+// ── Auth layout (clean — no Navbar, no Footer) ────────────────────────────────
+function AuthLayout() {
+    const location = useLocation();
+    return (
+        <div className="min-h-screen bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
+            <ScrollToTop />
+            <AuthHeader />
+            <Suspense fallback={<PageLoader />}>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -16 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                    >
+                        <Outlet />
+                    </motion.div>
+                </AnimatePresence>
+            </Suspense>
+        </div>
+    );
+}
+
 export default function App() {
     return (
         <Routes>
+            {/* ── Main site routes (Navbar + Footer) ── */}
             <Route element={<Layout />}>
                 <Route index element={<Home />} />
                 <Route path="products" element={<Products />} />
                 <Route path="products/:id" element={<ProductDetail />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="prescription" element={<Prescription />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="about" element={<About />} />
                 <Route path="faq" element={<FAQ />} />
                 <Route path="privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="terms-conditions" element={<TermsConditions />} />
                 <Route path="cancel-order" element={<CancelOrder />} />
+
+                {/* Protected routes */}
+                <Route element={<ProtectedRoute />}>
+                    <Route path="cart" element={<Cart />} />
+                    <Route path="prescription" element={<Prescription />} />
+                </Route>
+
                 <Route path="*" element={<NotFound />} />
+            </Route>
+
+            {/* ── Auth routes (no Navbar, no Footer) ── */}
+            <Route element={<AuthLayout />}>
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="confirm-email" element={<ConfirmEmail />} />
+                <Route path="resend-confirmation" element={<ResendConfirmationEmail />} />
+                <Route path="check-email" element={<CheckEmail />} />
             </Route>
         </Routes>
     );

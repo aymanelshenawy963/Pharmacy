@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { footerLinks } from '../data/products';
 import Icon from './Icons';
 import ThemeToggle from './ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LogOut, User } from 'lucide-react';
 
 const navLinks = footerLinks.filter((link) => link.label !== 'Home');
 
 export default function Navbar() {
     const { cartCount } = useCart();
+    const { user, isAuthenticated, logout } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
     useEffect(() => {
         setMenuOpen(false);
@@ -40,6 +49,27 @@ export default function Navbar() {
 
                 <div className="hidden items-center gap-4 lg:flex">
                     <ThemeToggle />
+                    
+                    {isAuthenticated ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-[rgb(var(--color-text))] flex items-center gap-2 px-3 py-2 rounded-xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]">
+                                <User size={16} className="text-[rgb(var(--color-primary))]" />
+                                {user?.firstName}
+                            </span>
+                            <button
+                                onClick={handleLogout}
+                                className="glass-button bg-surface text-text hover:bg-bg-subtle !px-3"
+                                title="Sign Out"
+                            >
+                                <LogOut size={18} />
+                            </button>
+                        </div>
+                    ) : (
+                        <Link to="/login" className="glass-button bg-[rgb(var(--color-primary))] text-white hover:bg-[rgb(var(--color-primary-dark))] !px-5 !py-2">
+                            Sign In
+                        </Link>
+                    )}
+
                     <Link
                         to="/cart"
                         className="glass-button bg-surface text-text hover:bg-bg-subtle relative"
@@ -101,6 +131,33 @@ export default function Navbar() {
                                         )}
                                     </span>
                                 </NavLink>
+
+                                <div className="my-2 border-t border-[rgb(var(--color-border))]"></div>
+                                
+                                {isAuthenticated ? (
+                                    <>
+                                        <div className="flex items-center gap-3 px-3 py-3 text-sm font-medium text-[rgb(var(--color-text))]">
+                                            <div className="h-8 w-8 rounded-full bg-[rgb(var(--color-primary))]/10 flex items-center justify-center">
+                                                <User size={16} className="text-[rgb(var(--color-primary))]" />
+                                            </div>
+                                            <div>
+                                                <p>{user?.firstName} {user?.lastName}</p>
+                                                <p className="text-xs text-[rgb(var(--color-text-muted))]">{user?.email}</p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={handleLogout}
+                                            className="flex w-full items-center gap-2 p-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                                        >
+                                            <LogOut size={18} />
+                                            Sign Out
+                                        </button>
+                                    </>
+                                ) : (
+                                    <Link to="/login" className="flex w-full items-center justify-center p-3 rounded-xl text-sm font-medium bg-[rgb(var(--color-primary))] text-white hover:bg-[rgb(var(--color-primary-dark))] transition-colors">
+                                        Sign In
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </motion.div>

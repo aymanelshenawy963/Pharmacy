@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -483,9 +483,9 @@
                                         <div class="f-fallback">
                                             <h1>Hi {{name}},</h1>
                                             <p>
-                                                To confirm your email, please click the button below:
+                                                Thank you for registering at <strong>Jaya Medical Store</strong>. To confirm your email address, please use the verification code below:
                                             </p>
-                                            <!-- Action -->
+                                            <!-- OTP Code Block -->
                                             <table class="body-action"
                                                    align="center"
                                                    width="100%"
@@ -494,8 +494,6 @@
                                                    role="presentation">
                                                 <tr>
                                                     <td align="center">
-                                                        <!-- Border based button
-                                                        https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
                                                         <table width="100%"
                                                                border="0"
                                                                cellspacing="0"
@@ -503,29 +501,19 @@
                                                                role="presentation">
                                                             <tr>
                                                                 <td align="center">
-                                                                    <a href="{{action_url}}"
-                                                                       class="f-fallback button button--green"
-                                                                       target="_blank">Verify email address</a>
+                                                                    <div style="display:inline-block;background-color:#22bc66;border-radius:8px;padding:18px 36px;margin:12px 0;">
+                                                                        <span style="font-size:36px;font-weight:bold;letter-spacing:12px;color:#ffffff;font-family:monospace;">{{otp}}</span>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                         </table>
                                                     </td>
                                                 </tr>
                                             </table>
-                                            <p>Thanks, <br />Survey Basket team</p>
-                                            <!-- Sub copy -->
-                                            <table class="body-sub" role="presentation">
-                                                <tr>
-                                                    <td>
-                                                        <p class="f-fallback sub">
-                                                            If you’re having trouble with the button above,
-                                                            copy and paste the URL below into your web
-                                                            browser.
-                                                        </p>
-                                                        <p class="f-fallback sub">{{action_url}}</p>
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                            <p style="text-align:center;color:#85878e;font-size:13px;">
+                                                This code expires in <strong>15 minutes</strong>. Do not share it with anyone.
+                                            </p>
+                                            <p>Thanks,<br />Jaya Medical Store team</p>
                                         </div>
                                     </td>
                                 </tr>

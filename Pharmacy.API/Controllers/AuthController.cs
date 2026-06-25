@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pharmacy.API.Helpers;
 using Pharmacy.Core.DTO;
@@ -66,6 +66,18 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         if (isSuccess)
             return Ok(new ResponseAPI(200,"Email confirmed successfully, you can now log in"));
+
+        return error == "Email is already confirmed" ? Conflict(new ResponseAPI(409, error))
+             : BadRequest(new ResponseAPI(400, error));
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmailByOtp([FromBody] ConfirmEmailOtpDTO request)
+    {
+        var (isSuccess, error) = await _authService.ConfirmEmailByOtpAsync(request);
+
+        if (isSuccess)
+            return Ok(new ResponseAPI(200, "Email confirmed successfully, you can now log in"));
 
         return error == "Email is already confirmed" ? Conflict(new ResponseAPI(409, error))
              : BadRequest(new ResponseAPI(400, error));

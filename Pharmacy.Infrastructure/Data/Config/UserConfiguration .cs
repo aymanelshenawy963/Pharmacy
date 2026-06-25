@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Pharmacy.Core.Consts;
@@ -19,11 +19,19 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder
        .OwnsMany(u => u.RefreshTokens).ToTable("RefreshTokens");
 
+        builder.OwnsOne(u => u.EmailOtp, otp =>
+        {
+            otp.Property(o => o.Code).HasColumnName("EmailOtpCode").HasMaxLength(6);
+            otp.Property(o => o.ExpiresOn).HasColumnName("EmailOtpExpiresOn");
+        });
+
+        builder.OwnsOne(u => u.PasswordResetOtp, otp =>
+        {
+            otp.Property(o => o.Code).HasColumnName("PasswordResetOtpCode").HasMaxLength(6);
+            otp.Property(o => o.ExpiresOn).HasColumnName("PasswordResetOtpExpiresOn");
+        });
 
         // Seed the default admin user
-
-        //var passwordHasher = new PasswordHasher<User>();
-
         builder.HasData(new User
         {
             Id = DefaultUsers.AdminId,
@@ -36,11 +44,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             SecurityStamp = DefaultUsers.AdminSecurityStamp,
             ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
             EmailConfirmed = true,
-            //PasswordHash = passwordHasher.HashPassword(null, DefaultUsers.AdminPassword),
             PasswordHash = DefaultUsers.AdminPasswordHash,
         });
-
-
-
     }
 }

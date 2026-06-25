@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -139,12 +139,15 @@ public class AuthService(UserManager<User> userManager,
         if (!user.EmailConfirmed)
             return (false, "Email is not confirmed");
 
-        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        var otp = GenerateOtp();
+        user.PasswordResetOtp ??= new EmailOtp();
+        user.PasswordResetOtp.Code = otp;
+        user.PasswordResetOtp.ExpiresOn = DateTime.UtcNow.AddMinutes(15);
+        await _userManager.UpdateAsync(user);
 
-        _logger.LogWarning("Reset password code: {code}", code);
+        _logger.LogWarning("Reset password code for {email}: {otp}", user.Email, otp);
 
-        await SendResetPasswordEmail(user, code);
+        await SendResetPasswordEmail(user, otp);
 
         return (true, null);
     }
@@ -153,23 +156,27 @@ public class AuthService(UserManager<User> userManager,
         if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
             return (false, "Invalid code");
 
-        IdentityResult result;
-        try
+        if (user.PasswordResetOtp is null || !user.PasswordResetOtp.IsValid(request.Code))
+            return (false, user.PasswordResetOtp?.IsExpired == true ? "Code has expired, please request a new one" : "Invalid code");
+
+        // Generate a real reset token and reset immediately
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+
+        if (!result.Succeeded)
         {
-            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
-            result = await _userManager.ResetPasswordAsync(user, code, request.NewPassword);
-
+            var error = result.Errors.First().Description;
+            return (false, error);
         }
-        catch (FormatException)
+
+        if (user.PasswordResetOtp is not null)
         {
-            result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
+            user.PasswordResetOtp.Code = null;
+            user.PasswordResetOtp.ExpiresOn = null;
         }
+        await _userManager.UpdateAsync(user);
 
-        if (result.Succeeded)
-            return (true, null);
-
-        var error = result.Errors.First().Description;
-        return (false, error);
+        return (true, null);
     }
 
 
@@ -194,13 +201,15 @@ public class AuthService(UserManager<User> userManager,
 
         if (result.Succeeded)
         {
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var otp = GenerateOtp();
+            user.EmailOtp ??= new EmailOtp();
+            user.EmailOtp.Code = otp;
+            user.EmailOtp.ExpiresOn = DateTime.UtcNow.AddMinutes(15);
+            await _userManager.UpdateAsync(user);
 
-            _logger.LogWarning("Confirmation code: {code}", code);
+            _logger.LogWarning("Email OTP for {email}: {otp}", user.Email, otp);
 
-            await SendConfirmationEmail(user, code);
-
+            await SendConfirmationEmail(user, otp);
 
             return (true, null);
         }
@@ -241,6 +250,38 @@ public class AuthService(UserManager<User> userManager,
         return (false, error);
     }
 
+    public async Task<(bool IsSuccess, string? Error)> ConfirmEmailByOtpAsync(ConfirmEmailOtpDTO request)
+    {
+        if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
+            return (false, "Invalid code");
+
+        if (user.EmailConfirmed)
+            return (false, "Email is already confirmed");
+
+        if (user.EmailOtp is null || !user.EmailOtp.IsValid(request.Code))
+            return (false, user.EmailOtp?.IsExpired == true ? "Code has expired, please request a new one" : "Invalid code");
+
+        // Generate a real confirmation token and confirm immediately
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+
+        if (!result.Succeeded)
+        {
+            var error = result.Errors.First().Description;
+            return (false, error);
+        }
+
+        if (user.EmailOtp is not null)
+        {
+            user.EmailOtp.Code = null;
+            user.EmailOtp.ExpiresOn = null;
+        }
+        await _userManager.AddToRolesAsync(user, new[] { DefaultRoles.Customer });
+        await _userManager.UpdateAsync(user);
+
+        return (true, null);
+    }
+
     public async Task<(bool IsSuccess, string? Error)> ResendConfirmationEmailAsync(ResendConfirmEmailDTO request)
     {
         if (await _userManager.FindByEmailAsync(request.Email) is not { } user)
@@ -249,12 +290,15 @@ public class AuthService(UserManager<User> userManager,
         if (user.EmailConfirmed)
             return (false, "Email is already confirmed");
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        var otp = GenerateOtp();
+        user.EmailOtp ??= new EmailOtp();
+        user.EmailOtp.Code = otp;
+        user.EmailOtp.ExpiresOn = DateTime.UtcNow.AddMinutes(15);
+        await _userManager.UpdateAsync(user);
 
-        _logger.LogWarning("Confirmation code: {code}", code);
+        _logger.LogWarning("Resent OTP for {email}: {otp}", user.Email, otp);
 
-        await SendConfirmationEmail(user, code);
+        await SendConfirmationEmail(user, otp);
 
         return (true, null);
     }
@@ -264,29 +308,30 @@ public class AuthService(UserManager<User> userManager,
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 
-    private async Task SendConfirmationEmail(User user,string code)
+    private static string GenerateOtp()
     {
-        var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+        return RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+    }
 
+    private async Task SendConfirmationEmail(User user, string otp)
+    {
         var emailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation",
             templlateModel: new Dictionary<string, string>
             {
-                    {"{{name}}",user.FirstName },
-                    { "{{action_url}}" , $"{origin}/auth/confirm-email?userId={user.Id}&code={code}" }
+                { "{{name}}", user.FirstName },
+                { "{{otp}}", otp }
             });
 
         await _emailSender.SendEmailAsync(user.Email!, "✅ Pharmacy : Email Confirmation", emailBody);
     }
 
-    private async Task SendResetPasswordEmail(User user, string code)
+    private async Task SendResetPasswordEmail(User user, string otp)
     {
-        var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
-
         var emailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword",
             templlateModel: new Dictionary<string, string>
             {
                     {"{{name}}",user.FirstName },
-                    { "{{action_url}}" , $"{origin}/auth/forget-password?email={user.Email}&code={code}" }
+                    { "{{otp}}" , otp }
             });
 
         await _emailSender.SendEmailAsync(user.Email!, "✅ Pharmacy : Change Password", emailBody);

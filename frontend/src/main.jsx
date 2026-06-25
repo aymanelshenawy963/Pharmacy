@@ -5,6 +5,7 @@ import App from './App';
 import AppToaster from './components/Toast';
 import { CartProvider } from './context/CartContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
 import './index.css';
 
 const basename = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -12,12 +13,14 @@ const basename = import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_U
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <ThemeProvider>
-            <CartProvider>
-                <BrowserRouter basename={basename}>
-                    <App />
-                    <AppToaster />
-                </BrowserRouter>
-            </CartProvider>
+            <AuthProvider>
+                <CartProvider>
+                    <BrowserRouter basename={basename}>
+                        <App />
+                        <AppToaster />
+                    </BrowserRouter>
+                </CartProvider>
+            </AuthProvider>
         </ThemeProvider>
     </React.StrictMode>,
 );
