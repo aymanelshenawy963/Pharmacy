@@ -1,4 +1,23 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
+import { Check } from 'lucide-react';
+
+const errorVariants = {
+    hidden: { opacity: 0, y: -4, height: 0 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        height: 'auto',
+        transition: { type: 'spring', damping: 20, stiffness: 300 },
+    },
+    exit: {
+        opacity: 0,
+        y: -4,
+        height: 0,
+        transition: { duration: 0.15 },
+    },
+};
 
 export default function FormField({
     label,
@@ -16,11 +35,13 @@ export default function FormField({
     multiple = false,
     rows = 3,
 }) {
+    const [isFocused, setIsFocused] = useState(false);
+
     const baseInputClass = clsx(
         'w-full rounded-xl border bg-[rgb(var(--color-surface))] px-4 py-3 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] outline-none transition-all duration-200',
         error
-            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-            : 'border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] focus:ring-1 focus:ring-[rgb(var(--color-primary))]',
+            ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+            : 'border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20',
         disabled && 'opacity-50 cursor-not-allowed'
     );
 
@@ -29,7 +50,15 @@ export default function FormField({
 
         if (type === 'select') {
             return (
-                <select name={name} value={value} onChange={onChange} disabled={disabled} className={baseInputClass}>
+                <select
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    disabled={disabled}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    className={baseInputClass}
+                >
                     <option value="">{placeholder || 'Select...'}</option>
                     {options?.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -49,6 +78,8 @@ export default function FormField({
                     disabled={disabled}
                     placeholder={placeholder}
                     rows={rows}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
                     className={clsx(baseInputClass, 'resize-none')}
                 />
             );
@@ -57,15 +88,79 @@ export default function FormField({
         if (type === 'checkbox') {
             return (
                 <div className="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        name={name}
-                        checked={value}
-                        onChange={onChange}
-                        disabled={disabled}
-                        className="h-4 w-4 rounded border-[rgb(var(--color-border))] text-[rgb(var(--color-primary))] focus:ring-[rgb(var(--color-primary))]"
-                    />
-                    {label && <label className="text-sm text-[rgb(var(--color-text))]">{label}</label>}
+                    <label className="relative flex items-center cursor-pointer group">
+                        <input
+                            type="checkbox"
+                            name={name}
+                            checked={value}
+                            onChange={onChange}
+                            disabled={disabled}
+                            className="peer sr-only"
+                        />
+                        <div className={clsx(
+                            'h-5 w-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center',
+                            value
+                                ? 'bg-[rgb(var(--color-primary))] border-[rgb(var(--color-primary))] scale-110'
+                                : 'border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] group-hover:border-[rgb(var(--color-primary))]/50',
+                            disabled && 'opacity-50 cursor-not-allowed'
+                        )}>
+                            <AnimatePresence>
+                                {value && (
+                                    <motion.div
+                                        initial={{ scale: 0, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0, opacity: 0 }}
+                                        transition={{ type: 'spring', damping: 15, stiffness: 400 }}
+                                    >
+                                        <Check size={12} className="text-white" strokeWidth={3} />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </label>
+                    {label && <label className="text-sm text-[rgb(var(--color-text))] select-none cursor-pointer">{label}</label>}
+                </div>
+            );
+        }
+
+        if (type === 'radio') {
+            return (
+                <div className="flex flex-col gap-2">
+                    {options?.map((opt) => (
+                        <label key={opt.value} className="flex items-center gap-3 cursor-pointer group">
+                            <div className="relative">
+                                <input
+                                    type="radio"
+                                    name={name}
+                                    value={opt.value}
+                                    checked={value === opt.value}
+                                    onChange={onChange}
+                                    disabled={disabled}
+                                    className="peer sr-only"
+                                />
+                                <div className={clsx(
+                                    'h-5 w-5 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
+                                    value === opt.value
+                                        ? 'border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))]'
+                                        : 'border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] group-hover:border-[rgb(var(--color-primary))]/50',
+                                    disabled && 'opacity-50 cursor-not-allowed'
+                                )}>
+                                    <AnimatePresence>
+                                        {value === opt.value && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                exit={{ scale: 0 }}
+                                                transition={{ type: 'spring', damping: 15, stiffness: 400 }}
+                                                className="h-2 w-2 rounded-full bg-white"
+                                            />
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+                            <span className="text-sm text-[rgb(var(--color-text))] select-none">{opt.label}</span>
+                        </label>
+                    ))}
                 </div>
             );
         }
@@ -79,7 +174,9 @@ export default function FormField({
                 disabled={disabled}
                 placeholder={placeholder}
                 required={required}
-                className={baseInputClass}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                className={clsx(baseInputClass)}
             />
         );
     };
@@ -88,7 +185,19 @@ export default function FormField({
         return (
             <div className={clsx('flex flex-col gap-1.5', className)}>
                 {renderInput()}
-                {error && <span className="text-xs font-medium text-red-500">{error}</span>}
+                <AnimatePresence>
+                    {error && (
+                        <motion.span
+                            variants={errorVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            className="text-xs font-medium text-red-500 overflow-hidden"
+                        >
+                            {error}
+                        </motion.span>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }
@@ -96,13 +205,25 @@ export default function FormField({
     return (
         <div className={clsx('flex flex-col gap-1.5', className)}>
             {label && (
-                <label htmlFor={name} className="text-sm font-medium text-[rgb(var(--color-text))]">
+                <label htmlFor={name} className="text-sm font-medium text-[rgb(var(--color-text))] select-none">
                     {label}
                     {required && <span className="ml-1 text-red-500">*</span>}
                 </label>
             )}
             {renderInput()}
-            {error && <span className="text-xs font-medium text-red-500">{error}</span>}
+            <AnimatePresence>
+                {error && (
+                    <motion.span
+                        variants={errorVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="text-xs font-medium text-red-500 overflow-hidden"
+                    >
+                        {error}
+                    </motion.span>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -18,15 +18,15 @@ const Input = forwardRef(({ label, error, type = 'text', className, ...props }, 
                     {label}
                 </label>
             )}
-            <div className="relative">
+            <div className="relative group">
                 <input
                     ref={ref}
                     type={isPassword ? (showPassword ? 'text' : 'password') : type}
                     className={cn(
-                        'w-full rounded-xl border bg-[rgb(var(--color-surface))] px-4 py-3 text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] outline-none transition-all duration-200',
+                        'glass-input',
                         error
-                            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                            : 'border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] focus:ring-1 focus:ring-[rgb(var(--color-primary))]',
+                            ? 'input-error'
+                            : '',
                         isPassword && 'pr-10',
                         className
                     )}
@@ -36,15 +36,15 @@ const Input = forwardRef(({ label, error, type = 'text', className, ...props }, 
                     <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] transition-colors duration-200"
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                 )}
             </div>
             {error && (
-                <span className="text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+                <span className="text-xs font-medium text-red-500 animate-slide-down" style={{ animationDuration: '0.2s' }}>
                     {error}
                 </span>
             )}

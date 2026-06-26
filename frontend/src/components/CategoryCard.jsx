@@ -4,19 +4,19 @@ import Icon from './Icons';
 
 export default function CategoryCard({ category }) {
     return (
-        <motion.div whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 220, damping: 20 }}>
+        <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 220, damping: 20 }}>
             <Link
                 to={`/products?category=${encodeURIComponent(category.slug)}`}
-                className="group block rounded-[28px] border border-brand-100 bg-white p-5 shadow-soft transition hover:shadow-lift"
+                className="group glass-card glass-card-hover block p-5"
             >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700 transition group-hover:bg-brand-500 group-hover:text-white">
-                    <Icon name={category.iconKey} className="h-6 w-6" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] transition-all duration-300 group-hover:bg-[rgb(var(--color-primary))] group-hover:text-white group-hover:shadow-[var(--shadow-glow)]">
+                    <Icon name={category.iconKey} className="h-5 w-5" />
                 </div>
-                <h3 className="mt-5 font-display text-2xl text-slate-900">{category.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{category.description}</p>
-                <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-700">
+                <h3 className="mt-4 font-serif text-xl font-bold text-[rgb(var(--color-text))]">{category.name}</h3>
+                <p className="mt-1.5 text-sm text-[rgb(var(--color-text-muted))] leading-relaxed">{category.description}</p>
+                <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[rgb(var(--color-primary))] transition-all duration-300 group-hover:gap-2.5">
                     Explore
-                    <Icon name="ArrowRight" className="h-4 w-4" />
+                    <Icon name="ArrowRight" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
             </Link>
         </motion.div>

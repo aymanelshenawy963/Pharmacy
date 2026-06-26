@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import toast from 'react-hot-toast';
 import { contactSubjects } from '../data/products';
@@ -38,7 +39,6 @@ export default function ContactForm() {
                     { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
                 );
             }
-
             toast.success('Message sent successfully.');
             setForm(initialForm);
             event.currentTarget.reset();
@@ -51,24 +51,24 @@ export default function ContactForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5 rounded-[32px] border border-brand-100 bg-white p-6 shadow-soft">
+        <form onSubmit={handleSubmit} className="glass-card space-y-5 p-6">
             <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">Contact form</p>
-                <h2 className="mt-2 font-display text-3xl text-slate-900">Send a message to the store</h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">Contact form</p>
+                <h2 className="mt-2 font-serif text-2xl font-bold text-[rgb(var(--color-text))]">Send a message to the store</h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-1.5 text-sm font-medium text-[rgb(var(--color-text))]">
                     Name
                     <input
                         name="name"
                         value={form.name}
                         onChange={onChange}
                         required
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-brand-500"
+                        className="glass-input"
                     />
                 </label>
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-1.5 text-sm font-medium text-[rgb(var(--color-text))]">
                     Email
                     <input
                         name="email"
@@ -76,13 +76,13 @@ export default function ContactForm() {
                         onChange={onChange}
                         type="email"
                         required
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-brand-500"
+                        className="glass-input"
                     />
                 </label>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-1.5 text-sm font-medium text-[rgb(var(--color-text))]">
                     Phone
                     <input
                         name="phone"
@@ -90,16 +90,16 @@ export default function ContactForm() {
                         onChange={onChange}
                         type="tel"
                         required
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-brand-500"
+                        className="glass-input"
                     />
                 </label>
-                <label className="space-y-2 text-sm font-medium text-slate-700">
+                <label className="space-y-1.5 text-sm font-medium text-[rgb(var(--color-text))]">
                     Subject
                     <select
                         name="subject"
                         value={form.subject}
                         onChange={onChange}
-                        className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-brand-500"
+                        className="glass-input"
                     >
                         {contactSubjects.map((subject) => (
                             <option key={subject} value={subject}>
@@ -110,7 +110,7 @@ export default function ContactForm() {
                 </label>
             </div>
 
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+            <label className="space-y-1.5 text-sm font-medium text-[rgb(var(--color-text))]">
                 Message
                 <textarea
                     name="message"
@@ -118,18 +118,26 @@ export default function ContactForm() {
                     onChange={onChange}
                     rows="5"
                     required
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-brand-500"
+                    className="glass-input resize-none"
                 />
             </label>
 
-            <button
+            <motion.button
                 type="submit"
                 disabled={sending}
-                className="glass-button text-brand-800 disabled:cursor-not-allowed disabled:opacity-70"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className="glass-button-primary w-full !py-3"
             >
-                {sending ? 'Sending...' : 'Submit message'}
-                <Icon name="Send" className="h-4 w-4" />
-            </button>
+                {sending ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                ) : (
+                    <>
+                        Submit message
+                        <Icon name="Send" className="h-4 w-4" />
+                    </>
+                )}
+            </motion.button>
         </form>
     );
 }

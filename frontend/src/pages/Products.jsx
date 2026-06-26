@@ -13,6 +13,24 @@ const sortOptions = [
     { value: 'newest', label: 'Newest First' },
 ];
 
+const staggerGrid = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.06 }
+    }
+};
+
+const gridItem = {
+    hidden: { opacity: 0, y: 20, scale: 0.97 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+    }
+};
+
 export default function Products() {
     const [searchParams] = useSearchParams();
     const [search, setSearch] = useState('');
@@ -26,7 +44,6 @@ export default function Products() {
 
     const perPage = 8;
 
-    // Simulated API Loading State
     useEffect(() => {
         setLoading(true);
         const timer = window.setTimeout(() => setLoading(false), 800);
@@ -108,8 +125,12 @@ export default function Products() {
                             </p>
                         </div>
 
-                        {/* Product count badge */}
-                        <div className="glass-card px-6 py-3 flex items-center gap-3">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2, duration: 0.4 }}
+                            className="glass-card px-6 py-3 flex items-center gap-3"
+                        >
                             <div className="bg-primary/20 p-2 rounded-lg">
                                 <Icon name="PackageSearch" className="h-5 w-5 text-primary" />
                             </div>
@@ -117,7 +138,7 @@ export default function Products() {
                                 <p className="text-sm text-text-muted font-medium">Showing</p>
                                 <p className="text-lg font-bold text-text">{filteredProducts.length} items</p>
                             </div>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>
@@ -125,7 +146,7 @@ export default function Products() {
             {/* Main content */}
             <section className="mx-auto max-w-7xl px-4 py-12 md:py-20">
                 <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-                    
+
                     {/* ─── Filters sidebar ─── */}
                     <motion.aside
                         initial={{ opacity: 0, x: -20 }}
@@ -141,7 +162,7 @@ export default function Products() {
                             <button
                                 type="button"
                                 onClick={resetFilters}
-                                className="text-[11px] font-semibold uppercase tracking-wider text-primary hover:text-primary-dark transition-colors"
+                                className="text-[11px] font-semibold uppercase tracking-wider text-primary hover:text-primary-dark transition-all duration-200 hover:underline"
                             >
                                 Reset
                             </button>
@@ -151,7 +172,7 @@ export default function Products() {
                             {/* Search */}
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Search</span>
-                                <div className="flex items-center gap-2 rounded-lg border border-border bg-bg px-3 py-2 transition-colors focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+                                <div className="flex items-center gap-2 rounded-lg border border-border bg-bg px-3 py-2 transition-all duration-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 focus-within:shadow-sm">
                                     <Icon name="Search" className="h-3.5 w-3.5 text-text-muted" />
                                     <input
                                         value={search}
@@ -168,7 +189,7 @@ export default function Products() {
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-text outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20 appearance-none"
+                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
                                 >
                                     {productCategories.map((option) => (
@@ -183,7 +204,7 @@ export default function Products() {
                                 <select
                                     value={brand}
                                     onChange={(e) => setBrand(e.target.value)}
-                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-text outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20 appearance-none"
+                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
                                 >
                                     <option value="All">All Brands</option>
@@ -196,7 +217,7 @@ export default function Products() {
                             {/* Price range */}
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Price Range</span>
-                                <div className="rounded-lg border border-border bg-bg p-3">
+                                <div className="rounded-lg border border-border bg-bg p-3 transition-all duration-300 hover:border-primary/30">
                                     <input
                                         type="range"
                                         min="50"
@@ -208,7 +229,7 @@ export default function Products() {
                                     />
                                     <div className="mt-3 flex items-center justify-between text-[11px] text-text-muted">
                                         <span>₹50</span>
-                                        <span className="font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">Up to ₹{priceCap}</span>
+                                        <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md transition-all duration-200">Up to ₹{priceCap}</span>
                                     </div>
                                 </div>
                             </label>
@@ -219,7 +240,7 @@ export default function Products() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-[13px] text-text outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20 appearance-none"
+                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
                                 >
                                     {sortOptions.map((option) => (
@@ -229,14 +250,14 @@ export default function Products() {
                             </label>
 
                             {/* Rx only */}
-                            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-bg px-3 py-3 text-[13px] font-medium text-text transition-colors hover:border-primary mt-2">
+                            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-bg px-3 py-3 text-[13px] font-medium text-text transition-all duration-300 hover:border-primary hover:bg-primary/5 mt-2 group/rx">
                                 <input
                                     type="checkbox"
                                     checked={rxOnly}
                                     onChange={(e) => setRxOnly(e.target.checked)}
-                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary transition-colors duration-200"
                                 />
-                                Prescription required
+                                <span className="transition-colors duration-200 group-hover/rx:text-primary">Prescription required</span>
                             </label>
                         </div>
                     </motion.aside>
@@ -250,11 +271,18 @@ export default function Products() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
                                     className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
                                 >
                                     {Array.from({ length: 6 }).map((_, i) => (
-                                        <div key={i} className="glass-card h-[420px] animate-pulse overflow-hidden flex flex-col">
-                                            <div className="h-48 bg-border/50" />
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.08, duration: 0.4 }}
+                                            className="glass-card h-[420px] animate-pulse overflow-hidden flex flex-col"
+                                        >
+                                            <div className="h-48 bg-gradient-to-r from-border/40 via-border/60 to-border/40 animate-shimmer" />
                                             <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
                                                 <div>
                                                     <div className="h-3 w-16 bg-border rounded-full mb-3" />
@@ -267,18 +295,21 @@ export default function Products() {
                                                 </div>
                                                 <div className="h-12 w-full bg-border/50 rounded-xl" />
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
                                 </motion.div>
                             ) : pageItems.length ? (
                                 <motion.div
                                     key="content"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
+                                    variants={staggerGrid}
+                                    initial="hidden"
+                                    animate="visible"
                                     className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
                                 >
                                     {pageItems.map((product) => (
-                                        <ProductCard key={product.id} product={product} />
+                                        <motion.div key={product.id} variants={gridItem}>
+                                            <ProductCard product={product} />
+                                        </motion.div>
                                     ))}
                                 </motion.div>
                             ) : (
@@ -286,11 +317,16 @@ export default function Products() {
                                     key="empty"
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                                     className="glass-card flex flex-col items-center justify-center py-20 px-8 text-center"
                                 >
-                                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-bg border border-border shadow-inner text-primary mb-6">
+                                    <motion.div
+                                        animate={{ y: [0, -8, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                                        className="flex h-24 w-24 items-center justify-center rounded-full bg-bg border border-border shadow-inner text-primary mb-6"
+                                    >
                                         <Icon name="PackageSearch" className="h-10 w-10 opacity-50" />
-                                    </div>
+                                    </motion.div>
                                     <h2 className="font-serif text-3xl font-semibold text-text mb-3">
                                         No products found
                                     </h2>
@@ -307,39 +343,45 @@ export default function Products() {
 
                         {/* Pagination */}
                         {!loading && totalPages > 1 && (
-                            <div className="flex items-center justify-center gap-2 pt-8 border-t border-border">
-                                <button 
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="flex items-center justify-center gap-2 pt-8 border-t border-border"
+                            >
+                                <button
                                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                     disabled={currentPage === 1}
-                                    className="glass-button p-2 text-text-muted disabled:opacity-30"
+                                    className="glass-button p-2 text-text-muted disabled:opacity-30 transition-all duration-200 hover:scale-105"
                                 >
                                     <Icon name="ChevronLeft" className="w-5 h-5" />
                                 </button>
-                                
-                                <div className="flex gap-2 bg-surface p-1 rounded-full border border-border shadow-sm">
+
+                                <div className="flex gap-1.5 bg-surface p-1.5 rounded-full border border-border shadow-sm">
                                     {Array.from({ length: totalPages }).map((_, i) => (
-                                        <button
+                                        <motion.button
                                             key={i}
                                             onClick={() => setCurrentPage(i + 1)}
-                                            className={`w-10 h-10 rounded-full text-sm font-semibold transition-all duration-200 flex items-center justify-center ${
+                                            whileTap={{ scale: 0.92 }}
+                                            className={`relative w-10 h-10 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center ${
                                                 i + 1 === currentPage
-                                                    ? 'bg-primary text-white shadow-md'
+                                                    ? 'bg-primary text-white shadow-md shadow-primary/20'
                                                     : 'text-text-muted hover:bg-bg hover:text-text'
                                             }`}
                                         >
                                             {i + 1}
-                                        </button>
+                                        </motion.button>
                                     ))}
                                 </div>
 
-                                <button 
+                                <button
                                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="glass-button p-2 text-text-muted disabled:opacity-30"
+                                    className="glass-button p-2 text-text-muted disabled:opacity-30 transition-all duration-200 hover:scale-105"
                                 >
                                     <Icon name="ChevronRight" className="w-5 h-5" />
                                 </button>
-                            </div>
+                            </motion.div>
                         )}
                     </div>
                 </div>

@@ -74,8 +74,26 @@ const staggerContainer = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1
+            staggerChildren: 0.12
         }
+    }
+};
+
+const heroStagger = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+    }
+};
+
+const heroItem = {
+    hidden: { opacity: 0, y: 30, filter: 'blur(4px)' },
+    visible: {
+        opacity: 1,
+        y: 0,
+        filter: 'blur(0px)',
+        transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
     }
 };
 
@@ -113,12 +131,21 @@ export default function Home() {
                 </div>
 
                 <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-10 px-5 py-[60px] md:grid-cols-12 md:px-8 lg:px-16">
-                    <div className="flex flex-col items-start gap-9 md:col-span-12 lg:col-span-9">
-                        <span className="inline-block rounded-full bg-[#cce8e7] px-3 py-1 text-[12px] font-bold uppercase tracking-[0.08em] text-[#005049]">
+                    <motion.div
+                        variants={heroStagger}
+                        initial="hidden"
+                        animate="visible"
+                        className="flex flex-col items-start gap-9 md:col-span-12 lg:col-span-9"
+                    >
+                        <motion.span
+                            variants={heroItem}
+                            className="inline-block rounded-full bg-[#cce8e7] px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-[#005049]"
+                        >
                             The Curated Sanctuary
-                        </span>
+                        </motion.span>
                         <div className="space-y-5">
-                            <h1
+                            <motion.h1
+                                variants={heroItem}
                                 className="max-w-[920px] font-serif text-[68px] font-bold leading-[0.95] text-slate-900 lg:text-[76px]"
                                 style={{ letterSpacing: '0.03em', wordSpacing: '0.18em' }}
                             >
@@ -126,51 +153,62 @@ export default function Home() {
                                 <span className="block whitespace-nowrap italic font-normal" style={{ color: '#00685f' }}>
                                     Our Priority.
                                 </span>
-                            </h1>
-                            <div className="max-w-[920px] text-[19px] leading-[1.6] text-slate-700 lg:text-[20px]">
+                            </motion.h1>
+                            <motion.div
+                                variants={heroItem}
+                                className="max-w-[920px] text-[19px] leading-[1.6] text-slate-700 lg:text-[20px]"
+                            >
                                 <p>Experience clinical excellence curated for your well-being.</p>
                                 <p>We blend rigorous medical standards with a sophisticated approach</p>
                                 <p>to personal care, delivering genuine remedies directly to your sanctuary.</p>
-                            </div>
+                            </motion.div>
                         </div>
-                        <div className="flex flex-col gap-4 pt-4 sm:flex-row">
+                        <motion.div variants={heroItem} className="flex flex-col gap-4 pt-4 sm:flex-row">
                             <Link
                                 to="/products"
-                                className="inline-flex min-w-[208px] items-center justify-center gap-2 rounded-full bg-[#fbbf24] px-8 py-4 text-[14px] font-medium tracking-[0.05em] text-slate-950 transition hover:bg-[#fcd34d]"
+                                className="inline-flex min-w-[208px] items-center justify-center gap-2 rounded-full bg-[#fbbf24] px-8 py-4 text-[14px] font-medium tracking-[0.05em] text-slate-950 transition-all duration-300 hover:bg-[#fcd34d] hover:shadow-lg hover:shadow-amber-300/30 hover:-translate-y-0.5 active:translate-y-0"
                             >
                                 Browse Products
                                 <Icon name="ArrowRight" className="h-4 w-4" />
                             </Link>
                             <Link
                                 to="/prescription"
-                                className="inline-flex min-w-[230px] items-center justify-center gap-2 rounded-full bg-white/60 backdrop-blur-md border border-white/40 px-8 py-4 text-[14px] font-medium tracking-[0.05em] text-teal-900 transition hover:bg-white/80"
+                                className="inline-flex min-w-[230px] items-center justify-center gap-2 rounded-full bg-white/60 backdrop-blur-md border border-white/40 px-8 py-4 text-[14px] font-medium tracking-[0.05em] text-teal-900 transition-all duration-300 hover:bg-white/80 hover:shadow-lg hover:shadow-white/20 hover:-translate-y-0.5 active:translate-y-0"
                             >
                                 <Icon name="Upload" className="h-4 w-4" />
                                 Upload Prescription
                             </Link>
-                        </div>
+                        </motion.div>
 
-                        <form className="mt-6 w-full md:max-w-none md:mr-[-14%] lg:mr-[-18%]" style={{ minWidth: '100%' }} onSubmit={(e) => e.preventDefault()}>
+                        <motion.form
+                            variants={heroItem}
+                            className="mt-6 w-full md:max-w-none md:mr-[-14%] lg:mr-[-18%]"
+                            style={{ minWidth: '100%' }}
+                            onSubmit={(e) => e.preventDefault()}
+                        >
                             <label htmlFor="hero-search" className="sr-only">Search</label>
                             <div className="flex items-center gap-3 w-full">
                                 <input
                                     id="hero-search"
                                     placeholder="🔍  Search for medicines, vitamins, baby care and personal care..."
-                                    className="flex-1 min-w-0 bg-white/80 backdrop-blur-md border border-white/40 shadow-sm rounded-full px-6 py-3 text-[15px] outline-none"
+                                    className="flex-1 min-w-0 bg-white/80 backdrop-blur-md border border-white/40 shadow-sm rounded-full px-6 py-3.5 text-[15px] outline-none transition-all duration-300 focus:bg-white/95 focus:shadow-md focus:ring-2 focus:ring-[#00685f]/20"
                                 />
-                                <button type="submit" className="rounded-full bg-[#fbbf24] px-6 py-3 text-sm font-medium tracking-[0.05em] text-slate-950 transition hover:bg-[#fcd34d]">
+                                <button
+                                    type="submit"
+                                    className="rounded-full bg-[#fbbf24] px-6 py-3.5 text-sm font-medium tracking-[0.05em] text-slate-950 transition-all duration-300 hover:bg-[#fcd34d] hover:shadow-lg hover:shadow-amber-300/30 hover:-translate-y-0.5 active:translate-y-0"
+                                >
                                     Search
                                 </button>
                             </div>
-                        </form>
-                    </div>
+                        </motion.form>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Trust Badges */}
             <section className="border-y border-border bg-surface/50 backdrop-blur-md">
                 <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-                    <motion.div 
+                    <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
@@ -178,11 +216,15 @@ export default function Home() {
                         className="grid grid-cols-2 gap-8 md:grid-cols-4"
                     >
                         {trustBadges.map((badge) => (
-                            <motion.div key={badge.title} variants={fadeInUp} className="group flex flex-col items-center gap-4 text-center">
-                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-bg border border-border shadow-sm text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/10">
-                                    <Icon name={badge.icon} className="h-6 w-6" />
+                            <motion.div
+                                key={badge.title}
+                                variants={fadeInUp}
+                                className="group flex flex-col items-center gap-4 text-center"
+                            >
+                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-bg border border-border shadow-sm text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/10 group-hover:shadow-md group-hover:shadow-primary/10 group-hover:-translate-y-0.5">
+                                    <Icon name={badge.icon} className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
                                 </div>
-                                <h3 className="text-base font-medium text-text">{badge.title}</h3>
+                                <h3 className="text-base font-medium text-text transition-colors duration-200 group-hover:text-primary">{badge.title}</h3>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -191,7 +233,7 @@ export default function Home() {
 
             {/* Collections */}
             <section className="mx-auto max-w-7xl px-4 py-24 md:px-8">
-                <motion.div 
+                <motion.div
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
@@ -211,7 +253,7 @@ export default function Home() {
                     </Link>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
@@ -221,14 +263,14 @@ export default function Home() {
                     {collectionCards.map((card) =>
                         card.large ? (
                             <motion.div variants={fadeInUp} key={card.title} className="md:col-span-8 md:row-span-2">
-                                <Link to="/products" className="group relative block w-full h-full overflow-hidden rounded-3xl border border-border shadow-lg">
+                                <Link to="/products" className="group relative block w-full h-full overflow-hidden rounded-3xl border border-border shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/20">
                                     <img
                                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         alt={card.title}
                                         src={card.image}
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 p-8 md:p-10 w-full">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 group-hover:via-black/30" />
+                                    <div className="absolute bottom-0 left-0 p-8 md:p-10 w-full transition-transform duration-500 group-hover:translate-y-[-4px]">
                                         <h3 className="mb-3 font-serif text-4xl font-semibold text-white">{card.title}</h3>
                                         <p className="max-w-md text-base text-white/80">{card.description}</p>
                                     </div>
@@ -236,19 +278,19 @@ export default function Home() {
                             </motion.div>
                         ) : (
                             <motion.div variants={fadeInUp} key={card.title} className="md:col-span-4">
-                                <Link to="/products" className="group relative flex flex-col justify-end overflow-hidden rounded-3xl border border-border bg-surface p-6 h-full shadow-md hover:shadow-xl transition-all duration-300">
+                                <Link to="/products" className="group relative flex flex-col justify-end overflow-hidden rounded-3xl border border-border bg-surface p-6 h-full shadow-md transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/20">
                                     {card.image && (
                                         <>
                                             <img
-                                                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                                                className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                                                 alt={card.title}
                                                 src={card.image}
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 transition-all duration-500 group-hover:via-black/50" />
                                         </>
                                     )}
-                                    <div className="relative z-10">
-                                        <div className="mb-4 inline-flex rounded-xl bg-white/20 backdrop-blur-md p-2 text-white">
+                                    <div className="relative z-10 transition-transform duration-500 group-hover:translate-y-[-4px]">
+                                        <div className="mb-4 inline-flex rounded-xl bg-white/20 backdrop-blur-md p-2 text-white transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110">
                                             <Icon name={card.icon || 'Pill'} className="h-6 w-6" />
                                         </div>
                                         <h3 className="font-serif text-2xl font-medium text-white mb-1">{card.title}</h3>
@@ -264,9 +306,9 @@ export default function Home() {
             {/* Process */}
             <section className="bg-surface border-y border-border py-24 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-lofi opacity-20 blur-[100px] pointer-events-none" />
-                
+
                 <div className="mx-auto max-w-7xl px-4 md:px-8 relative z-10">
-                    <motion.div 
+                    <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
@@ -280,20 +322,23 @@ export default function Home() {
                         </p>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={staggerContainer}
                         className="relative flex flex-col gap-12 md:flex-row md:items-start md:justify-between"
                     >
-                        {/* Connecting Line */}
                         <div className="absolute left-1/2 md:left-0 top-0 md:top-10 h-full md:h-px w-px md:w-full -translate-x-1/2 md:translate-x-0 bg-border md:block" />
-                        
+
                         {processSteps.map((step, index) => (
-                            <motion.div variants={fadeInUp} key={step.title} className="z-10 flex w-full flex-col items-center bg-surface md:bg-transparent px-4 text-center md:w-1/3 pt-4 md:pt-0">
-                                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-bg border border-border shadow-lg text-primary">
-                                    <Icon name={step.icon} className="h-8 w-8" />
+                            <motion.div
+                                variants={fadeInUp}
+                                key={step.title}
+                                className="z-10 flex w-full flex-col items-center bg-surface md:bg-transparent px-4 text-center md:w-1/3 pt-4 md:pt-0 group/step"
+                            >
+                                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-bg border border-border shadow-lg text-primary transition-all duration-400 group-hover/step:scale-110 group-hover/step:shadow-xl group-hover/step:shadow-primary/15 group-hover/step:-translate-y-1">
+                                    <Icon name={step.icon} className="h-8 w-8 transition-transform duration-300 group-hover/step:scale-110" />
                                 </div>
                                 <h4 className="mb-3 font-serif text-2xl font-medium text-text">{step.title}</h4>
                                 <p className="text-base text-text-muted max-w-xs">{step.description}</p>
@@ -305,21 +350,24 @@ export default function Home() {
 
             {/* Owner Section */}
             <section className="mx-auto max-w-7xl px-4 py-24 md:px-8">
-                <motion.div 
+                <motion.div
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
                     variants={staggerContainer}
                     className="grid grid-cols-1 items-center gap-16 md:grid-cols-2"
                 >
-                    <motion.div variants={fadeInUp} className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-2xl">
+                    <motion.div
+                        variants={fadeInUp}
+                        className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-2xl group/owner"
+                    >
                         <img
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover/owner:scale-105"
                             alt="Madan Mohan Mishra"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvLR3jdxYJOrAIhUGI00WIuVfHFtqPy3-XgSkwQLQHqugGoqmYpqsZecRw6mhaUfUy71UpewC33x5BM_9ICyj2bK9yHfckn5uAn8wV7XSJDDhnFYIU62S9T-904OxYNG9SLYbLW4SgzbCCBitIPaKB3I6pIaJVlnuZ3nYLzgkmSV4cr70WEfsaxWHNJ-bOPvkjSfn5-8XdRuIN2sGao0AKiWPqInpq6OhlEcYVEPHhoNSC5k86ktriB55v4mmYhpg8nW6pefT14Mw"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        <div className="absolute bottom-0 left-0 p-8 text-white">
+                        <div className="absolute bottom-0 left-0 p-8 text-white transition-transform duration-500 group-hover/owner:translate-y-[-4px]">
                             <p className="font-serif text-2xl font-medium">Madan Mohan Mishra</p>
                             <p className="text-white/80">Founder & Owner</p>
                         </div>
@@ -347,14 +395,14 @@ export default function Home() {
             <section className="bg-lofi py-24 relative overflow-hidden">
                 <div className="absolute inset-0 bg-bg/80 dark:bg-bg/90 backdrop-blur-[50px] z-0" />
                 <div className="mx-auto max-w-3xl px-4 text-center relative z-10">
-                    <motion.div 
+                    <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={staggerContainer}
                         className="glass-card p-12 md:p-16"
                     >
-                        <motion.div variants={fadeInUp} className="inline-flex bg-primary/10 p-4 rounded-full mb-6">
+                        <motion.div variants={fadeInUp} className="inline-flex bg-primary/10 p-4 rounded-full mb-6 transition-transform duration-300 hover:scale-110 hover:bg-primary/15">
                             <Icon name="Mail" className="h-8 w-8 text-primary" />
                         </motion.div>
                         <motion.h2 variants={fadeInUp} className="display-heading !mb-4">Join The Sanctuary</motion.h2>
@@ -368,7 +416,7 @@ export default function Home() {
                                 value={newsletterEmail}
                                 onChange={(event) => setNewsletterEmail(event.target.value)}
                                 placeholder="Enter your email address"
-                                className="flex-1 rounded-full border border-border bg-surface px-6 py-4 text-text outline-none focus:border-primary transition-colors shadow-sm"
+                                className="flex-1 rounded-full border border-border bg-surface px-6 py-4 text-text outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 shadow-sm focus:shadow-md"
                             />
                             <button type="submit" className="glass-button-primary py-4 px-8">
                                 Subscribe

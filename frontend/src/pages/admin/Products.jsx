@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Package, Plus, Pencil, Trash2, RefreshCw, Filter, ChevronDown, IndianRupee, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { productService } from '../../services/productService';
@@ -40,6 +41,46 @@ const INITIAL_ERRORS = {
     categoryId: '',
     photos: '',
 };
+
+const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
+
+function StockIndicator({ stock }) {
+    let color, bg, label;
+    if (stock <= 0) {
+        color = 'text-red-500';
+        bg = 'bg-red-500/10';
+        label = 'Out of Stock';
+    } else if (stock <= 10) {
+        color = 'text-amber-500';
+        bg = 'bg-amber-500/10';
+        label = 'Low Stock';
+    } else {
+        color = 'text-emerald-500';
+        bg = 'bg-emerald-500/10';
+        label = 'In Stock';
+    }
+    return (
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${bg} ${color}`}>
+            <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+            {stock} ({label})
+        </span>
+    );
+}
 
 export default function Products() {
     const [products, setProducts] = useState([]);
@@ -259,7 +300,7 @@ export default function Products() {
             width: '300px',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-[rgb(var(--color-border))]">
+                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:ring-1 group-hover:ring-[rgb(var(--color-primary))]/20">
                         {row.photos?.[0] ? (
                             <img src={row.photos[0]} alt={row.name} className="h-full w-full object-cover" />
                         ) : (
@@ -276,7 +317,7 @@ export default function Products() {
             key: 'categoryName',
             header: 'Category',
             render: (row) => (
-                <span className="rounded-lg bg-[rgb(var(--color-primary))]/10 px-2.5 py-1 text-xs font-medium text-[rgb(var(--color-primary))]">
+                <span className="rounded-lg bg-[rgb(var(--color-primary))]/10 px-2.5 py-1 text-xs font-medium text-[rgb(var(--color-primary))] transition-all duration-200 hover:bg-[rgb(var(--color-primary))]/15">
                     {row.categoryName}
                 </span>
             ),
@@ -297,19 +338,15 @@ export default function Products() {
         {
             key: 'stock',
             header: 'Stock',
-            render: (row) => (
-                <span className={`font-medium ${row.stock <= 0 ? 'text-red-500' : row.stock <= 10 ? 'text-amber-500' : 'text-[rgb(var(--color-text))]'}`}>
-                    {row.stock}
-                </span>
-            ),
+            render: (row) => <StockIndicator stock={row.stock} />,
         },
         {
             key: 'requiresPrescription',
             header: 'Rx Required',
             render: (row) => (
-                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold transition-all duration-200 ${
                     row.requiresPrescription
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 ring-1 ring-purple-500/10'
                         : 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400'
                 }`}>
                     {row.requiresPrescription ? 'Rx' : 'OTC'}
@@ -321,7 +358,7 @@ export default function Products() {
             header: 'Top Selling',
             render: (row) => (
                 row.topSelling ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 ring-1 ring-amber-500/10 transition-all duration-200 hover:bg-amber-200/70">
                         <Star size={12} fill="currentColor" />
                         Top
                     </span>
@@ -338,14 +375,14 @@ export default function Products() {
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openEditModal(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/10 transition-colors"
+                        className="rounded-lg p-2 text-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/10 transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Edit"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => openDeleteDialog(row)}
-                        className="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                        className="rounded-lg p-2 text-red-500 hover:bg-red-500/10 transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Delete"
                     >
                         <Trash2 size={16} />
@@ -485,36 +522,46 @@ export default function Products() {
         : 'All Categories';
 
     return (
-        <div className="flex flex-col gap-6">
-            <PageHeader
-                title="Products"
-                description={`Manage your product inventory (${totalCount} total)`}
-                action={
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={fetchProducts}
-                            className="glass-button-secondary flex items-center gap-2 !px-3 !py-2.5 text-sm"
-                            title="Refresh"
-                        >
-                            <RefreshCw size={16} />
-                        </button>
-                        <button
-                            onClick={openCreateModal}
-                            className="glass-button-primary flex items-center gap-2 !px-4 !py-2.5 text-sm"
-                        >
-                            <Plus size={16} />
-                            Add Product
-                        </button>
-                    </div>
-                }
-            />
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col gap-6"
+        >
+            <motion.div variants={itemVariants}>
+                <PageHeader
+                    title="Products"
+                    description={`Manage your product inventory (${totalCount} total)`}
+                    action={
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={fetchProducts}
+                                className="glass-button-secondary flex items-center gap-2 !px-3 !py-2.5 text-sm"
+                                title="Refresh"
+                            >
+                                <RefreshCw size={16} />
+                            </button>
+                            <button
+                                onClick={openCreateModal}
+                                className="glass-button-primary flex items-center gap-2 !px-4 !py-2.5 text-sm"
+                            >
+                                <Plus size={16} />
+                                Add Product
+                            </button>
+                        </div>
+                    }
+                />
+            </motion.div>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <motion.div
+                variants={itemVariants}
+                className="flex flex-col gap-4 sm:flex-row sm:items-center"
+            >
                 <SearchInput
                     value={search}
                     onChange={setSearch}
                     placeholder="Search products..."
-                    className="w-full sm:max-w-xs"
+                    className="w-full sm:max-w-xs transition-all duration-300 focus-within:shadow-glow"
                 />
 
                 <div className="flex items-center gap-3">
@@ -525,15 +572,20 @@ export default function Products() {
                         >
                             <Filter size={14} />
                             {currentSortLabel}
-                            <ChevronDown size={14} className={`transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={14} className={`transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
                         </button>
                         {sortOpen && (
-                            <div className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl">
+                            <motion.div
+                                initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl"
+                            >
                                 {SORT_OPTIONS.map(opt => (
                                     <button
                                         key={opt.value}
                                         onClick={() => { setSort(opt.value); setSortOpen(false); }}
-                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${
+                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-all duration-150 ${
                                             sort === opt.value
                                                 ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
                                                 : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
@@ -542,7 +594,7 @@ export default function Products() {
                                         {opt.label}
                                     </button>
                                 ))}
-                            </div>
+                            </motion.div>
                         )}
                     </div>
 
@@ -553,13 +605,18 @@ export default function Products() {
                         >
                             <Package size={14} />
                             {currentCategoryLabel}
-                            <ChevronDown size={14} className={`transition-transform ${categoryOpen ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={14} className={`transition-transform duration-200 ${categoryOpen ? 'rotate-180' : ''}`} />
                         </button>
                         {categoryOpen && (
-                            <div className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl max-h-60 overflow-y-auto">
+                            <motion.div
+                                initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl max-h-60 overflow-y-auto"
+                            >
                                 <button
                                     onClick={() => { setCategoryFilter(''); setCategoryOpen(false); }}
-                                    className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${
+                                    className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-all duration-150 ${
                                         !categoryFilter
                                             ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
                                             : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
@@ -571,7 +628,7 @@ export default function Products() {
                                     <button
                                         key={cat.id}
                                         onClick={() => { setCategoryFilter(String(cat.id)); setCategoryOpen(false); }}
-                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${
+                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-all duration-150 ${
                                             String(categoryFilter) === String(cat.id)
                                                 ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
                                                 : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
@@ -580,24 +637,26 @@ export default function Products() {
                                         {cat.name}
                                     </button>
                                 ))}
-                            </div>
+                            </motion.div>
                         )}
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
-            <DataTable
-                columns={columns}
-                data={products}
-                isLoading={isLoading}
-                error={error}
-                onRetry={fetchProducts}
-                emptyTitle="No products found"
-                emptyDescription="Start by adding your first product."
-                pageIndex={pageIndex}
-                totalPages={totalPages}
-                onPageChange={setPageIndex}
-            />
+            <motion.div variants={itemVariants}>
+                <DataTable
+                    columns={columns}
+                    data={products}
+                    isLoading={isLoading}
+                    error={error}
+                    onRetry={fetchProducts}
+                    emptyTitle="No products found"
+                    emptyDescription="Start by adding your first product."
+                    pageIndex={pageIndex}
+                    totalPages={totalPages}
+                    onPageChange={setPageIndex}
+                />
+            </motion.div>
 
             <Modal
                 isOpen={showCreateModal}
@@ -667,6 +726,6 @@ export default function Products() {
                 variant="danger"
                 isLoading={isSubmitting}
             />
-        </div>
+        </motion.div>
     );
 }

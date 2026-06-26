@@ -1,14 +1,47 @@
 import { useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
+
+const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+};
+
+const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 10 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: { type: 'spring', damping: 25, stiffness: 350 },
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.95,
+        y: 10,
+        transition: { duration: 0.15, ease: 'easeIn' },
+    },
+};
 
 export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) {
     const overlayRef = useRef(null);
+    const contentRef = useRef(null);
+    const previousFocusRef = useRef(null);
 
     useEffect(() => {
         if (isOpen) {
+            previousFocusRef.current = document.activeElement;
             document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                const focusable = contentRef.current?.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                if (focusable?.length) focusable[0].focus();
+            }, 100);
         } else {
             document.body.style.overflow = '';
+            previousFocusRef.current?.focus();
         }
         return () => {
             document.body.style.overflow = '';
@@ -23,29 +56,70 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
         return () => window.removeEventListener('keydown', handleEsc);
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (!isOpen) return;
+        function handleTab(e) {
+            if (e.key !== 'Tab') return;
+            const focusable = contentRef.current?.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if (!focusable?.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+        window.addEventListener('keydown', handleTab);
+        return () => window.removeEventListener('keydown', handleTab);
+    }, [isOpen]);
 
     return (
-        <div
-            ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            onClick={(e) => e.target === overlayRef.current && onClose()}
-        >
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-            <div
-                className={`relative z-10 w-full ${maxWidth} max-h-[90vh] overflow-y-auto rounded-2xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-2xl`}
-            >
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-6 py-4 rounded-t-2xl">
-                    <h2 className="font-serif text-xl font-bold text-[rgb(var(--color-text))]">{title}</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 rounded-xl text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))] transition-colors"
+        <AnimatePresence>
+            {isOpen && (
+                <div
+                    ref={overlayRef}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    onClick={(e) => e.target === overlayRef.current && onClose()}
+                >
+                    <motion.div
+                        variants={backdropVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-md"
+                    />
+                    <motion.div
+                        ref={contentRef}
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className={`relative z-10 w-full ${maxWidth} max-h-[90vh] overflow-y-auto rounded-2xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-2xl`}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={title}
                     >
-                        <X size={20} />
-                    </button>
+                        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/80 backdrop-blur-md px-6 py-4 rounded-t-2xl">
+                            <h2 className="font-serif text-xl font-bold text-[rgb(var(--color-text))]">
+                                {title}
+                            </h2>
+                            <button
+                                onClick={onClose}
+                                className="p-2 rounded-xl text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))] transition-all duration-200 hover:scale-110 active:scale-95"
+                                aria-label="Close dialog"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6">{children}</div>
+                    </motion.div>
                 </div>
-                <div className="p-6">{children}</div>
-            </div>
-        </div>
+            )}
+        </AnimatePresence>
     );
 }

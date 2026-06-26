@@ -43,6 +43,13 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import AdminProtectedRoute from './routes/AdminProtectedRoute';
 import AccountProtectedRoute from './routes/AccountProtectedRoute';
 
+const pageTransition = {
+    initial: { opacity: 0, y: 12 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+};
+
 function ScrollToTop() {
     const location = useLocation();
     useEffect(() => {
@@ -65,10 +72,7 @@ function Layout() {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={location.pathname}
-                            initial={{ opacity: 0, y: 14 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -14 }}
-                            transition={{ duration: 0.28, ease: 'easeOut' }}
+                            {...pageTransition}
                         >
                             <Outlet />
                         </motion.div>
@@ -91,10 +95,10 @@ function AuthLayout() {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={location.pathname}
-                        initial={{ opacity: 0, y: 16 }}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -16 }}
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     >
                         <Outlet />
                     </motion.div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Shield, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { roleService } from '../../services/roleService';
@@ -11,6 +12,23 @@ import StatusBadge from '../../components/admin/StatusBadge';
 import FormField from '../../components/admin/FormField';
 
 const INITIAL_FORM = { name: '' };
+
+const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
 
 export default function Roles() {
     const [roles, setRoles] = useState([]);
@@ -155,7 +173,7 @@ export default function Roles() {
             header: 'Name',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 ring-1 ring-[rgb(var(--color-primary))]/10 transition-all duration-300 group-hover:ring-[rgb(var(--color-primary))]/25">
                         <Shield className="h-4 w-4 text-[rgb(var(--color-primary))]" />
                     </div>
                     <span className="font-medium">{row.name}</span>
@@ -181,14 +199,18 @@ export default function Roles() {
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openEdit(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-primary))] transition-colors"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Edit"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => openToggle(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-primary))] transition-colors"
+                        className={`rounded-lg p-2 text-[rgb(var(--color-text-muted))] transition-all duration-200 hover:scale-110 active:scale-95 ${
+                            row.isDeleted
+                                ? 'hover:bg-emerald-500/10 hover:text-emerald-500'
+                                : 'hover:bg-amber-500/10 hover:text-amber-500'
+                        }`}
                         title={row.isDeleted ? 'Restore' : 'Deactivate'}
                     >
                         {row.isDeleted ? <ToggleLeft size={16} /> : <ToggleRight size={16} />}
@@ -215,46 +237,58 @@ export default function Roles() {
     );
 
     return (
-        <div className="space-y-6">
-            <PageHeader
-                title="Roles Management"
-                description="Manage user roles and their permissions"
-                action={headerAction}
-            />
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+        >
+            <motion.div variants={itemVariants}>
+                <PageHeader
+                    title="Roles Management"
+                    description="Manage user roles and their permissions"
+                    action={headerAction}
+                />
+            </motion.div>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <motion.div
+                variants={itemVariants}
+                className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
                 <SearchInput
                     value={search}
                     onChange={setSearch}
                     placeholder="Search roles..."
-                    className="sm:max-w-xs"
+                    className="sm:max-w-xs transition-all duration-300 focus-within:shadow-glow"
                 />
                 <button
                     onClick={() => setShowDeleted(!showDeleted)}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
                         showDeleted
-                            ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
-                            : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))]'
+                            ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] shadow-sm ring-1 ring-[rgb(var(--color-primary))]/20'
+                            : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] hover:shadow-sm'
                     }`}
                 >
                     {showDeleted ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                     {showDeleted ? 'Showing Deleted' : 'Show Deleted'}
                 </button>
-            </div>
+            </motion.div>
 
-            <DataTable
-                columns={columns}
-                data={filteredRoles}
-                isLoading={isLoading}
-                error={error}
-                onRetry={fetchRoles}
-                emptyTitle="No roles found"
-                emptyDescription={
-                    search
-                        ? 'No roles match your search criteria.'
-                        : 'Get started by creating your first role.'
-                }
-            />
+            <motion.div variants={itemVariants}>
+                <DataTable
+                    columns={columns}
+                    data={filteredRoles}
+                    isLoading={isLoading}
+                    error={error}
+                    onRetry={fetchRoles}
+                    emptyTitle="No roles found"
+                    emptyDescription={
+                        search
+                            ? 'No roles match your search criteria.'
+                            : 'Get started by creating your first role.'
+                    }
+                />
+            </motion.div>
 
             {/* Create Modal */}
             <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create Role">
@@ -346,6 +380,6 @@ export default function Roles() {
                 variant={togglingRole?.isDeleted ? 'primary' : 'danger'}
                 isLoading={isSubmitting}
             />
-        </div>
+        </motion.div>
     );
 }

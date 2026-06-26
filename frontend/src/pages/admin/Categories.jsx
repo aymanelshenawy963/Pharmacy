@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { FolderTree, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { categoryService } from '../../services/categoryService';
@@ -10,6 +11,23 @@ import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import FormField from '../../components/admin/FormField';
 
 const emptyForm = { name: '', description: '' };
+
+const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
 
 export default function Categories() {
     const [categories, setCategories] = useState([]);
@@ -130,8 +148,10 @@ export default function Categories() {
             key: 'name',
             header: 'Name',
             render: (row) => (
-                <div className="flex items-center gap-2">
-                    <FolderTree size={16} className="text-teal-500" />
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 ring-1 ring-teal-500/10 transition-all duration-300 group-hover:ring-teal-500/25">
+                        <FolderTree size={16} className="text-teal-500" />
+                    </div>
                     <span className="font-medium">{row.name}</span>
                 </div>
             ),
@@ -153,14 +173,14 @@ export default function Categories() {
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openEdit(row)}
-                        className="glass-button-secondary !p-2 !rounded-lg"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Edit"
                     >
                         <Pencil size={14} />
                     </button>
                     <button
                         onClick={() => openDelete(row)}
-                        className="glass-button-secondary !p-2 !rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Delete"
                     >
                         <Trash2 size={14} />
@@ -171,42 +191,54 @@ export default function Categories() {
     ];
 
     return (
-        <div className="space-y-6">
-            <PageHeader
-                title="Categories"
-                description="Manage your product categories"
-                action={
-                    <div className="flex items-center gap-3">
-                        <button onClick={fetchCategories} className="glass-button-secondary !p-2.5 !rounded-xl" title="Refresh">
-                            <RefreshCw size={16} />
-                        </button>
-                        <button onClick={openCreate} className="glass-button-primary !px-4 !py-2.5 text-sm flex items-center gap-2">
-                            <Plus size={16} />
-                            Add Category
-                        </button>
-                    </div>
-                }
-            />
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+        >
+            <motion.div variants={itemVariants}>
+                <PageHeader
+                    title="Categories"
+                    description="Manage your product categories"
+                    action={
+                        <div className="flex items-center gap-3">
+                            <button onClick={fetchCategories} className="glass-button-secondary !p-2.5 !rounded-xl" title="Refresh">
+                                <RefreshCw size={16} />
+                            </button>
+                            <button onClick={openCreate} className="glass-button-primary !px-4 !py-2.5 text-sm flex items-center gap-2">
+                                <Plus size={16} />
+                                Add Category
+                            </button>
+                        </div>
+                    }
+                />
+            </motion.div>
 
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Search categories..."
-            />
+            <motion.div variants={itemVariants}>
+                <SearchInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search categories..."
+                    className="transition-all duration-300 focus-within:shadow-glow"
+                />
+            </motion.div>
 
-            <DataTable
-                columns={columns}
-                data={filtered}
-                isLoading={isLoading}
-                error={error}
-                onRetry={fetchCategories}
-                emptyTitle="No categories found"
-                emptyDescription={
-                    search
-                        ? 'No categories match your search.'
-                        : 'Create your first category to get started.'
-                }
-            />
+            <motion.div variants={itemVariants}>
+                <DataTable
+                    columns={columns}
+                    data={filtered}
+                    isLoading={isLoading}
+                    error={error}
+                    onRetry={fetchCategories}
+                    emptyTitle="No categories found"
+                    emptyDescription={
+                        search
+                            ? 'No categories match your search.'
+                            : 'Create your first category to get started.'
+                    }
+                />
+            </motion.div>
 
             <Modal
                 isOpen={isModalOpen}
@@ -265,6 +297,6 @@ export default function Categories() {
                 variant="danger"
                 isLoading={isSubmitting}
             />
-        </div>
+        </motion.div>
     );
 }

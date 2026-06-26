@@ -55,6 +55,23 @@ const lineVariantsMobile = {
     },
 };
 
+const staggerSide = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.12, delayChildren: 0.2 }
+    }
+};
+
+const sideItem = {
+    hidden: { opacity: 0, x: 20 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+    }
+};
+
 export default function Prescription() {
     return (
         <>
@@ -96,11 +113,17 @@ export default function Prescription() {
                     <PrescriptionUpload />
 
                     {/* Right: Info sidebar */}
-                    <div className="space-y-6 lg:sticky lg:top-28">
+                    <motion.div
+                        variants={staggerSide}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="space-y-6 lg:sticky lg:top-28"
+                    >
                         {/* Pharmacist review card */}
-                        <div className="glass-card p-6 bg-primary/5">
+                        <motion.div variants={sideItem} className="glass-card p-6 bg-primary/5">
                             <div className="flex items-start gap-4">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-transform duration-300 hover:scale-110">
                                     <Icon name="ShieldCheck" className="h-6 w-6" />
                                 </div>
                                 <div>
@@ -110,12 +133,12 @@ export default function Prescription() {
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Accepted files card */}
-                        <div className="glass-card p-6">
+                        <motion.div variants={sideItem} className="glass-card p-6">
                             <div className="flex items-start gap-4">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary border border-secondary/20">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary border border-secondary/20 transition-transform duration-300 hover:scale-110">
                                     <Icon name="FileText" className="h-6 w-6" />
                                 </div>
                                 <div>
@@ -127,7 +150,7 @@ export default function Prescription() {
                                         {['JPG', 'PNG', 'PDF'].map((fmt) => (
                                             <span
                                                 key={fmt}
-                                                className="inline-flex items-center rounded-lg border border-border bg-bg-subtle px-3 py-1 text-xs font-bold tracking-widest text-text-muted"
+                                                className="inline-flex items-center rounded-lg border border-border bg-bg-subtle px-3 py-1 text-xs font-bold tracking-widest text-text-muted transition-all duration-200 hover:border-primary/30 hover:bg-primary/5 cursor-default"
                                             >
                                                 .{fmt}
                                             </span>
@@ -135,12 +158,12 @@ export default function Prescription() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Fast support card */}
-                        <div className="glass-card p-6">
+                        <motion.div variants={sideItem} className="glass-card p-6">
                             <div className="flex items-start gap-4">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-transform duration-300 hover:scale-110">
                                     <Icon name="MessageCircle" className="h-6 w-6" />
                                 </div>
                                 <div>
@@ -150,23 +173,26 @@ export default function Prescription() {
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Trust badge */}
-                        <div className="flex items-center gap-3 rounded-xl bg-bg-subtle border border-border p-4">
+                        <motion.div
+                            variants={sideItem}
+                            className="flex items-center gap-3 rounded-xl bg-bg-subtle border border-border p-4 transition-all duration-200 hover:border-primary/20 hover:bg-primary/5"
+                        >
                             <Icon name="BadgeCheck" className="h-5 w-5 text-green-500" />
                             <p className="text-xs font-medium text-text-muted">
                                 100% secure — your data is never shared with third parties.
                             </p>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </motion.div>
             </section>
 
             {/* ─── How It Works ─── */}
             <section className="bg-surface relative overflow-hidden py-16 md:py-24">
                 <div className="absolute top-0 right-0 w-1/3 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
-                
+
                 <div className="mx-auto max-w-5xl px-4 sm:px-6 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 18 }}
@@ -192,21 +218,22 @@ export default function Prescription() {
                         className="relative flex flex-col items-center gap-12 md:flex-row md:items-start md:justify-between md:gap-4"
                     >
                         {steps.map((step, index) => (
-                            <div key={step.title} className="flex flex-col items-center md:flex-1 w-full relative">
+                            <div key={step.title} className="flex flex-col items-center md:flex-1 w-full relative group/step">
                                 <motion.div
                                     variants={stepVariants}
-                                    className="relative z-10 flex w-full max-w-[280px] flex-col items-center text-center glass-card p-6 border-transparent hover:border-primary/20 hover:bg-surface transition-colors"
+                                    whileHover={{ y: -6, scale: 1.02 }}
+                                    className="relative z-10 flex w-full max-w-[280px] flex-col items-center text-center glass-card p-6 border-transparent hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                                 >
                                     <div className="relative mb-6">
-                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-bg shadow-sm text-primary font-serif text-2xl font-bold">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-bg shadow-sm text-primary font-serif text-2xl font-bold transition-all duration-300 group-hover/step:scale-110 group-hover/step:shadow-md">
                                             {index + 1}
                                         </div>
-                                        <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+                                        <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform duration-300 group-hover/step:scale-110">
                                             <Icon name={step.icon} className="h-4 w-4" />
                                         </div>
                                     </div>
 
-                                    <h3 className="mb-3 font-serif text-xl font-medium text-text">
+                                    <h3 className="mb-3 font-serif text-xl font-medium text-text transition-colors duration-200 group-hover/step:text-primary">
                                         {step.title}
                                     </h3>
                                     <p className="text-sm text-text-muted">

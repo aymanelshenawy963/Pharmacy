@@ -5,27 +5,30 @@ import Icon from './Icons';
 export default function OwnerCard({ compact = false }) {
     return (
         <motion.div
-            whileHover={{ y: -4 }}
-            className={`overflow-hidden rounded-[32px] border border-brand-100 bg-white shadow-soft ${compact ? 'p-5' : 'p-6'}`}
+            whileHover={{ y: -3 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+            className={`glass-card overflow-hidden ${compact ? 'p-5' : 'p-6'}`}
         >
             <div className={`flex ${compact ? 'items-center gap-4' : 'flex-col gap-5'} `}>
-                <img
-                    src="/images/owner.jpg"
-                    alt="Madan Mohan Mishra - Proprietor, Jaya Medical Store"
-                    className={`rounded-full object-cover ${compact ? 'h-24 w-24' : 'h-44 w-44'}`}
-                    loading="lazy"
-                />
-                <div className="space-y-3">
+                <div className={`relative ${compact ? 'h-20 w-20' : 'h-40 w-40'} flex-shrink-0`}>
+                    <img
+                        src="/images/owner.jpg"
+                        alt="Madan Mohan Mishra - Proprietor, Jaya Medical Store"
+                        className="h-full w-full rounded-2xl object-cover ring-2 ring-[rgb(var(--color-primary))]/10"
+                        loading="lazy"
+                    />
+                </div>
+                <div className="space-y-2.5">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-700">Owner</p>
-                        <h3 className="mt-2 font-display text-3xl text-slate-900">{ownerProfile.name}</h3>
-                        <p className="mt-1 text-sm font-medium text-slate-500">{ownerProfile.title}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">Owner</p>
+                        <h3 className="mt-1 font-serif text-2xl font-bold text-[rgb(var(--color-text))]">{ownerProfile.name}</h3>
+                        <p className="mt-0.5 text-sm font-medium text-[rgb(var(--color-text-muted))]">{ownerProfile.title}</p>
                     </div>
-                    <p className="text-sm leading-6 text-slate-600">{ownerProfile.quote}</p>
-                    {!compact ? <p className="text-sm leading-6 text-slate-600">{ownerProfile.bio}</p> : null}
-                    <div className="flex items-center gap-2 text-sm text-brand-700">
+                    <p className="text-sm leading-relaxed text-[rgb(var(--color-text-muted))] italic">&ldquo;{ownerProfile.quote}&rdquo;</p>
+                    {!compact ? <p className="text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">{ownerProfile.bio}</p> : null}
+                    <div className="flex items-center gap-2 text-sm text-[rgb(var(--color-primary))] font-medium">
                         <Icon name="Sparkles" className="h-4 w-4" />
-                        Serving your family's health for over {ownerProfile.years} years
+                        Serving for {ownerProfile.years}+ years
                     </div>
                 </div>
             </div>

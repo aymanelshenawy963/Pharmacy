@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { User, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -8,6 +9,23 @@ import FormField from '../../components/admin/FormField';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import { validators } from '../../utils/validators';
+
+const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
 
 export default function ProfileSettings() {
     const { user } = useAuth();
@@ -91,17 +109,30 @@ export default function ProfileSettings() {
     }
 
     return (
-        <div className="mx-auto max-w-2xl space-y-6">
-            <PageHeader
-                title="Profile Settings"
-                description="Update your personal information"
-            />
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            className="mx-auto max-w-2xl space-y-6"
+        >
+            <motion.div variants={itemVariants}>
+                <PageHeader
+                    title="Profile Settings"
+                    description="Update your personal information"
+                />
+            </motion.div>
 
-            <ErrorBanner message={serverError} onRetry={fetchProfile} />
+            <motion.div variants={itemVariants}>
+                <ErrorBanner message={serverError} onRetry={fetchProfile} />
+            </motion.div>
 
-            <form onSubmit={handleSubmit} className="glass-card space-y-6 p-6">
+            <motion.form
+                variants={itemVariants}
+                onSubmit={handleSubmit}
+                className="glass-card space-y-6 p-6 transition-all duration-300 hover:shadow-lg"
+            >
                 <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10">
+                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[rgb(var(--color-primary))]/15 to-[rgb(var(--color-primary))]/5 ring-2 ring-[rgb(var(--color-primary))]/10 shadow-inner transition-all duration-300 hover:ring-[rgb(var(--color-primary))]/25 hover:shadow-md">
                         <User className="h-8 w-8 text-[rgb(var(--color-primary))]" />
                     </div>
                     <div>
@@ -111,6 +142,8 @@ export default function ProfileSettings() {
                         <p className="text-sm text-[rgb(var(--color-text-muted))]">{user?.email}</p>
                     </div>
                 </div>
+
+                <div className="h-px bg-gradient-to-r from-transparent via-[rgb(var(--color-border))] to-transparent" />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                     <FormField
@@ -137,17 +170,17 @@ export default function ProfileSettings() {
                     <button
                         type="submit"
                         disabled={isSaving || !hasChanges}
-                        className="glass-button-primary !px-6"
+                        className="glass-button-primary !px-6 group"
                     >
                         {isSaving ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                            <Save className="h-4 w-4" />
+                            <Save className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                         )}
                         Save Changes
                     </button>
                 </div>
-            </form>
-        </div>
+            </motion.form>
+        </motion.div>
     );
 }

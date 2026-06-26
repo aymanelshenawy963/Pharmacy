@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import {
     Pencil,
@@ -38,6 +39,23 @@ const INITIAL_EDIT_FORM = {
     firstName: '',
     lastName: '',
     roles: [],
+};
+
+const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
 };
 
 function validateCreateForm(form) {
@@ -338,7 +356,7 @@ export default function Users() {
             header: 'Name',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-sm font-semibold">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-sm font-semibold ring-2 ring-[rgb(var(--color-primary))]/5 transition-all duration-300 group-hover:ring-[rgb(var(--color-primary))]/20">
                         {(row.firstName || '?')[0]?.toUpperCase()}
                         {(row.lastName || '')[0]?.toUpperCase()}
                     </div>
@@ -372,7 +390,7 @@ export default function Users() {
                         {roles.map((role, i) => (
                             <span
                                 key={i}
-                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))]"
+                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))] transition-all duration-200 hover:bg-[rgb(var(--color-primary))]/15 hover:shadow-sm"
                             >
                                 <Shield size={10} />
                                 {getRoleName(role)}
@@ -401,28 +419,28 @@ export default function Users() {
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openViewModal(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-primary))] transition-colors"
+                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
                         title="View details"
                     >
                         <Eye size={16} />
                     </button>
                     <button
                         onClick={() => openEditModal(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-primary))] transition-colors"
+                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Edit user"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => openToggleDialog(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-amber-500 transition-colors"
+                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-amber-500/10 hover:text-amber-500 transition-all duration-200 hover:scale-110 active:scale-95"
                         title={row.isDisabled ? 'Enable user' : 'Disable user'}
                     >
                         {row.isDisabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                     </button>
                     <button
                         onClick={() => openUnlockDialog(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-emerald-500 transition-colors"
+                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-emerald-500/10 hover:text-emerald-500 transition-all duration-200 hover:scale-110 active:scale-95"
                         title="Unlock account"
                     >
                         <Unlock size={16} />
@@ -438,7 +456,7 @@ export default function Users() {
             <label className="text-sm font-medium text-[rgb(var(--color-text))]">
                 Roles <span className="ml-1 text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-2 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-3">
+            <div className="grid grid-cols-2 gap-2 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-3 transition-all duration-300">
                 {availableRoles.length === 0 ? (
                     <p className="col-span-2 text-xs text-[rgb(var(--color-text-muted))]">
                         No roles available
@@ -450,10 +468,10 @@ export default function Users() {
                         return (
                             <label
                                 key={roleName}
-                                className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                                className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
                                     isChecked
-                                        ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
-                                        : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
+                                        ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] shadow-sm'
+                                        : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))] hover:shadow-sm'
                                 }`}
                             >
                                 <input
@@ -473,28 +491,38 @@ export default function Users() {
     );
 
     return (
-        <div className="space-y-6">
-            <PageHeader
-                title="Users Management"
-                description="Manage user accounts, roles, and access permissions"
-                action={
-                    <button
-                        onClick={openCreateModal}
-                        className="glass-button-primary flex items-center gap-2"
-                    >
-                        <UserPlus size={18} />
-                        Add User
-                    </button>
-                }
-            />
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6"
+        >
+            <motion.div variants={itemVariants}>
+                <PageHeader
+                    title="Users Management"
+                    description="Manage user accounts, roles, and access permissions"
+                    action={
+                        <button
+                            onClick={openCreateModal}
+                            className="glass-button-primary flex items-center gap-2"
+                        >
+                            <UserPlus size={18} />
+                            Add User
+                        </button>
+                    }
+                />
+            </motion.div>
 
             {/* Toolbar */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <motion.div
+                variants={itemVariants}
+                className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
                 <SearchInput
                     value={search}
                     onChange={setSearch}
                     placeholder="Search users by name, email, or username..."
-                    className="w-full sm:max-w-sm"
+                    className="w-full sm:max-w-sm transition-all duration-300 focus-within:shadow-glow"
                 />
                 <button
                     onClick={fetchUsers}
@@ -503,22 +531,24 @@ export default function Users() {
                     <RefreshCw size={16} />
                     Refresh
                 </button>
-            </div>
+            </motion.div>
 
             {/* Table */}
-            <DataTable
-                columns={columns}
-                data={filteredUsers}
-                isLoading={isLoading}
-                error={error}
-                onRetry={fetchUsers}
-                emptyTitle="No users found"
-                emptyDescription={
-                    search
-                        ? 'No users match your search. Try a different query.'
-                        : 'There are no users in the system yet.'
-                }
-            />
+            <motion.div variants={itemVariants}>
+                <DataTable
+                    columns={columns}
+                    data={filteredUsers}
+                    isLoading={isLoading}
+                    error={error}
+                    onRetry={fetchUsers}
+                    emptyTitle="No users found"
+                    emptyDescription={
+                        search
+                            ? 'No users match your search. Try a different query.'
+                            : 'There are no users in the system yet.'
+                    }
+                />
+            </motion.div>
 
             {/* ── Create User Modal ── */}
             <Modal
@@ -696,7 +726,7 @@ export default function Users() {
                 ) : viewUser ? (
                     <div className="space-y-5">
                         <div className="flex items-center gap-4">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-xl font-bold">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-xl font-bold shadow-inner ring-2 ring-[rgb(var(--color-primary))]/10">
                                 {(viewUser.firstName || '?')[0]?.toUpperCase()}
                                 {(viewUser.lastName || '')[0]?.toUpperCase()}
                             </div>
@@ -710,16 +740,16 @@ export default function Users() {
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-[rgb(var(--color-border))] divide-y divide-[rgb(var(--color-border))]">
-                            <div className="flex items-center justify-between px-4 py-3">
+                        <div className="rounded-xl border border-[rgb(var(--color-border))] divide-y divide-[rgb(var(--color-border))] overflow-hidden">
+                            <div className="flex items-center justify-between px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
                                 <span className="text-sm text-[rgb(var(--color-text-muted))]">Email</span>
                                 <span className="text-sm font-medium text-[rgb(var(--color-text))]">{viewUser.email}</span>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-3">
+                            <div className="flex items-center justify-between px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
                                 <span className="text-sm text-[rgb(var(--color-text-muted))]">Username</span>
                                 <span className="text-sm font-medium text-[rgb(var(--color-text))]">{viewUser.userName}</span>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-3">
+                            <div className="flex items-center justify-between px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
                                 <span className="text-sm text-[rgb(var(--color-text-muted))]">Status</span>
                                 <StatusBadge
                                     active={!viewUser.isDisabled}
@@ -727,7 +757,7 @@ export default function Users() {
                                     inactiveText="Disabled"
                                 />
                             </div>
-                            <div className="px-4 py-3">
+                            <div className="px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
                                 <span className="text-sm text-[rgb(var(--color-text-muted))]">Roles</span>
                                 <div className="mt-2 flex flex-wrap gap-1.5">
                                     {(viewUser.roles || []).length === 0 ? (
@@ -736,7 +766,7 @@ export default function Users() {
                                         (viewUser.roles || []).map((role, i) => (
                                             <span
                                                 key={i}
-                                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))]"
+                                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))] transition-all duration-200 hover:bg-[rgb(var(--color-primary))]/15"
                                             >
                                                 <Shield size={10} />
                                                 {getRoleName(role)}
@@ -796,6 +826,6 @@ export default function Users() {
                 variant="primary"
                 isLoading={isUnlocking}
             />
-        </div>
+        </motion.div>
     );
 }

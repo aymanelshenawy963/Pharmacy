@@ -3,6 +3,23 @@ import Seo from '../components/Seo';
 import Icon from '../components/Icons';
 import { storeInfo } from '../data/products';
 
+const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1, delayChildren: 0.15 }
+    }
+};
+
+const staggerItem = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+    }
+};
+
 export default function CancelOrder() {
     return (
         <>
@@ -28,17 +45,20 @@ export default function CancelOrder() {
                     </motion.div>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="visible"
                         className="mt-12 space-y-10"
                     >
                         {/* Highlighted Policy Box */}
-                        <div className="glass-card p-8 md:p-10 border-tertiary/20 bg-tertiary/5">
+                        <motion.div variants={staggerItem} className="glass-card p-8 md:p-10 border-tertiary/20 bg-tertiary/5">
                             <div className="flex items-start gap-5">
-                                <div className="mt-1 inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-tertiary/10 text-tertiary border border-tertiary/20">
+                                <motion.div
+                                    whileHover={{ rotate: -10, scale: 1.1 }}
+                                    className="mt-1 inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-tertiary/10 text-tertiary border border-tertiary/20 transition-transform duration-300"
+                                >
                                     <Icon name="Clock" className="h-6 w-6" />
-                                </div>
+                                </motion.div>
                                 <div>
                                     <h2 className="font-serif text-2xl font-semibold text-text mb-3">
                                         The 2-Hour Cancellation Window
@@ -48,24 +68,26 @@ export default function CancelOrder() {
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
 
                         <div className="grid gap-6 md:grid-cols-2">
                             {/* How to Cancel */}
-                            <div className="glass-card p-8">
+                            <motion.div variants={staggerItem} className="glass-card p-8">
                                 <h3 className="font-serif text-2xl font-semibold text-text mb-4">
                                     How to Cancel
-                               </h3>
+                                </h3>
                                 <p className="text-base leading-relaxed text-text-muted mb-6">
                                     To cancel your order, you must provide your order details directly to our support team within the 2-hour window. Please share your Name and Order ID using one of the methods below:
                                 </p>
-                                
+
                                 <div className="space-y-4">
-                                    <a 
-                                        href={storeInfo.whatsapp} 
-                                        target="_blank" 
+                                    <motion.a
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        href={storeInfo.whatsapp}
+                                        target="_blank"
                                         rel="noreferrer"
-                                        className="flex w-full items-center gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4 transition-all hover:bg-primary/10 hover:-translate-y-0.5"
+                                        className="flex w-full items-center gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4 transition-all duration-300 hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
                                             <Icon name="MessageCircle" className="h-5 w-5" />
@@ -74,11 +96,13 @@ export default function CancelOrder() {
                                             <p className="text-sm font-bold text-text">WhatsApp Us</p>
                                             <p className="text-xs text-text-muted mt-0.5">Fastest response time</p>
                                         </div>
-                                    </a>
+                                    </motion.a>
 
-                                    <a 
+                                    <motion.a
+                                        whileHover={{ scale: 1.02, y: -2 }}
+                                        whileTap={{ scale: 0.98 }}
                                         href={`tel:${storeInfo.phone.replace(/\s/g, '')}`}
-                                        className="flex w-full items-center gap-4 rounded-xl border border-border bg-bg-subtle p-4 transition-all hover:bg-bg hover:-translate-y-0.5"
+                                        className="flex w-full items-center gap-4 rounded-xl border border-border bg-bg-subtle p-4 transition-all duration-300 hover:bg-bg hover:shadow-md"
                                     >
                                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-bg border border-border text-text">
                                             <Icon name="Phone" className="h-5 w-5" />
@@ -87,30 +111,36 @@ export default function CancelOrder() {
                                             <p className="text-sm font-bold text-text">Call Support</p>
                                             <p className="text-xs text-text-muted mt-0.5">{storeInfo.phone}</p>
                                         </div>
-                                    </a>
+                                    </motion.a>
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* Refunds & Exceptions */}
-                            <div className="glass-card p-8">
+                            <motion.div variants={staggerItem} className="glass-card p-8">
                                 <h3 className="font-serif text-2xl font-semibold text-text mb-6">
                                     Refunds & Exceptions
                                 </h3>
                                 <ul className="space-y-5 text-base leading-relaxed text-text-muted">
                                     <li className="flex items-start gap-4">
-                                        <Icon name="CheckCircle2" className="mt-1 h-5 w-5 flex-shrink-0 text-green-500" />
+                                        <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
+                                            <Icon name="CheckCircle2" className="h-4 w-4 text-green-500" />
+                                        </div>
                                         <span>If you cancel within 2 hours, 95% of your pre-paid amount will be refunded to your original payment method within 3-5 business days (a 5% deduction applies due to payment gateway processing charges).</span>
                                     </li>
                                     <li className="flex items-start gap-4">
-                                        <Icon name="AlertCircle" className="mt-1 h-5 w-5 flex-shrink-0 text-tertiary" />
+                                        <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-tertiary/10 border border-tertiary/20">
+                                            <Icon name="AlertCircle" className="h-4 w-4 text-tertiary" />
+                                        </div>
                                         <span>Temperature-sensitive medicines (like insulin) cannot be returned or cancelled once dispatched under any circumstances due to strict safety regulations.</span>
                                     </li>
                                     <li className="flex items-start gap-4">
-                                        <Icon name="Ban" className="mt-1 h-5 w-5 flex-shrink-0 text-red-500" />
+                                        <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/10 border border-red-500/20">
+                                            <Icon name="Ban" className="h-4 w-4 text-red-500" />
+                                        </div>
                                         <span>Orders cancelled after the 2-hour window, or orders refused at the time of delivery, may be subject to a nominal delivery cancellation fee.</span>
                                     </li>
                                 </ul>
-                            </div>
+                            </motion.div>
                         </div>
                     </motion.div>
                 </div>

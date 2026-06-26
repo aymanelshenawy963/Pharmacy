@@ -19,6 +19,23 @@ const emailConfigured =
     import.meta.env.VITE_EMAILJS_CONTACT_TEMPLATE &&
     import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
+const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+    }
+};
+
+const staggerItem = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+    }
+};
+
 export default function Contact() {
     const [form, setForm] = useState(initialForm);
     const [sending, setSending] = useState(false);
@@ -51,7 +68,7 @@ export default function Contact() {
     };
 
     const inputClass =
-        'w-full bg-bg border border-border rounded-xl px-4 py-3 text-text placeholder:text-text-muted/60 focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none transition-colors duration-300 text-sm';
+        'w-full bg-bg border border-border rounded-xl px-4 py-3 text-text placeholder:text-text-muted/60 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm outline-none transition-all duration-300 text-sm hover:border-primary/40';
 
     return (
         <>
@@ -62,7 +79,7 @@ export default function Contact() {
 
             <main className="min-h-[calc(100vh-72px)] bg-surface relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/2 h-[500px] bg-primary/10 blur-[120px] pointer-events-none" />
-                
+
                 <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 relative z-10">
                     {/* Header */}
                     <motion.div
@@ -92,10 +109,16 @@ export default function Contact() {
                                     Send a Message
                                 </h2>
 
-                                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                                <motion.form
+                                    variants={staggerContainer}
+                                    initial="hidden"
+                                    animate="visible"
+                                    onSubmit={handleSubmit}
+                                    className="flex flex-col gap-6"
+                                >
                                     {/* Name + Email */}
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        <div>
+                                        <motion.div variants={staggerItem}>
                                             <label htmlFor="contact-name" className="mb-2 block text-xs font-bold uppercase tracking-widest text-text-muted">
                                                 Name
                                             </label>
@@ -108,8 +131,8 @@ export default function Contact() {
                                                 placeholder="Jane Doe"
                                                 className={inputClass}
                                             />
-                                        </div>
-                                        <div>
+                                        </motion.div>
+                                        <motion.div variants={staggerItem}>
                                             <label htmlFor="contact-email" className="mb-2 block text-xs font-bold uppercase tracking-widest text-text-muted">
                                                 Email
                                             </label>
@@ -123,12 +146,12 @@ export default function Contact() {
                                                 placeholder="jane@example.com"
                                                 className={inputClass}
                                             />
-                                        </div>
+                                        </motion.div>
                                     </div>
 
                                     {/* Phone + Subject */}
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        <div>
+                                        <motion.div variants={staggerItem}>
                                             <label htmlFor="contact-phone" className="mb-2 block text-xs font-bold uppercase tracking-widest text-text-muted">
                                                 Phone
                                             </label>
@@ -142,8 +165,8 @@ export default function Contact() {
                                                 placeholder="+91 00000 00000"
                                                 className={inputClass}
                                             />
-                                        </div>
-                                        <div>
+                                        </motion.div>
+                                        <motion.div variants={staggerItem}>
                                             <label htmlFor="contact-subject" className="mb-2 block text-xs font-bold uppercase tracking-widest text-text-muted">
                                                 Subject
                                             </label>
@@ -156,11 +179,11 @@ export default function Contact() {
                                                 placeholder="Prescription Inquiry"
                                                 className={inputClass}
                                             />
-                                        </div>
+                                        </motion.div>
                                     </div>
 
                                     {/* Message */}
-                                    <div>
+                                    <motion.div variants={staggerItem}>
                                         <label htmlFor="contact-message" className="mb-2 block text-xs font-bold uppercase tracking-widest text-text-muted">
                                             Message
                                         </label>
@@ -174,27 +197,34 @@ export default function Contact() {
                                             placeholder="How can we assist you today?"
                                             className={inputClass + ' resize-none'}
                                         />
-                                    </div>
+                                    </motion.div>
 
                                     {/* Submit */}
-                                    <div className="pt-4">
-                                        <button
+                                    <motion.div variants={staggerItem} className="pt-4">
+                                        <motion.button
+                                            whileHover={{ scale: 1.01 }}
+                                            whileTap={{ scale: 0.98 }}
                                             type="submit"
                                             disabled={sending}
                                             className="glass-button-primary w-full md:w-auto px-10 py-4 justify-center"
                                         >
                                             {sending ? 'Sending...' : 'Send Message'}
                                             <Icon name="ArrowRight" className="ml-2 h-4 w-4" />
-                                        </button>
-                                    </div>
-                                </form>
+                                        </motion.button>
+                                    </motion.div>
+                                </motion.form>
                             </div>
                         </div>
 
                         {/* ─── Right Column: Info + Owner ─── */}
-                        <div className="flex flex-col gap-8 md:col-span-5">
+                        <motion.div
+                            variants={staggerContainer}
+                            initial="hidden"
+                            animate="visible"
+                            className="flex flex-col gap-8 md:col-span-5"
+                        >
                             {/* Store Details Card */}
-                            <div className="glass-card p-8">
+                            <motion.div variants={staggerItem} className="glass-card p-8">
                                 <h3 className="font-serif text-2xl font-semibold text-primary mb-6">
                                     Store Details
                                 </h3>
@@ -208,22 +238,24 @@ export default function Contact() {
 
                                 {/* WhatsApp Button */}
                                 <div className="mt-8 pt-8 border-t border-border">
-                                    <a
+                                    <motion.a
+                                        whileHover={{ scale: 1.02, y: -1 }}
+                                        whileTap={{ scale: 0.98 }}
                                         href={storeInfo.whatsapp}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-6 py-4 text-sm font-medium text-primary transition-all duration-300 hover:bg-primary/20"
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-6 py-4 text-sm font-medium text-primary transition-all duration-300 hover:bg-primary/20 hover:shadow-md hover:shadow-primary/10"
                                     >
                                         <Icon name="MessageCircle" className="h-5 w-5" />
                                         Chat on WhatsApp
-                                    </a>
+                                    </motion.a>
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* Owner Card */}
-                            <div className="glass-card p-6 bg-primary/5">
+                            <motion.div variants={staggerItem} className="glass-card p-6 bg-primary/5">
                                 <div className="flex items-center gap-6">
-                                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-border shadow-sm">
+                                    <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-border shadow-sm transition-transform duration-300 hover:scale-105">
                                         <img
                                             src="/images/owner.jpg"
                                             alt={ownerProfile.name}
@@ -243,8 +275,8 @@ export default function Contact() {
                                         </p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     </motion.div>
 
                     {/* Google Maps */}
@@ -272,7 +304,7 @@ export default function Contact() {
 
 function InfoRow({ icon, label, value, href }) {
     const content = href ? (
-        <a href={href} className="text-sm text-text hover:text-primary transition-colors">
+        <a href={href} className="text-sm text-text hover:text-primary transition-colors duration-200">
             {value}
         </a>
     ) : (
@@ -280,8 +312,8 @@ function InfoRow({ icon, label, value, href }) {
     );
 
     return (
-        <div className="flex items-start gap-4">
-            <span className="mt-0.5 text-primary">
+        <div className="flex items-start gap-4 group/inf">
+            <span className="mt-0.5 text-primary transition-transform duration-200 group-hover/inf:scale-110">
                 <Icon name={icon} className="h-5 w-5" />
             </span>
             <div>

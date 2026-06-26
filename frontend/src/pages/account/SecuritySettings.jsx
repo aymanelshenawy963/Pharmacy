@@ -1,11 +1,46 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { Lock, Save, Loader2, Shield } from 'lucide-react';
+import { Lock, Save, Loader2, Shield, Check, X } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 import PageHeader from '../../components/admin/PageHeader';
 import FormField from '../../components/admin/FormField';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import { validators } from '../../utils/validators';
+
+const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
+
+function PasswordRequirement({ label, met }) {
+    return (
+        <div className={`flex items-center gap-2 text-xs transition-all duration-200 ${met ? 'text-emerald-500' : 'text-[rgb(var(--color-text-muted))]'}`}>
+            {met ? (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/15">
+                    <Check size={10} className="text-emerald-500" />
+                </span>
+            ) : (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgb(var(--color-bg-subtle))]">
+                    <X size={10} className="text-[rgb(var(--color-text-muted))]" />
+                </span>
+            )}
+            {label}
+        </div>
+    );
+}
 
 export default function SecuritySettings() {
     const [formData, setFormData] = useState({
@@ -59,18 +94,40 @@ export default function SecuritySettings() {
         }
     };
 
+    const password = formData.newPassword || '';
+    const requirements = [
+        { label: 'At least 8 characters', met: password.length >= 8 },
+        { label: 'One uppercase letter', met: /[A-Z]/.test(password) },
+        { label: 'One lowercase letter', met: /[a-z]/.test(password) },
+        { label: 'One number', met: /\d/.test(password) },
+        { label: 'One special character (@$!%*?&^#_-)', met: /[@$!%*?&^#_-]/.test(password) },
+    ];
+
     return (
-        <div className="mx-auto max-w-2xl space-y-6">
-            <PageHeader
-                title="Security Settings"
-                description="Change your password to keep your account secure"
-            />
+        <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+            className="mx-auto max-w-2xl space-y-6"
+        >
+            <motion.div variants={itemVariants}>
+                <PageHeader
+                    title="Security Settings"
+                    description="Change your password to keep your account secure"
+                />
+            </motion.div>
 
-            <ErrorBanner message={serverError} />
+            <motion.div variants={itemVariants}>
+                <ErrorBanner message={serverError} />
+            </motion.div>
 
-            <form onSubmit={handleSubmit} className="glass-card space-y-6 p-6">
+            <motion.form
+                variants={itemVariants}
+                onSubmit={handleSubmit}
+                className="glass-card space-y-6 p-6 transition-all duration-300 hover:shadow-lg"
+            >
                 <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-secondary))]/10">
+                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[rgb(var(--color-secondary))]/15 to-[rgb(var(--color-secondary))]/5 ring-2 ring-[rgb(var(--color-secondary))]/10 shadow-inner transition-all duration-300 hover:ring-[rgb(var(--color-secondary))]/25 hover:shadow-md">
                         <Shield className="h-8 w-8 text-[rgb(var(--color-secondary))]" />
                     </div>
                     <div>
@@ -82,6 +139,8 @@ export default function SecuritySettings() {
                         </p>
                     </div>
                 </div>
+
+                <div className="h-px bg-gradient-to-r from-transparent via-[rgb(var(--color-border))] to-transparent" />
 
                 <div className="space-y-4">
                     <FormField
@@ -116,28 +175,32 @@ export default function SecuritySettings() {
                     />
                 </div>
 
-                <div className="rounded-xl bg-[rgb(var(--color-bg-subtle))] p-4">
-                    <p className="text-xs font-medium text-[rgb(var(--color-text-muted))]">
-                        Password must contain at least 8 characters, one uppercase letter, one lowercase letter,
-                        one digit, and one special character (@$!%*?&^#_-)
+                <div className="rounded-xl bg-[rgb(var(--color-bg-subtle))] p-4 ring-1 ring-[rgb(var(--color-border))]">
+                    <p className="text-xs font-semibold text-[rgb(var(--color-text-muted))] mb-3 uppercase tracking-wider">
+                        Password Requirements
                     </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {requirements.map((req, i) => (
+                            <PasswordRequirement key={i} label={req.label} met={req.met} />
+                        ))}
+                    </div>
                 </div>
 
                 <div className="flex justify-end">
                     <button
                         type="submit"
                         disabled={isSaving}
-                        className="glass-button-primary !px-6"
+                        className="glass-button-primary !px-6 group"
                     >
                         {isSaving ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                            <Lock className="h-4 w-4" />
+                            <Lock className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                         )}
                         Update Password
                     </button>
                 </div>
-            </form>
-        </div>
+            </motion.form>
+        </motion.div>
     );
 }

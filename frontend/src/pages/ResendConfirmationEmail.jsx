@@ -3,9 +3,25 @@ import { Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { validators } from '../utils/validators';
 import Input from '../components/Input';
-import { AlertCircle, ArrowLeft, ArrowRight, Mail, MailCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Mail, MailCheck } from 'lucide-react';
 import { parseApiError } from '../utils/apiErrorHandler';
 import AuthErrorAlert from '../components/AuthErrorAlert';
+import { motion } from 'framer-motion';
+
+const container = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
+};
+
+const fadeUp = {
+    hidden: { opacity: 0, y: 24 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] } },
+};
+
+const floatingAnimation = {
+    y: [0, -10, 0],
+    transition: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+};
 
 export default function ResendConfirmationEmail() {
     const [email, setEmail] = useState('');
@@ -52,90 +68,154 @@ export default function ResendConfirmationEmail() {
     /* ── Success state ── */
     if (isSuccess) {
         return (
-            <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi">
+            <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi relative overflow-hidden">
                 <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/70 backdrop-blur-sm" />
-                <div className="relative z-10 w-full max-w-md">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="relative z-10 w-full max-w-md"
+                >
                     <div className="glass-card p-10 text-center">
-                        <div className="mb-6 flex h-20 w-20 mx-auto items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/25">
-                            <MailCheck size={40} className="text-[rgb(var(--color-primary))]" />
-                        </div>
-                        <h2 className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-3">
-                            Email sent!
-                        </h2>
-                        <p className="text-[rgb(var(--color-text-muted))] text-sm mb-8 leading-relaxed">
-                            {successMessage}
-                        </p>
-                        <Link
-                            to="/login"
-                            className="glass-button-primary w-full !rounded-xl !py-3.5 !text-base"
+                        <motion.div
+                            initial={{ scale: 0, rotate: -30 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2, type: 'spring', stiffness: 180 }}
+                            className="mb-6 flex h-20 w-20 mx-auto items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/25"
                         >
-                            <span className="flex items-center justify-center gap-2">
-                                Return to Sign In <ArrowRight size={18} />
-                            </span>
-                        </Link>
+                            <MailCheck size={40} className="text-[rgb(var(--color-primary))]" />
+                        </motion.div>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4, duration: 0.4 }}
+                            className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-3"
+                        >
+                            Email sent!
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5, duration: 0.4 }}
+                            className="text-[rgb(var(--color-text-muted))] text-sm mb-8 leading-relaxed"
+                        >
+                            {successMessage}
+                        </motion.p>
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6, duration: 0.4 }}
+                        >
+                            <Link
+                                to="/login"
+                                className="glass-button-primary w-full !rounded-xl !py-3.5 !text-base inline-block"
+                            >
+                                <span className="flex items-center justify-center gap-2">
+                                    Return to Sign In <ArrowRight size={18} />
+                                </span>
+                            </Link>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         );
     }
 
     /* ── Form state ── */
     return (
-        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi">
+        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi relative overflow-hidden">
             <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/70 backdrop-blur-sm" />
 
-            <div className="relative z-10 w-full max-w-md">
-                <Link
-                    to="/login"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] transition-colors mb-8"
+            {/* Decorative floating elements */}
+            <motion.div
+                animate={floatingAnimation}
+                className="absolute top-24 left-[18%] h-16 w-16 rounded-full bg-[rgb(var(--color-primary))]/5 blur-xl"
+            />
+            <motion.div
+                animate={{ y: [0, 8, 0], transition: { duration: 7, repeat: Infinity, ease: 'easeInOut' } }}
+                className="absolute bottom-20 right-[15%] h-14 w-14 rounded-full bg-[rgb(var(--color-primary))]/5 blur-xl"
+            />
+
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="relative z-10 w-full max-w-md"
+            >
+                <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
                 >
-                    <ArrowLeft size={16} /> Back to sign in
-                </Link>
+                    <Link
+                        to="/login"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] transition-colors duration-200 mb-8"
+                    >
+                        <ArrowLeft size={16} /> Back to sign in
+                    </Link>
+                </motion.div>
 
-                <div className="glass-card p-8 sm:p-10">
-                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10">
-                        <Mail className="h-7 w-7 text-[rgb(var(--color-primary))]" />
-                    </div>
+                <div className="relative">
+                    <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-[rgb(var(--color-primary))]/20 via-transparent to-[rgb(var(--color-primary))]/10 opacity-60" />
+                    <div className="glass-card p-8 sm:p-10 relative rounded-3xl">
+                        <motion.div variants={container} initial="hidden" animate="show">
+                            <motion.div variants={fadeUp} className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10">
+                                <motion.div
+                                    initial={{ rotate: -15 }}
+                                    animate={{ rotate: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.3, type: 'spring' }}
+                                >
+                                    <Mail className="h-7 w-7 text-[rgb(var(--color-primary))]" />
+                                </motion.div>
+                            </motion.div>
 
-                    <h2 className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
-                        Resend confirmation
-                    </h2>
-                    <p className="text-sm text-[rgb(var(--color-text-muted))] mb-8 leading-relaxed">
-                        Didn&apos;t receive the confirmation email? Enter your address and we&apos;ll resend it.
-                    </p>
+                            <motion.h2 variants={fadeUp} className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
+                                Resend confirmation
+                            </motion.h2>
+                            <motion.p variants={fadeUp} className="text-sm text-[rgb(var(--color-text-muted))] mb-8 leading-relaxed">
+                                Didn&apos;t receive the confirmation email? Enter your address and we&apos;ll resend it.
+                            </motion.p>
 
-                    {serverError.length > 0 && (
-                        <div className="mb-6">
-                            <AuthErrorAlert errors={serverError} />
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                        <Input
-                            label="Email address"
-                            name="email"
-                            type="email"
-                            value={email}
-                            onChange={handleChange}
-                            error={error}
-                            placeholder="you@example.com"
-                        />
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="glass-button-primary w-full !rounded-xl !py-3.5 !text-base"
-                        >
-                            {isSubmitting ? (
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    Resend Email <ArrowRight size={18} />
-                                </span>
+                            {serverError.length > 0 && (
+                                <motion.div variants={fadeUp} className="mb-6">
+                                    <AuthErrorAlert errors={serverError} />
+                                </motion.div>
                             )}
-                        </button>
-                    </form>
+
+                            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                                <motion.div variants={fadeUp}>
+                                    <Input
+                                        label="Email address"
+                                        name="email"
+                                        type="email"
+                                        value={email}
+                                        onChange={handleChange}
+                                        error={error}
+                                        placeholder="you@example.com"
+                                    />
+                                </motion.div>
+                                <motion.div variants={fadeUp}>
+                                    <motion.button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        whileHover={{ scale: 1.01, y: -1 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="glass-button-primary w-full !rounded-xl !py-3.5 !text-base transition-shadow duration-300 hover:shadow-lg hover:shadow-[rgb(var(--color-primary))]/20"
+                                    >
+                                        {isSubmitting ? (
+                                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                        ) : (
+                                            <span className="flex items-center gap-2 justify-center">
+                                                Resend Email <ArrowRight size={18} />
+                                            </span>
+                                        )}
+                                    </motion.button>
+                                </motion.div>
+                            </form>
+                        </motion.div>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
