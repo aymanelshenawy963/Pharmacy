@@ -7,6 +7,7 @@ import Icon from './Icons';
 import ThemeToggle from './ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, User } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const navLinks = footerLinks.filter((link) => link.label !== 'Home');
 
@@ -19,6 +20,10 @@ export default function Navbar() {
 
     const handleLogout = () => {
         logout();
+        toast.success('You have been signed out. See you next time!', {
+            icon: '👋',
+            duration: 3000,
+        });
         navigate('/');
     };
 

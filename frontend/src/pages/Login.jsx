@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { validators } from '../utils/validators';
 import Input from '../components/Input';
 import { AlertCircle, ArrowRight, Mail, Lock, ShieldCheck } from 'lucide-react';
-
+import AuthErrorAlert from '../components/AuthErrorAlert';
+import { parseApiError } from '../utils/apiErrorHandler';
 export default function Login() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({});
@@ -55,24 +56,22 @@ export default function Login() {
                 const msg = error.message?.toLowerCase() || '';
                 if (msg.includes('not confirmed')) {
                     setNeedsConfirmation(true);
-                    setServerError('Your email address has not been confirmed yet.');
+                    setServerError(['Your email address has not been confirmed yet.']);
                 } else if (msg.includes('disabled')) {
-                    setServerError('This account has been disabled. Please contact support.');
+                    setServerError(['This account has been disabled. Please contact support.']);
                 } else {
-                    setServerError(error.message || 'Access denied.');
+                    setServerError(parseApiError(error));
                 }
-            } else if (error.status === 401) {
-                setServerError('Incorrect email or password. Please try again.');
-            } else if (error.status === 400 && error.validationErrors) {
-                const apiErrors = {};
-                Object.keys(error.validationErrors).forEach((key) => {
-                    const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
-                    apiErrors[fieldName] = error.validationErrors[key][0];
-                });
-                setErrors((prev) => ({ ...prev, ...apiErrors }));
-                setServerError(error.message || 'Validation failed. Please check your inputs.');
             } else {
-                setServerError(error.message || 'An unexpected error occurred. Please try again.');
+                if (error.status === 400 && error.validationErrors) {
+                    const apiErrors = {};
+                    Object.keys(error.validationErrors).forEach((key) => {
+                        const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+                        apiErrors[fieldName] = error.validationErrors[key][0];
+                    });
+                    setErrors((prev) => ({ ...prev, ...apiErrors }));
+                }
+                setServerError(parseApiError(error));
             }
         }
     };
@@ -126,34 +125,26 @@ export default function Login() {
                         </p>
                     </div>
 
-                    {serverError && (
-                        <div className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800 flex items-start gap-3">
-                            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
-                            <div className="flex-1">
-                                <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-snug">
-                                    {serverError}
-                                </p>
-                                {needsConfirmation && (
-                                    <div className="mt-3 flex flex-col gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate('/confirm-email', { state: { email: formData.email } })}
-                                            className="text-sm font-semibold text-[rgb(var(--color-primary))] hover:underline flex items-center gap-1"
-                                        >
-                                            Enter 6-digit confirmation code <ArrowRight size={13} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => navigate('/resend-confirmation', { state: { email: formData.email } })}
-                                            className="text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-primary))] transition-colors flex items-center gap-1"
-                                        >
-                                            Resend confirmation email
-                                        </button>
-                                    </div>
-                                )}
+                    <AuthErrorAlert errors={serverError}>
+                        {needsConfirmation && (
+                            <div className="mt-3 flex flex-col gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/confirm-email', { state: { email: formData.email } })}
+                                    className="text-sm font-semibold text-[rgb(var(--color-primary))] hover:underline flex items-center gap-1"
+                                >
+                                    Enter 6-digit confirmation code <ArrowRight size={13} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/resend-confirmation', { state: { email: formData.email } })}
+                                    className="text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-primary))] transition-colors flex items-center gap-1"
+                                >
+                                    Resend confirmation email
+                                </button>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </AuthErrorAlert>
 
                     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                         <Input

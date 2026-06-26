@@ -5,7 +5,8 @@ import { authService } from '../services/authService';
 import { validators, getPasswordStrength } from '../utils/validators';
 import Input from '../components/Input';
 import { AlertCircle, ArrowRight, CheckCircle2, UserPlus } from 'lucide-react';
-
+import AuthErrorAlert from '../components/AuthErrorAlert';
+import { parseApiError } from '../utils/apiErrorHandler';
 export default function Register() {
     const [formData, setFormData] = useState({
         firstName: '',
@@ -65,17 +66,17 @@ export default function Register() {
                 const msg = error.message?.toLowerCase() || '';
                 if (msg.includes('email')) setErrors((prev) => ({ ...prev, email: error.message }));
                 else if (msg.includes('username')) setErrors((prev) => ({ ...prev, userName: error.message }));
-                else setServerError(error.message || 'A conflict occurred. Please try different details.');
-            } else if (error.status === 400 && error.validationErrors) {
-                const apiErrors = {};
-                Object.keys(error.validationErrors).forEach((key) => {
-                    const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
-                    apiErrors[fieldName] = error.validationErrors[key][0];
-                });
-                setErrors((prev) => ({ ...prev, ...apiErrors }));
-                setServerError(error.message || 'Validation failed. Please check your inputs.');
+                else setServerError(parseApiError(error));
             } else {
-                setServerError(error.message || 'Registration failed. Please try again.');
+                if (error.status === 400 && error.validationErrors) {
+                    const apiErrors = {};
+                    Object.keys(error.validationErrors).forEach((key) => {
+                        const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+                        apiErrors[fieldName] = error.validationErrors[key][0];
+                    });
+                    setErrors((prev) => ({ ...prev, ...apiErrors }));
+                }
+                setServerError(parseApiError(error));
             }
         } finally {
             setIsSubmitting(false);
@@ -140,14 +141,7 @@ export default function Register() {
                         </p>
                     </div>
 
-                    {serverError && (
-                        <div className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800 flex items-start gap-3">
-                            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
-                            <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-snug">
-                                {serverError}
-                            </p>
-                        </div>
-                    )}
+                    <AuthErrorAlert errors={serverError} />
 
                     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

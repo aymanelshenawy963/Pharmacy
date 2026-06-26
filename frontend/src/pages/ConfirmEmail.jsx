@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { CheckCircle, XCircle, Loader2, ArrowRight, ShieldCheck, Mail } from 'lucide-react';
-
+import { parseApiError } from '../utils/apiErrorHandler';
+import AuthErrorAlert from '../components/AuthErrorAlert';
 export default function ConfirmEmail() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -10,17 +11,17 @@ export default function ConfirmEmail() {
     const [code, setCode] = useState('');
 
     const [status, setStatus] = useState('idle'); // idle | loading | success
-    const [errorMsg, setErrorMsg] = useState('');
+    const [serverError, setServerError] = useState([]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!email || !code) {
-            setErrorMsg('Please enter both your email and the 6-digit code.');
+            setServerError(['Please enter both your email and the 6-digit code.']);
             return;
         }
 
         setStatus('loading');
-        setErrorMsg('');
+        setServerError([]);
 
         try {
             await authService.confirmEmailByOtp(email, code);
@@ -31,7 +32,7 @@ export default function ConfirmEmail() {
             if (err.status === 409) {
                 setStatus('success');
             } else {
-                setErrorMsg(err.message || 'Invalid or expired code. Please try again.');
+                setServerError(parseApiError(err, 'Invalid or expired code. Please try again.'));
             }
         }
     };
@@ -83,10 +84,9 @@ export default function ConfirmEmail() {
                         Enter the 6-digit code sent to your email address.
                     </p>
 
-                    {errorMsg && (
-                        <div className="mb-6 rounded-xl bg-red-500/10 p-4 text-sm text-red-500 flex items-center gap-3 text-left">
-                            <XCircle size={18} className="shrink-0" />
-                            {errorMsg}
+                    {serverError.length > 0 && (
+                        <div className="mb-6">
+                            <AuthErrorAlert errors={serverError} />
                         </div>
                     )}
 

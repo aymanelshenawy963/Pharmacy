@@ -4,11 +4,13 @@ import { authService } from '../services/authService';
 import { validators } from '../utils/validators';
 import Input from '../components/Input';
 import { AlertCircle, ArrowLeft, ArrowRight, Mail, MailCheck } from 'lucide-react';
+import { parseApiError } from '../utils/apiErrorHandler';
+import AuthErrorAlert from '../components/AuthErrorAlert';
 
 export default function ResendConfirmationEmail() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState(null);
-    const [serverError, setServerError] = useState(null);
+    const [serverError, setServerError] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -16,7 +18,7 @@ export default function ResendConfirmationEmail() {
     const handleChange = (e) => {
         setEmail(e.target.value);
         if (error) setError(null);
-        setServerError(null);
+        setServerError([]);
     };
 
     const validate = () => {
@@ -27,7 +29,7 @@ export default function ResendConfirmationEmail() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setServerError(null);
+        setServerError([]);
         if (!validate()) return;
 
         setIsSubmitting(true);
@@ -40,7 +42,7 @@ export default function ResendConfirmationEmail() {
                 setIsSuccess(true);
                 setSuccessMessage('This email is already confirmed. You can proceed to sign in.');
             } else {
-                setServerError(err.message || 'Failed to resend confirmation email. Please try again.');
+                setServerError(parseApiError(err, 'Failed to resend confirmation email. Please try again.'));
             }
         } finally {
             setIsSubmitting(false);
@@ -102,12 +104,9 @@ export default function ResendConfirmationEmail() {
                         Didn&apos;t receive the confirmation email? Enter your address and we&apos;ll resend it.
                     </p>
 
-                    {serverError && (
-                        <div className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800 flex items-start gap-3">
-                            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
-                            <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-snug">
-                                {serverError}
-                            </p>
+                    {serverError.length > 0 && (
+                        <div className="mb-6">
+                            <AuthErrorAlert errors={serverError} />
                         </div>
                     )}
 

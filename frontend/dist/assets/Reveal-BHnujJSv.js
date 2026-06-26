@@ -1,0 +1,1 @@
+import{j as o,d as a}from"./index-C9ysrpNc.js";function r({children:t,className:i="",delay:e=0}){return o.jsx(a.div,{initial:{opacity:0,y:22},whileInView:{opacity:1,y:0},viewport:{once:!0,amount:.2},transition:{duration:.55,delay:e,ease:"easeOut"},className:i,children:t})}export{r as R};

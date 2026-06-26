@@ -5,6 +5,8 @@ import { authService } from '../services/authService';
 import { validators, getPasswordStrength } from '../utils/validators';
 import Input from '../components/Input';
 import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, LockKeyhole } from 'lucide-react';
+import AuthErrorAlert from '../components/AuthErrorAlert';
+import { parseApiError } from '../utils/apiErrorHandler';
 
 export default function ResetPassword() {
     const location = useLocation();
@@ -56,7 +58,15 @@ export default function ResetPassword() {
             toast.success('Password reset successfully!');
             navigate('/login');
         } catch (err) {
-            setServerError(err.message || 'Failed to reset password. Please try again or request a new code.');
+            if (err.status === 400 && err.validationErrors) {
+                const apiErrors = {};
+                Object.keys(err.validationErrors).forEach((key) => {
+                    const fieldName = key.charAt(0).toLowerCase() + key.slice(1);
+                    apiErrors[fieldName] = err.validationErrors[key][0];
+                });
+                setErrors((prev) => ({ ...prev, ...apiErrors }));
+            }
+            setServerError(parseApiError(err));
         } finally {
             setIsSubmitting(false);
         }
@@ -97,14 +107,7 @@ export default function ResetPassword() {
                         Enter the reset code from your email along with your new password.
                     </p>
 
-                    {serverError && (
-                        <div className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800 flex items-start gap-3">
-                            <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
-                            <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-snug">
-                                {serverError}
-                            </p>
-                        </div>
-                    )}
+                    <AuthErrorAlert errors={serverError} />
 
                     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <Input
