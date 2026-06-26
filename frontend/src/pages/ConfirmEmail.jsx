@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { CheckCircle, Loader2, ArrowRight, ShieldCheck, Mail } from 'lucide-react';
+import { validators } from '../utils/validators';
+import Input from '../components/Input';
+import { CheckCircle, Loader2, ArrowRight, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { parseApiError } from '../utils/apiErrorHandler';
 import AuthErrorAlert from '../components/AuthErrorAlert';
 import { motion } from 'framer-motion';
@@ -24,22 +26,47 @@ const floatingAnimation = {
 export default function ConfirmEmail() {
     const location = useLocation();
     const navigate = useNavigate();
+    const emailInputRef = useRef(null);
+
     const [email, setEmail] = useState(location.state?.email || '');
     const [code, setCode] = useState('');
+    const [errors, setErrors] = useState({});
 
     const [status, setStatus] = useState('idle'); // idle | loading | success
     const [serverError, setServerError] = useState([]);
 
+    const handleChangeEmail = (e) => {
+        setEmail(e.target.value);
+        if (errors.email) setErrors((prev) => ({ ...prev, email: null }));
+        setServerError([]);
+    };
+
+    const handleChangeCode = (e) => {
+        const raw = e.target.value.replace(/\D/g, '').slice(0, 6);
+        setCode(raw);
+        if (errors.code) setErrors((prev) => ({ ...prev, code: null }));
+        setServerError([]);
+    };
+
+    const validateForm = () => {
+        const newErrors = {
+            email: validators.email(email),
+            code: validators.required(code, 'Verification code'),
+        };
+        if (!newErrors.code && code.length !== 6) {
+            newErrors.code = 'Verification code must be 6 digits';
+        }
+        const hasErrors = Object.values(newErrors).some(Boolean);
+        if (hasErrors) setErrors(newErrors);
+        return !hasErrors;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email || !code) {
-            setServerError(['Please enter both your email and the 6-digit code.']);
-            return;
-        }
+        setServerError([]);
+        if (!validateForm()) return;
 
         setStatus('loading');
-        setServerError([]);
-
         try {
             await authService.confirmEmailByOtp(email, code);
             setStatus('success');
@@ -64,19 +91,14 @@ export default function ConfirmEmail() {
                     transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                     className="relative z-10 w-full max-w-md"
                 >
-                    <div className="glass-card p-10 text-center">
+                    <div className="glass-card p-10 text-center rounded-3xl">
                         <motion.div
                             initial={{ scale: 0, rotate: -30 }}
                             animate={{ scale: 1, rotate: 0 }}
                             transition={{ duration: 0.6, delay: 0.2, type: 'spring', stiffness: 180 }}
                             className="mb-6 flex mx-auto h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/25"
                         >
-                            <motion.div
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: 1 }}
-                            >
-                                <CheckCircle size={40} className="text-green-500" />
-                            </motion.div>
+                            <CheckCircle size={40} className="text-green-500" />
                         </motion.div>
                         <motion.h2
                             initial={{ opacity: 0, y: 10 }}
@@ -134,6 +156,19 @@ export default function ConfirmEmail() {
                 transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className="relative z-10 w-full max-w-md"
             >
+                <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                    <Link
+                        to="/register"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] transition-colors duration-200 mb-8"
+                    >
+                        <ArrowLeft size={16} /> Back to sign up
+                    </Link>
+                </motion.div>
+
                 <div className="relative">
                     <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-[rgb(var(--color-primary))]/20 via-transparent to-[rgb(var(--color-primary))]/10 opacity-60" />
                     <div className="glass-card p-10 text-center relative rounded-3xl">
@@ -148,51 +183,55 @@ export default function ConfirmEmail() {
                                 </motion.div>
                             </motion.div>
 
-                            <motion.h2 variants={fadeUp} className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-3">
+                            <motion.h2 variants={fadeUp} className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
                                 Verify your email
                             </motion.h2>
                             <motion.p variants={fadeUp} className="text-[rgb(var(--color-text-muted))] text-sm mb-8">
                                 Enter the 6-digit code sent to your email address.
                             </motion.p>
 
-                            {serverError.length > 0 && (
-                                <motion.div variants={fadeUp} className="mb-6">
-                                    <AuthErrorAlert errors={serverError} />
-                                </motion.div>
-                            )}
+                            <motion.div variants={fadeUp}>
+                                <AuthErrorAlert errors={serverError} />
+                            </motion.div>
 
-                            <form onSubmit={handleSubmit} className="space-y-5 text-left">
-                                {/* Email Input */}
-                                <motion.div variants={fadeUp} className="space-y-2">
-                                    <label className="text-sm font-medium text-[rgb(var(--color-text))] ml-1">
-                                        Email Address
-                                    </label>
-                                    <div className="relative group">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] h-5 w-5 transition-colors duration-200 group-focus-within:text-[rgb(var(--color-primary))]" />
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="Enter your email"
-                                            required
-                                            className="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] py-3.5 pl-12 pr-4 text-[rgb(var(--color-text))] placeholder-[rgb(var(--color-text-muted))] focus:border-[rgb(var(--color-primary))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20 transition-all duration-300"
-                                        />
-                                    </div>
+                            <form onSubmit={handleSubmit} className="space-y-5 text-left" noValidate>
+                                <motion.div variants={fadeUp}>
+                                    <Input
+                                        ref={emailInputRef}
+                                        label="Email Address"
+                                        name="email"
+                                        type="email"
+                                        value={email}
+                                        onChange={handleChangeEmail}
+                                        error={errors.email}
+                                        placeholder="Enter your email"
+                                        autoComplete="email"
+                                        autoFocus
+                                    />
                                 </motion.div>
 
                                 {/* OTP Code Input */}
                                 <motion.div variants={fadeUp} className="space-y-2">
-                                    <label className="text-sm font-medium text-[rgb(var(--color-text))] ml-1">
+                                    <label htmlFor="otp-code" className="text-sm font-medium text-[rgb(var(--color-text))]">
                                         6-Digit Code
                                     </label>
                                     <input
+                                        id="otp-code"
                                         type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
                                         value={code}
-                                        onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        onChange={handleChangeCode}
                                         placeholder="------"
-                                        required
+                                        maxLength={6}
+                                        autoComplete="one-time-code"
                                         className="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] py-3.5 px-4 text-center text-2xl tracking-[0.5em] font-mono text-[rgb(var(--color-text))] placeholder-[rgb(var(--color-text-muted))] focus:border-[rgb(var(--color-primary))] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20 transition-all duration-300 uppercase"
                                     />
+                                    {errors.code && (
+                                        <span className="text-xs font-medium text-red-500 animate-slide-down" style={{ animationDuration: '0.2s' }}>
+                                            {errors.code}
+                                        </span>
+                                    )}
                                     {code.length > 0 && (
                                         <motion.div
                                             initial={{ opacity: 0 }}
@@ -221,12 +260,14 @@ export default function ConfirmEmail() {
                                         disabled={status === 'loading'}
                                         whileHover={{ scale: 1.01, y: -1 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="glass-button-primary w-full !rounded-xl !py-4 !mt-8 transition-shadow duration-300 hover:shadow-lg hover:shadow-[rgb(var(--color-primary))]/20"
+                                        className="glass-button-primary w-full !rounded-xl !py-4 !mt-4 transition-shadow duration-300 hover:shadow-lg hover:shadow-[rgb(var(--color-primary))]/20"
                                     >
                                         {status === 'loading' ? (
                                             <Loader2 className="mx-auto h-5 w-5 animate-spin" />
                                         ) : (
-                                            'Verify Code'
+                                            <span className="flex items-center justify-center gap-2">
+                                                Verify Code <ArrowRight size={18} />
+                                            </span>
                                         )}
                                     </motion.button>
                                 </motion.div>

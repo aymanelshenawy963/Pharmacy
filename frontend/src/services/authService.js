@@ -41,7 +41,7 @@ export const authService = {
     },
 
     /**
-     * POST /Auth/confirm-email
+     * POST /Auth/confirm-email (OTP-based confirmation)
      * Returns ResponseAPI on 200
      * Throws 400/409 on error or already confirmed
      */

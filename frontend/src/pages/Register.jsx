@@ -218,20 +218,20 @@ export default function Register() {
 
                     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Input label="First name" name="firstName" value={formData.firstName} onChange={handleChange} error={errors.firstName} placeholder="John" />
-                            <Input label="Last name" name="lastName" value={formData.lastName} onChange={handleChange} error={errors.lastName} placeholder="Doe" />
+                            <Input label="First name" name="firstName" value={formData.firstName} onChange={handleChange} error={errors.firstName} placeholder="John" autoFocus autoComplete="given-name" />
+                            <Input label="Last name" name="lastName" value={formData.lastName} onChange={handleChange} error={errors.lastName} placeholder="Doe" autoComplete="family-name" />
                         </motion.div>
 
                         <motion.div variants={fadeUp}>
-                            <Input label="Username" name="userName" value={formData.userName} onChange={handleChange} error={errors.userName} placeholder="johndoe123" />
+                            <Input label="Username" name="userName" value={formData.userName} onChange={handleChange} error={errors.userName} placeholder="johndoe123" autoComplete="username" />
                         </motion.div>
                         <motion.div variants={fadeUp}>
-                            <Input label="Email address" name="email" type="email" value={formData.email} onChange={handleChange} error={errors.email} placeholder="you@example.com" />
+                            <Input label="Email address" name="email" type="email" value={formData.email} onChange={handleChange} error={errors.email} placeholder="you@example.com" autoComplete="email" />
                         </motion.div>
 
                         {/* Password + strength */}
                         <motion.div variants={fadeUp} className="space-y-2">
-                            <Input label="Password" name="password" type="password" value={formData.password} onChange={handleChange} error={errors.password} placeholder="••••••••" />
+                            <Input label="Password" name="password" type="password" value={formData.password} onChange={handleChange} error={errors.password} placeholder="••••••••" autoComplete="new-password" />
 
                             <motion.div
                                 initial={false}
@@ -287,7 +287,7 @@ export default function Register() {
                         </motion.div>
 
                         <motion.div variants={fadeUp}>
-                            <Input label="Confirm password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={errors.confirmPassword} placeholder="••••••••" />
+                            <Input label="Confirm password" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={errors.confirmPassword} placeholder="••••••••" autoComplete="new-password" />
                         </motion.div>
 
                         <motion.div variants={fadeUp}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { authService } from '../services/authService';
 import { validators } from '../utils/validators';
@@ -25,7 +25,8 @@ const floatingAnimation = {
 };
 
 export default function ForgotPassword() {
-    const [email, setEmail] = useState('');
+    const location = useLocation();
+    const [email, setEmail] = useState(location.state?.email || '');
     const [error, setError] = useState(null);
     const [serverError, setServerError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,6 +155,8 @@ export default function ForgotPassword() {
                                         onChange={handleChange}
                                         error={error}
                                         placeholder="you@example.com"
+                                        autoFocus
+                                        autoComplete="email"
                                     />
                                 </motion.div>
                                 <motion.div variants={fadeUp}>

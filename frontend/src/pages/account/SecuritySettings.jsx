@@ -7,6 +7,7 @@ import PageHeader from '../../components/admin/PageHeader';
 import FormField from '../../components/admin/FormField';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import { validators } from '../../utils/validators';
+import { parseApiError } from '../../utils/apiErrorHandler';
 
 const pageVariants = {
     hidden: { opacity: 0 },
@@ -63,7 +64,7 @@ export default function SecuritySettings() {
         const newErrors = {
             currentPassword: validators.required(formData.currentPassword, 'Current password'),
             newPassword: validators.password(formData.newPassword),
-            confirmPassword: validators.confirmPassword(formData.newPassword, formData.confirmPassword),
+            confirmPassword: validators.confirmPassword(formData.confirmPassword, formData.newPassword),
         };
         const hasErrors = Object.values(newErrors).some(Boolean);
         if (hasErrors) setErrors(newErrors);
@@ -84,11 +85,8 @@ export default function SecuritySettings() {
             setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
             toast.success('Password changed successfully');
         } catch (err) {
-            if (err.status === 400) {
-                setServerError(err.message || 'Incorrect current password');
-            } else {
-                setServerError(err.message || 'Failed to change password');
-            }
+            const errors = parseApiError(err);
+            setServerError(errors.join('. '));
         } finally {
             setIsSaving(false);
         }

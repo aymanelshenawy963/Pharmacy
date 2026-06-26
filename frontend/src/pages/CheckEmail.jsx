@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Mailbox, RefreshCw } from 'lucide-react';
+import { ArrowRight, ArrowLeft, CheckCircle2, Mailbox, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const container = {
@@ -49,6 +49,19 @@ export default function CheckEmail() {
                 transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className="relative z-10 w-full max-w-md"
             >
+                <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                    <Link
+                        to="/register"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] transition-colors duration-200 mb-8"
+                    >
+                        <ArrowLeft size={16} /> Back to sign up
+                    </Link>
+                </motion.div>
+
                 <div className="relative">
                     <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-[rgb(var(--color-primary))]/20 via-transparent to-[rgb(var(--color-primary))]/10 opacity-60" />
                     <div className="glass-card p-10 text-center relative rounded-3xl">

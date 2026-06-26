@@ -252,6 +252,7 @@ export default function Login() {
                                 error={errors.email}
                                 placeholder="you@example.com"
                                 autoComplete="email"
+                                autoFocus
                             />
                         </motion.div>
 

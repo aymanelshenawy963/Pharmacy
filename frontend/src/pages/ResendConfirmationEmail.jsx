@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { validators } from '../utils/validators';
 import Input from '../components/Input';
@@ -24,7 +24,8 @@ const floatingAnimation = {
 };
 
 export default function ResendConfirmationEmail() {
-    const [email, setEmail] = useState('');
+    const location = useLocation();
+    const [email, setEmail] = useState(location.state?.email || '');
     const [error, setError] = useState(null);
     const [serverError, setServerError] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -192,6 +193,8 @@ export default function ResendConfirmationEmail() {
                                         onChange={handleChange}
                                         error={error}
                                         placeholder="you@example.com"
+                                        autoFocus
+                                        autoComplete="email"
                                     />
                                 </motion.div>
                                 <motion.div variants={fadeUp}>

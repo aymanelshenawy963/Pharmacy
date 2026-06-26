@@ -170,6 +170,8 @@ export default function ResetPassword() {
                                         placeholder="you@example.com"
                                         readOnly={!!location.state?.email}
                                         className={location.state?.email ? 'opacity-60 cursor-not-allowed' : ''}
+                                        autoFocus={!location.state?.email}
+                                        autoComplete="email"
                                     />
                                 </motion.div>
 
@@ -178,9 +180,19 @@ export default function ResetPassword() {
                                         label="Reset code"
                                         name="code"
                                         value={formData.code}
-                                        onChange={handleChange}
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                            setFormData((prev) => ({ ...prev, code: raw }));
+                                            if (errors.code) setErrors((prev) => ({ ...prev, code: null }));
+                                            setServerError(null);
+                                        }}
                                         error={errors.code}
                                         placeholder="Enter the 6-digit code from your email"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        maxLength={6}
+                                        autoComplete="one-time-code"
+                                        autoFocus={!!location.state?.email}
                                     />
                                 </motion.div>
 
@@ -194,6 +206,7 @@ export default function ResetPassword() {
                                         onChange={handleChange}
                                         error={errors.newPassword}
                                         placeholder="••••••••"
+                                        autoComplete="new-password"
                                     />
                                     <motion.div
                                         initial={false}
@@ -255,6 +268,7 @@ export default function ResetPassword() {
                                         onChange={handleChange}
                                         error={errors.confirmPassword}
                                         placeholder="••••••••"
+                                        autoComplete="new-password"
                                     />
                                 </motion.div>
 
