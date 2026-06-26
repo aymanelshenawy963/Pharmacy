@@ -1,0 +1,672 @@
+import { useState, useEffect, useRef } from 'react';
+import { Package, Plus, Pencil, Trash2, RefreshCw, Filter, ChevronDown, IndianRupee, Star } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { productService } from '../../services/productService';
+import { categoryService } from '../../services/categoryService';
+import PageHeader from '../../components/admin/PageHeader';
+import SearchInput from '../../components/admin/SearchInput';
+import DataTable from '../../components/admin/DataTable';
+import Modal from '../../components/admin/Modal';
+import ConfirmDialog from '../../components/admin/ConfirmDialog';
+import FormField from '../../components/admin/FormField';
+import ImageUploader from '../../components/admin/ImageUploader';
+
+const SORT_OPTIONS = [
+    { value: 'priceasc', label: 'Price: Low to High' },
+    { value: 'pricedesc', label: 'Price: High to Low' },
+    { value: 'nameasc', label: 'Name: A to Z' },
+    { value: 'namedesc', label: 'Name: Z to A' },
+];
+
+const INITIAL_FORM = {
+    name: '',
+    description: '',
+    newPrice: '',
+    oldPrice: '',
+    stock: '',
+    categoryId: '',
+    requiresPrescription: false,
+    hasStrips: false,
+    stripCount: '',
+    topSelling: false,
+};
+
+const INITIAL_ERRORS = {
+    name: '',
+    description: '',
+    newPrice: '',
+    oldPrice: '',
+    stock: '',
+    categoryId: '',
+    photos: '',
+};
+
+export default function Products() {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [pageIndex, setPageIndex] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [search, setSearch] = useState('');
+    const [sort, setSort] = useState('nameasc');
+    const [categoryFilter, setCategoryFilter] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [form, setForm] = useState(INITIAL_FORM);
+    const [formErrors, setFormErrors] = useState(INITIAL_ERRORS);
+    const [photos, setPhotos] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [sortOpen, setSortOpen] = useState(false);
+    const [categoryOpen, setCategoryOpen] = useState(false);
+
+    const sortRef = useRef(null);
+    const categoryRef = useRef(null);
+    const searchTimeout = useRef(null);
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [pageIndex, sort, categoryFilter]);
+
+    useEffect(() => {
+        if (searchTimeout.current) clearTimeout(searchTimeout.current);
+        searchTimeout.current = setTimeout(() => {
+            setPageIndex(1);
+            fetchProducts();
+        }, 300);
+        return () => clearTimeout(searchTimeout.current);
+    }, [search]);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
+            if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryOpen(false);
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    async function fetchCategories() {
+        try {
+            const data = await categoryService.getAll();
+            setCategories(data);
+        } catch {
+            toast.error('Failed to load categories');
+        }
+    }
+
+    async function fetchProducts() {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const params = {
+                PageSize: 6,
+                PageNumber: pageIndex,
+                Sort: sort,
+            };
+            if (search.trim()) params.Search = search.trim();
+            if (categoryFilter) params.CategoryId = categoryFilter;
+
+            const res = await productService.getAll(params);
+            setProducts(res.data || []);
+            setTotalPages(res.totalPages || 1);
+            setTotalCount(res.totalCount || 0);
+        } catch (err) {
+            setError(err.message || 'Failed to load products');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    function resetForm() {
+        setForm(INITIAL_FORM);
+        setFormErrors(INITIAL_ERRORS);
+        setPhotos([]);
+    }
+
+    function openCreateModal() {
+        resetForm();
+        setShowCreateModal(true);
+    }
+
+    function openEditModal(product) {
+        setSelectedProduct(product);
+        setForm({
+            name: product.name || '',
+            description: product.description || '',
+            newPrice: product.newPrice ?? '',
+            oldPrice: product.oldPrice ?? '',
+            stock: product.stock ?? '',
+            categoryId: categories.find(c => c.name === product.categoryName)?.id || '',
+            requiresPrescription: product.requiresPrescription || false,
+            hasStrips: product.hasStrips || false,
+            stripCount: product.stripCount ?? '',
+            topSelling: product.topSelling || false,
+        });
+        setPhotos(product.photos?.map(url => url) || []);
+        setFormErrors(INITIAL_ERRORS);
+        setShowEditModal(true);
+    }
+
+    function openDeleteDialog(product) {
+        setSelectedProduct(product);
+        setShowDeleteDialog(true);
+    }
+
+    function handleFormChange(e) {
+        const { name, value, type, checked } = e.target;
+        setForm(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
+        if (formErrors[name]) {
+            setFormErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    }
+
+    function validate() {
+        const errors = {};
+        if (!form.name.trim()) errors.name = 'Name is required';
+        if (!form.description.trim()) errors.description = 'Description is required';
+        if (!form.newPrice || Number(form.newPrice) <= 0) errors.newPrice = 'Valid price is required';
+        if (!form.oldPrice || Number(form.oldPrice) <= 0) errors.oldPrice = 'Valid old price is required';
+        if (!form.stock || Number(form.stock) < 0) errors.stock = 'Valid stock is required';
+        if (!form.categoryId) errors.categoryId = 'Category is required';
+        if (photos.length === 0) errors.photos = 'At least one photo is required';
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
+
+    function buildFormData() {
+        const fd = new FormData();
+        fd.append('Name', form.name.trim());
+        fd.append('Description', form.description.trim());
+        fd.append('NewPrice', Number(form.newPrice));
+        fd.append('OldPrice', Number(form.oldPrice));
+        fd.append('Stock', Number(form.stock));
+        fd.append('RequiresPrescription', form.requiresPrescription);
+        fd.append('HasStrips', form.hasStrips);
+        fd.append('StripCount', form.hasStrips ? (Number(form.stripCount) || '') : '');
+        fd.append('TopSelling', form.topSelling);
+        fd.append('CategoryId', Number(form.categoryId));
+        photos.forEach(file => {
+            if (file instanceof File) fd.append('Photos', file);
+        });
+        return fd;
+    }
+
+    async function handleCreate() {
+        if (!validate()) return;
+        setIsSubmitting(true);
+        try {
+            const fd = buildFormData();
+            await productService.create(fd);
+            toast.success('Product created successfully');
+            setShowCreateModal(false);
+            resetForm();
+            fetchProducts();
+        } catch (err) {
+            toast.error(err.message || 'Failed to create product');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    async function handleUpdate() {
+        if (!validate()) return;
+        setIsSubmitting(true);
+        try {
+            const fd = buildFormData();
+            await productService.update(selectedProduct.id, fd);
+            toast.success('Product updated successfully');
+            setShowEditModal(false);
+            resetForm();
+            fetchProducts();
+        } catch (err) {
+            toast.error(err.message || 'Failed to update product');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    async function handleDelete() {
+        setIsSubmitting(true);
+        try {
+            await productService.remove(selectedProduct.id);
+            toast.success('Product deleted successfully');
+            setShowDeleteDialog(false);
+            setSelectedProduct(null);
+            fetchProducts();
+        } catch (err) {
+            toast.error(err.message || 'Failed to delete product');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
+    const columns = [
+        {
+            key: 'product',
+            header: 'Product',
+            width: '300px',
+            render: (row) => (
+                <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-[rgb(var(--color-border))]">
+                        {row.photos?.[0] ? (
+                            <img src={row.photos[0]} alt={row.name} className="h-full w-full object-cover" />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-[rgb(var(--color-bg-subtle))]">
+                                <Package size={20} className="text-[rgb(var(--color-text-muted))]" />
+                            </div>
+                        )}
+                    </div>
+                    <span className="font-medium">{row.name}</span>
+                </div>
+            ),
+        },
+        {
+            key: 'categoryName',
+            header: 'Category',
+            render: (row) => (
+                <span className="rounded-lg bg-[rgb(var(--color-primary))]/10 px-2.5 py-1 text-xs font-medium text-[rgb(var(--color-primary))]">
+                    {row.categoryName}
+                </span>
+            ),
+        },
+        {
+            key: 'newPrice',
+            header: 'Price',
+            render: (row) => (
+                <div className="flex items-center gap-1">
+                    <IndianRupee size={14} className="text-[rgb(var(--color-text-muted))]" />
+                    <span className="font-semibold">{row.newPrice}</span>
+                    {row.oldPrice > row.newPrice && (
+                        <span className="ml-1 text-xs text-[rgb(var(--color-text-muted))] line-through">{row.oldPrice}</span>
+                    )}
+                </div>
+            ),
+        },
+        {
+            key: 'stock',
+            header: 'Stock',
+            render: (row) => (
+                <span className={`font-medium ${row.stock <= 0 ? 'text-red-500' : row.stock <= 10 ? 'text-amber-500' : 'text-[rgb(var(--color-text))]'}`}>
+                    {row.stock}
+                </span>
+            ),
+        },
+        {
+            key: 'requiresPrescription',
+            header: 'Rx Required',
+            render: (row) => (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    row.requiresPrescription
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400'
+                }`}>
+                    {row.requiresPrescription ? 'Rx' : 'OTC'}
+                </span>
+            ),
+        },
+        {
+            key: 'topSelling',
+            header: 'Top Selling',
+            render: (row) => (
+                row.topSelling ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Star size={12} fill="currentColor" />
+                        Top
+                    </span>
+                ) : (
+                    <span className="text-xs text-[rgb(var(--color-text-muted))]">—</span>
+                )
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Actions',
+            width: '140px',
+            render: (row) => (
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => openEditModal(row)}
+                        className="rounded-lg p-2 text-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/10 transition-colors"
+                        title="Edit"
+                    >
+                        <Pencil size={16} />
+                    </button>
+                    <button
+                        onClick={() => openDeleteDialog(row)}
+                        className="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                        title="Delete"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
+
+    const renderForm = () => (
+        <div className="flex flex-col gap-4">
+            <FormField
+                label="Name"
+                name="name"
+                value={form.name}
+                onChange={handleFormChange}
+                error={formErrors.name}
+                required
+                placeholder="Product name"
+            />
+
+            <FormField
+                label="Description"
+                name="description"
+                type="textarea"
+                value={form.description}
+                onChange={handleFormChange}
+                error={formErrors.description}
+                required
+                placeholder="Product description"
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    label="New Price"
+                    name="newPrice"
+                    type="number"
+                    value={form.newPrice}
+                    onChange={handleFormChange}
+                    error={formErrors.newPrice}
+                    required
+                    placeholder="0.00"
+                />
+                <FormField
+                    label="Old Price"
+                    name="oldPrice"
+                    type="number"
+                    value={form.oldPrice}
+                    onChange={handleFormChange}
+                    error={formErrors.oldPrice}
+                    required
+                    placeholder="0.00"
+                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    label="Stock"
+                    name="stock"
+                    type="number"
+                    value={form.stock}
+                    onChange={handleFormChange}
+                    error={formErrors.stock}
+                    required
+                    placeholder="0"
+                />
+                <FormField
+                    label="Category"
+                    name="categoryId"
+                    type="select"
+                    value={form.categoryId}
+                    onChange={handleFormChange}
+                    error={formErrors.categoryId}
+                    required
+                    placeholder="Select category"
+                    options={categories.map(c => ({ value: c.id, label: c.name }))}
+                />
+            </div>
+
+            <div className="flex flex-wrap gap-6">
+                <FormField
+                    label="Requires Prescription"
+                    name="requiresPrescription"
+                    type="checkbox"
+                    value={form.requiresPrescription}
+                    onChange={handleFormChange}
+                />
+                <FormField
+                    label="Has Strips"
+                    name="hasStrips"
+                    type="checkbox"
+                    value={form.hasStrips}
+                    onChange={handleFormChange}
+                />
+                <FormField
+                    label="Top Selling"
+                    name="topSelling"
+                    type="checkbox"
+                    value={form.topSelling}
+                    onChange={handleFormChange}
+                />
+            </div>
+
+            {form.hasStrips && (
+                <FormField
+                    label="Strip Count"
+                    name="stripCount"
+                    type="number"
+                    value={form.stripCount}
+                    onChange={handleFormChange}
+                    placeholder="Number of strips"
+                />
+            )}
+
+            <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-[rgb(var(--color-text))]">
+                    Photos <span className="ml-1 text-red-500">*</span>
+                </label>
+                {selectedProduct && photos.some(p => typeof p === 'string') && (
+                    <p className="text-xs text-amber-500">
+                        Note: Uploading new images will replace all existing images.
+                    </p>
+                )}
+                <ImageUploader
+                    files={photos}
+                    onChange={setPhotos}
+                    maxFiles={5}
+                    error={formErrors.photos}
+                />
+            </div>
+        </div>
+    );
+
+    const currentSortLabel = SORT_OPTIONS.find(o => o.value === sort)?.label || 'Sort';
+    const currentCategoryLabel = categoryFilter
+        ? categories.find(c => String(c.id) === String(categoryFilter))?.name || 'Category'
+        : 'All Categories';
+
+    return (
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title="Products"
+                description={`Manage your product inventory (${totalCount} total)`}
+                action={
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={fetchProducts}
+                            className="glass-button-secondary flex items-center gap-2 !px-3 !py-2.5 text-sm"
+                            title="Refresh"
+                        >
+                            <RefreshCw size={16} />
+                        </button>
+                        <button
+                            onClick={openCreateModal}
+                            className="glass-button-primary flex items-center gap-2 !px-4 !py-2.5 text-sm"
+                        >
+                            <Plus size={16} />
+                            Add Product
+                        </button>
+                    </div>
+                }
+            />
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <SearchInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search products..."
+                    className="w-full sm:max-w-xs"
+                />
+
+                <div className="flex items-center gap-3">
+                    <div className="relative" ref={sortRef}>
+                        <button
+                            onClick={() => setSortOpen(!sortOpen)}
+                            className="glass-button-secondary flex items-center gap-2 !px-3 !py-2 text-sm"
+                        >
+                            <Filter size={14} />
+                            {currentSortLabel}
+                            <ChevronDown size={14} className={`transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {sortOpen && (
+                            <div className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl">
+                                {SORT_OPTIONS.map(opt => (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => { setSort(opt.value); setSortOpen(false); }}
+                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${
+                                            sort === opt.value
+                                                ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
+                                                : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="relative" ref={categoryRef}>
+                        <button
+                            onClick={() => setCategoryOpen(!categoryOpen)}
+                            className="glass-button-secondary flex items-center gap-2 !px-3 !py-2 text-sm"
+                        >
+                            <Package size={14} />
+                            {currentCategoryLabel}
+                            <ChevronDown size={14} className={`transition-transform ${categoryOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {categoryOpen && (
+                            <div className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl max-h-60 overflow-y-auto">
+                                <button
+                                    onClick={() => { setCategoryFilter(''); setCategoryOpen(false); }}
+                                    className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${
+                                        !categoryFilter
+                                            ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
+                                            : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
+                                    }`}
+                                >
+                                    All Categories
+                                </button>
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => { setCategoryFilter(String(cat.id)); setCategoryOpen(false); }}
+                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors ${
+                                            String(categoryFilter) === String(cat.id)
+                                                ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
+                                                : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
+                                        }`}
+                                    >
+                                        {cat.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <DataTable
+                columns={columns}
+                data={products}
+                isLoading={isLoading}
+                error={error}
+                onRetry={fetchProducts}
+                emptyTitle="No products found"
+                emptyDescription="Start by adding your first product."
+                pageIndex={pageIndex}
+                totalPages={totalPages}
+                onPageChange={setPageIndex}
+            />
+
+            <Modal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                title="Add Product"
+                maxWidth="max-w-2xl"
+            >
+                {renderForm()}
+                <div className="mt-6 flex justify-end gap-3">
+                    <button
+                        onClick={() => setShowCreateModal(false)}
+                        disabled={isSubmitting}
+                        className="glass-button-secondary !px-4 !py-2 text-sm"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleCreate}
+                        disabled={isSubmitting}
+                        className="glass-button-primary !px-4 !py-2 text-sm"
+                    >
+                        {isSubmitting ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        ) : (
+                            'Create Product'
+                        )}
+                    </button>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                title="Edit Product"
+                maxWidth="max-w-2xl"
+            >
+                {renderForm()}
+                <div className="mt-6 flex justify-end gap-3">
+                    <button
+                        onClick={() => setShowEditModal(false)}
+                        disabled={isSubmitting}
+                        className="glass-button-secondary !px-4 !py-2 text-sm"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleUpdate}
+                        disabled={isSubmitting}
+                        className="glass-button-primary !px-4 !py-2 text-sm"
+                    >
+                        {isSubmitting ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        ) : (
+                            'Save Changes'
+                        )}
+                    </button>
+                </div>
+            </Modal>
+
+            <ConfirmDialog
+                isOpen={showDeleteDialog}
+                onClose={() => setShowDeleteDialog(false)}
+                onConfirm={handleDelete}
+                title="Delete Product"
+                message={`Are you sure you want to delete "${selectedProduct?.name}"? This action cannot be undone.`}
+                confirmText="Delete"
+                variant="danger"
+                isLoading={isSubmitting}
+            />
+        </div>
+    );
+}

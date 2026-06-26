@@ -7,6 +7,7 @@ import Input from '../components/Input';
 import { AlertCircle, ArrowRight, Mail, Lock, ShieldCheck } from 'lucide-react';
 import AuthErrorAlert from '../components/AuthErrorAlert';
 import { parseApiError } from '../utils/apiErrorHandler';
+import { getUserRoles } from '../utils/jwt';
 export default function Login() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({});
@@ -49,7 +50,12 @@ export default function Login() {
 
         if (result.success) {
             toast.success('Welcome back!');
-            navigate(from, { replace: true });
+            const roles = getUserRoles(result.data.token);
+            if (roles.includes('Admin')) {
+                navigate('/admin/products', { replace: true });
+            } else {
+                navigate(from, { replace: true });
+            }
         } else {
             const error = result.error;
             if (error.status === 403) {

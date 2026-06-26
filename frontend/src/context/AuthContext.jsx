@@ -1,11 +1,20 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { authService } from '../services/authService';
 import { authStorage } from '../services/authStorage';
+import { getUserRoles } from '../utils/jwt';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(() => authStorage.getUser());
+    const [user, setUser] = useState(() => {
+        const stored = authStorage.getUser();
+        if (stored) {
+            const token = authStorage.getToken();
+            const roles = token ? getUserRoles(token) : [];
+            return { ...stored, roles };
+        }
+        return null;
+    });
     const [isAuthenticated, setIsAuthenticated] = useState(() => authStorage.isAuthenticated());
     const [isLoadingAuth, setIsLoadingAuth] = useState(false);
     const refreshTimerRef = useRef(null);
@@ -24,7 +33,6 @@ export function AuthProvider({ children }) {
             clearTimeout(refreshTimerRef.current);
         }
 
-        // Refresh 60 seconds before expiry (or at 80% of expiry time, whichever is earlier)
         const refreshAt = Math.max((expiresIn - 60) * 1000, expiresIn * 0.8 * 1000);
 
         refreshTimerRef.current = setTimeout(async () => {
@@ -37,11 +45,13 @@ export function AuthProvider({ children }) {
                 }
                 const data = await authService.refreshToken(token, refreshToken);
                 authStorage.setAuth(data);
+                const roles = getUserRoles(data.token);
                 setUser({
                     id: data.id,
                     email: data.email,
                     firstName: data.firstName,
                     lastName: data.lastName,
+                    roles,
                 });
                 scheduleTokenRefresh(data.expiresIn);
             } catch {
@@ -50,7 +60,6 @@ export function AuthProvider({ children }) {
         }, refreshAt);
     }, [clearAuthState]);
 
-    // On mount: if we have tokens, schedule refresh
     useEffect(() => {
         const expiresIn = authStorage.getExpiresIn();
         if (isAuthenticated && expiresIn) {
@@ -66,11 +75,13 @@ export function AuthProvider({ children }) {
         try {
             const data = await authService.login(email, password);
             authStorage.setAuth(data);
+            const roles = getUserRoles(data.token);
             const userData = {
                 id: data.id,
                 email: data.email,
                 firstName: data.firstName,
                 lastName: data.lastName,
+                roles,
             };
             setUser(userData);
             setIsAuthenticated(true);

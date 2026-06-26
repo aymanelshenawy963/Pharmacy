@@ -30,7 +30,18 @@ const ConfirmEmail = lazy(() => import('./pages/ConfirmEmail'));
 const ResendConfirmationEmail = lazy(() => import('./pages/ResendConfirmationEmail'));
 const CheckEmail = lazy(() => import('./pages/CheckEmail'));
 
+// Admin Pages
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const AdminUsers = lazy(() => import('./pages/admin/Users'));
+const AdminRoles = lazy(() => import('./pages/admin/Roles'));
+const AdminCategories = lazy(() => import('./pages/admin/Categories'));
+const AdminProducts = lazy(() => import('./pages/admin/Products'));
+const ProfileSettings = lazy(() => import('./pages/account/ProfileSettings'));
+const SecuritySettings = lazy(() => import('./pages/account/SecuritySettings'));
+
 import ProtectedRoute from './routes/ProtectedRoute';
+import AdminProtectedRoute from './routes/AdminProtectedRoute';
+import AccountProtectedRoute from './routes/AccountProtectedRoute';
 
 function ScrollToTop() {
     const location = useLocation();
@@ -93,6 +104,15 @@ function AuthLayout() {
     );
 }
 
+// ── Admin layout (sidebar + header) ───────────────────────────────────────────
+function AdminLayoutWrapper() {
+    return (
+        <Suspense fallback={<PageLoader />}>
+            <AdminLayout />
+        </Suspense>
+    );
+}
+
 export default function App() {
     return (
         <Routes>
@@ -126,6 +146,25 @@ export default function App() {
                 <Route path="confirm-email" element={<ConfirmEmail />} />
                 <Route path="resend-confirmation" element={<ResendConfirmationEmail />} />
                 <Route path="check-email" element={<CheckEmail />} />
+            </Route>
+
+            {/* ── Admin routes (AdminLayout with sidebar) ── */}
+            <Route element={<AdminProtectedRoute />}>
+                <Route path="admin" element={<AdminLayoutWrapper />}>
+                    <Route index element={<AdminProducts />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="roles" element={<AdminRoles />} />
+                    <Route path="categories" element={<AdminCategories />} />
+                    <Route path="products" element={<AdminProducts />} />
+                </Route>
+            </Route>
+
+            {/* ── Account routes (AdminLayout with sidebar) ── */}
+            <Route element={<AccountProtectedRoute />}>
+                <Route path="account" element={<AdminLayoutWrapper />}>
+                    <Route path="profile" element={<ProfileSettings />} />
+                    <Route path="security" element={<SecuritySettings />} />
+                </Route>
             </Route>
         </Routes>
     );
