@@ -39,6 +39,19 @@ export const authStorage = {
         }
     },
 
+    setUser(userData) {
+        try {
+            localStorage.setItem(KEYS.USER, JSON.stringify({
+                id: userData.id,
+                email: userData.email,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+            }));
+        } catch (e) {
+            console.error('authStorage.setUser failed', e);
+        }
+    },
+
     getExpiresIn() {
         const val = localStorage.getItem(KEYS.EXPIRES_IN);
         return val ? Number(val) : null;

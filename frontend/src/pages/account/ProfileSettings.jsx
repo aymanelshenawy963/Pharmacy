@@ -28,7 +28,7 @@ const itemVariants = {
 };
 
 export default function ProfileSettings() {
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const [formData, setFormData] = useState({ firstName: '', lastName: '' });
     const [initialData, setInitialData] = useState(null);
     const [errors, setErrors] = useState({});
@@ -83,6 +83,7 @@ export default function ProfileSettings() {
         setIsSaving(true);
         try {
             await profileService.updateProfile(formData);
+            updateProfile(formData.firstName, formData.lastName);
             setInitialData({ ...formData });
             toast.success('Profile updated successfully');
         } catch (err) {

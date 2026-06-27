@@ -104,6 +104,15 @@ export function AuthProvider({ children }) {
         }
     }, [clearAuthState]);
 
+    const updateProfile = useCallback((firstName, lastName) => {
+        setUser((prev) => {
+            if (!prev) return prev;
+            const updated = { ...prev, firstName, lastName };
+            authStorage.setUser(updated);
+            return updated;
+        });
+    }, []);
+
     const value = {
         user,
         isAuthenticated,
@@ -111,6 +120,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         clearAuthState,
+        updateProfile,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
