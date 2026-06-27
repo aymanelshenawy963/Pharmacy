@@ -32,15 +32,17 @@ const accountItems = [
 ];
 
 function SidebarContent({ onNavigate, user, onLogout }) {
+    const isAdmin = user?.roles?.includes('Admin');
+
     return (
         <>
             <div className="flex h-16 items-center justify-between border-b border-[rgb(var(--color-border))] px-5">
-                <NavLink to="/admin/products" onClick={onNavigate} className="flex items-center gap-2.5">
+                <NavLink to={isAdmin ? '/admin/products' : '/account/profile'} onClick={onNavigate} className="flex items-center gap-2.5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10">
                         <Activity className="h-5 w-5 text-[rgb(var(--color-primary))]" />
                     </div>
                     <span className="font-serif text-lg font-bold text-[rgb(var(--color-text))]">
-                        Jaya Admin
+                        {isAdmin ? 'Jaya Admin' : 'Jaya'}
                     </span>
                 </NavLink>
                 <button
@@ -53,35 +55,39 @@ function SidebarContent({ onNavigate, user, onLogout }) {
             </div>
 
             <nav className="flex-1 overflow-y-auto px-3 py-4">
-                <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-[rgb(var(--color-text-muted))]">
-                    Management
-                </p>
-                <div className="mb-6 flex flex-col gap-1">
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.to}
-                            to={item.to}
-                            onClick={onNavigate}
-                            className={({ isActive }) =>
-                                `relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 group min-h-[44px] ${
-                                    isActive
-                                        ? 'bg-gradient-to-r from-[rgb(var(--color-primary))]/15 to-[rgb(var(--color-primary))]/5 text-[rgb(var(--color-primary))] shadow-sm'
-                                        : 'text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-text))]'
-                                }`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    {isActive && (
-                                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-[rgb(var(--color-primary))]" />
+                {isAdmin && (
+                    <>
+                        <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-[rgb(var(--color-text-muted))]">
+                            Management
+                        </p>
+                        <div className="mb-6 flex flex-col gap-1">
+                            {navItems.map((item) => (
+                                <NavLink
+                                    key={item.to}
+                                    to={item.to}
+                                    onClick={onNavigate}
+                                    className={({ isActive }) =>
+                                        `relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 group min-h-[44px] ${
+                                            isActive
+                                                ? 'bg-gradient-to-r from-[rgb(var(--color-primary))]/15 to-[rgb(var(--color-primary))]/5 text-[rgb(var(--color-primary))] shadow-sm'
+                                                : 'text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-text))]'
+                                        }`
+                                    }
+                                >
+                                    {({ isActive }) => (
+                                        <>
+                                            {isActive && (
+                                                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-full bg-[rgb(var(--color-primary))]" />
+                                            )}
+                                            <item.icon size={18} className="transition-transform duration-200 group-hover:scale-110" />
+                                            <span>{item.label}</span>
+                                        </>
                                     )}
-                                    <item.icon size={18} className="transition-transform duration-200 group-hover:scale-110" />
-                                    <span>{item.label}</span>
-                                </>
-                            )}
-                        </NavLink>
-                    ))}
-                </div>
+                                </NavLink>
+                            ))}
+                        </div>
+                    </>
+                )}
 
                 <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-[rgb(var(--color-text-muted))]">
                     Account
