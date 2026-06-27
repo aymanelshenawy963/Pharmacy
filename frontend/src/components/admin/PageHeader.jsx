@@ -23,25 +23,25 @@ export default function PageHeader({ title, description, action = null }) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
         >
-            <div>
+            <div className="min-w-0">
                 <motion.h1
                     variants={itemVariants}
-                    className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] md:text-3xl"
+                    className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-[rgb(var(--color-text))] leading-tight"
                 >
                     {title}
                 </motion.h1>
                 {description && (
                     <motion.p
                         variants={itemVariants}
-                        className="mt-1.5 text-sm leading-relaxed text-[rgb(var(--color-text-muted))]"
+                        className="mt-1 text-xs sm:text-sm leading-relaxed text-[rgb(var(--color-text-muted))] line-clamp-2"
                     >
                         {description}
                     </motion.p>
                 )}
             </div>
-            {action && <motion.div variants={itemVariants}>{action}</motion.div>}
+            {action && <motion.div variants={itemVariants} className="flex-shrink-0">{action}</motion.div>}
         </motion.div>
     );
 }

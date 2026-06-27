@@ -38,7 +38,7 @@ export default function FormField({
     const [isFocused, setIsFocused] = useState(false);
 
     const baseInputClass = clsx(
-        'w-full rounded-xl border bg-[rgb(var(--color-surface))] px-4 py-3 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] outline-none transition-all duration-200',
+        'w-full rounded-xl border bg-[rgb(var(--color-surface))] px-4 py-3 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] outline-none transition-all duration-200 min-h-[44px]',
         error
             ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
             : 'border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20',
@@ -57,7 +57,8 @@ export default function FormField({
                     disabled={disabled}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    className={baseInputClass}
+                    className={clsx(baseInputClass, 'appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px]')}
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")` }}
                 >
                     <option value="">{placeholder || 'Select...'}</option>
                     {options?.map((opt) => (
@@ -80,7 +81,7 @@ export default function FormField({
                     rows={rows}
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
-                    className={clsx(baseInputClass, 'resize-none')}
+                    className={clsx(baseInputClass, 'resize-none min-h-[80px]')}
                 />
             );
         }

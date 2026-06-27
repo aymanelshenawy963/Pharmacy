@@ -83,7 +83,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             {isOpen && (
                 <div
                     ref={overlayRef}
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
                     onClick={(e) => e.target === overlayRef.current && onClose()}
                 >
                     <motion.div
@@ -99,24 +99,24 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className={`relative z-10 w-full ${maxWidth} max-h-[90vh] overflow-y-auto rounded-2xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-2xl`}
+                        className={`relative z-10 w-full ${maxWidth} max-h-[95vh] sm:max-h-[85vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-2xl`}
                         role="dialog"
                         aria-modal="true"
                         aria-label={title}
                     >
-                        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/80 backdrop-blur-md px-6 py-4 rounded-t-2xl">
-                            <h2 className="font-serif text-xl font-bold text-[rgb(var(--color-text))]">
+                        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4 rounded-t-2xl">
+                            <h2 className="font-serif text-lg sm:text-xl font-bold text-[rgb(var(--color-text))]">
                                 {title}
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-xl text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))] transition-all duration-200 hover:scale-110 active:scale-95"
+                                className="p-2 rounded-xl text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                                 aria-label="Close dialog"
                             >
                                 <X size={20} />
                             </button>
                         </div>
-                        <div className="p-6">{children}</div>
+                        <div className="p-4 sm:p-6">{children}</div>
                     </motion.div>
                 </div>
             )}

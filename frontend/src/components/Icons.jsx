@@ -1,4 +1,5 @@
 import {
+    Activity,
     ArrowDownUp,
     ArrowRight,
     ArrowUp,
@@ -49,6 +50,7 @@ import {
 } from 'lucide-react';
 
 export const iconMap = {
+    Activity,
     ArrowDownUp,
     ArrowRight,
     ArrowUp,

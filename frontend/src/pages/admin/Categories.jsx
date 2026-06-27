@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FolderTree, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { categoryService } from '../../services/categoryService';
+import { parseApiError } from '../../utils/apiErrorHandler';
 import PageHeader from '../../components/admin/PageHeader';
 import SearchInput from '../../components/admin/SearchInput';
 import DataTable from '../../components/admin/DataTable';
@@ -43,22 +44,23 @@ export default function Categories() {
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    async function fetchCategories() {
+    const fetchCategories = useCallback(async () => {
         setIsLoading(true);
         setError('');
         try {
             const data = await categoryService.getAll();
             setCategories(data);
         } catch (err) {
-            setError(err.message || 'Failed to load categories');
+            const msgs = parseApiError(err);
+            setError(msgs.join(' '));
         } finally {
             setIsLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
         fetchCategories();
-    }, []);
+    }, [fetchCategories]);
 
     const filtered = useMemo(() => {
         const q = search.toLowerCase();
@@ -104,18 +106,19 @@ export default function Categories() {
                     name: form.name.trim(),
                     description: form.description.trim(),
                 });
-                toast.success('Category updated');
+                toast.success('Category updated successfully');
             } else {
                 await categoryService.create({
                     name: form.name.trim(),
                     description: form.description.trim(),
                 });
-                toast.success('Category created');
+                toast.success('Category created successfully');
             }
             setIsModalOpen(false);
             await fetchCategories();
         } catch (err) {
-            toast.error(err.message || 'Something went wrong');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -126,12 +129,13 @@ export default function Categories() {
         setIsSubmitting(true);
         try {
             await categoryService.remove(deletingCategory.id);
-            toast.success('Category deleted');
+            toast.success('Category deleted successfully');
             setIsDeleteOpen(false);
             setDeletingCategory(null);
             await fetchCategories();
         } catch (err) {
-            toast.error(err.message || 'Failed to delete category');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -149,7 +153,7 @@ export default function Categories() {
             header: 'Name',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 ring-1 ring-teal-500/10 transition-all duration-300 group-hover:ring-teal-500/25">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-teal-500/10 ring-1 ring-teal-500/10">
                         <FolderTree size={16} className="text-teal-500" />
                     </div>
                     <span className="font-medium">{row.name}</span>
@@ -160,7 +164,7 @@ export default function Categories() {
             key: 'description',
             header: 'Description',
             render: (row) => (
-                <span className="text-[rgb(var(--color-text-muted))] max-w-xs truncate block">
+                <span className="text-[rgb(var(--color-text-muted))] text-sm line-clamp-2">
                     {row.description}
                 </span>
             ),
@@ -168,19 +172,19 @@ export default function Categories() {
         {
             key: 'actions',
             header: 'Actions',
-            width: '120px',
+            width: 'auto',
             render: (row) => (
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openEdit(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Edit"
                     >
                         <Pencil size={14} />
                     </button>
                     <button
                         onClick={() => openDelete(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-red-500/10 hover:text-red-500 transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Delete"
                     >
                         <Trash2 size={14} />
@@ -195,20 +199,20 @@ export default function Categories() {
             variants={pageVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
             <motion.div variants={itemVariants}>
                 <PageHeader
                     title="Categories"
                     description="Manage your product categories"
                     action={
-                        <div className="flex items-center gap-3">
-                            <button onClick={fetchCategories} className="glass-button-secondary !p-2.5 !rounded-xl" title="Refresh">
+                        <div className="flex items-center gap-2">
+                            <button onClick={fetchCategories} className="glass-button-secondary !p-2.5 !rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center" title="Refresh">
                                 <RefreshCw size={16} />
                             </button>
-                            <button onClick={openCreate} className="glass-button-primary !px-4 !py-2.5 text-sm flex items-center gap-2">
+                            <button onClick={openCreate} className="glass-button-primary !px-3 sm:!px-4 min-h-[44px] text-sm flex items-center gap-2">
                                 <Plus size={16} />
-                                Add Category
+                                <span className="hidden sm:inline">Add Category</span>
                             </button>
                         </div>
                     }
@@ -220,7 +224,6 @@ export default function Categories() {
                     value={search}
                     onChange={setSearch}
                     placeholder="Search categories..."
-                    className="transition-all duration-300 focus-within:shadow-glow"
                 />
             </motion.div>
 
@@ -244,6 +247,7 @@ export default function Categories() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={editingCategory ? 'Edit Category' : 'Create Category'}
+                maxWidth="max-w-full sm:max-w-lg"
             >
                 <div className="space-y-4">
                     <FormField
@@ -265,18 +269,18 @@ export default function Categories() {
                         required
                         placeholder="Brief description of this category"
                     />
-                    <div className="flex justify-end gap-3 pt-2">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
                         <button
                             onClick={() => setIsModalOpen(false)}
                             disabled={isSubmitting}
-                            className="glass-button-secondary !px-4 !py-2 text-sm"
+                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="glass-button-primary !px-4 !py-2 text-sm flex items-center gap-2"
+                            className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center gap-2"
                         >
                             {isSubmitting && (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

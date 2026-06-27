@@ -113,7 +113,7 @@ export default function ProfileSettings() {
             variants={pageVariants}
             initial="hidden"
             animate="visible"
-            className="mx-auto max-w-2xl space-y-6"
+            className="mx-auto max-w-2xl space-y-4 sm:space-y-6"
         >
             <motion.div variants={itemVariants}>
                 <PageHeader
@@ -129,17 +129,17 @@ export default function ProfileSettings() {
             <motion.form
                 variants={itemVariants}
                 onSubmit={handleSubmit}
-                className="glass-card space-y-6 p-6 transition-all duration-300 hover:shadow-lg"
+                className="glass-card space-y-5 sm:space-y-6 p-4 sm:p-6 transition-all duration-300 hover:shadow-lg"
             >
-                <div className="flex items-center gap-4">
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[rgb(var(--color-primary))]/15 to-[rgb(var(--color-primary))]/5 ring-2 ring-[rgb(var(--color-primary))]/10 shadow-inner transition-all duration-300 hover:ring-[rgb(var(--color-primary))]/25 hover:shadow-md">
-                        <User className="h-8 w-8 text-[rgb(var(--color-primary))]" />
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="relative flex h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[rgb(var(--color-primary))]/15 to-[rgb(var(--color-primary))]/5 ring-2 ring-[rgb(var(--color-primary))]/10 shadow-inner">
+                        <User className="h-7 w-7 sm:h-8 sm:w-8 text-[rgb(var(--color-primary))]" />
                     </div>
-                    <div>
-                        <p className="font-serif text-lg font-bold text-[rgb(var(--color-text))]">
+                    <div className="min-w-0">
+                        <p className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
                             {user?.firstName} {user?.lastName}
                         </p>
-                        <p className="text-sm text-[rgb(var(--color-text-muted))]">{user?.email}</p>
+                        <p className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))] truncate">{user?.email}</p>
                     </div>
                 </div>
 
@@ -170,7 +170,7 @@ export default function ProfileSettings() {
                     <button
                         type="submit"
                         disabled={isSaving || !hasChanges}
-                        className="glass-button-primary !px-6 group"
+                        className="glass-button-primary !px-6 min-h-[44px] group flex items-center gap-2"
                     >
                         {isSaving ? (
                             <Loader2 className="h-4 w-4 animate-spin" />

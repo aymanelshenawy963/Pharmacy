@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Shield, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { roleService } from '../../services/roleService';
+import { parseApiError } from '../../utils/apiErrorHandler';
 import PageHeader from '../../components/admin/PageHeader';
 import SearchInput from '../../components/admin/SearchInput';
 import DataTable from '../../components/admin/DataTable';
@@ -55,7 +56,8 @@ export default function Roles() {
             const data = await roleService.getAll(showDeleted);
             setRoles(data);
         } catch (err) {
-            setError(err.message || 'Failed to load roles');
+            const msgs = parseApiError(err);
+            setError(msgs.join(' '));
         } finally {
             setIsLoading(false);
         }
@@ -117,7 +119,8 @@ export default function Roles() {
             setIsCreateOpen(false);
             fetchRoles();
         } catch (err) {
-            toast.error(err.message || 'Failed to create role');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -137,7 +140,8 @@ export default function Roles() {
             setEditingRole(null);
             fetchRoles();
         } catch (err) {
-            toast.error(err.message || 'Failed to update role');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -153,7 +157,8 @@ export default function Roles() {
             setTogglingRole(null);
             fetchRoles();
         } catch (err) {
-            toast.error(err.message || 'Failed to toggle role status');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -173,7 +178,7 @@ export default function Roles() {
             header: 'Name',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 ring-1 ring-[rgb(var(--color-primary))]/10 transition-all duration-300 group-hover:ring-[rgb(var(--color-primary))]/25">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 ring-1 ring-[rgb(var(--color-primary))]/10">
                         <Shield className="h-4 w-4 text-[rgb(var(--color-primary))]" />
                     </div>
                     <span className="font-medium">{row.name}</span>
@@ -194,19 +199,19 @@ export default function Roles() {
         {
             key: 'actions',
             header: 'Actions',
-            width: '120px',
+            width: 'auto',
             render: (row) => (
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openEdit(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Edit"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => openToggle(row)}
-                        className={`rounded-lg p-2 text-[rgb(var(--color-text-muted))] transition-all duration-200 hover:scale-110 active:scale-95 ${
+                        className={`rounded-lg p-2 text-[rgb(var(--color-text-muted))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center ${
                             row.isDeleted
                                 ? 'hover:bg-emerald-500/10 hover:text-emerald-500'
                                 : 'hover:bg-amber-500/10 hover:text-amber-500'
@@ -221,17 +226,17 @@ export default function Roles() {
     ];
 
     const headerAction = (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
             <button
                 onClick={fetchRoles}
-                className="glass-button-secondary flex items-center gap-2 !px-3 !py-2 text-sm"
+                className="glass-button-secondary flex items-center gap-2 !px-3 min-h-[44px] text-sm"
             >
                 <RefreshCw size={16} />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
             </button>
-            <button onClick={openCreate} className="glass-button-primary flex items-center gap-2 !px-4 !py-2 text-sm">
+            <button onClick={openCreate} className="glass-button-primary flex items-center gap-2 !px-3 sm:!px-4 min-h-[44px] text-sm">
                 <Plus size={16} />
-                Add Role
+                <span className="hidden sm:inline">Add Role</span>
             </button>
         </div>
     );
@@ -241,7 +246,7 @@ export default function Roles() {
             variants={pageVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
             <motion.div variants={itemVariants}>
                 <PageHeader
@@ -253,24 +258,25 @@ export default function Roles() {
 
             <motion.div
                 variants={itemVariants}
-                className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
                 <SearchInput
                     value={search}
                     onChange={setSearch}
                     placeholder="Search roles..."
-                    className="sm:max-w-xs transition-all duration-300 focus-within:shadow-glow"
+                    className="sm:max-w-xs"
                 />
                 <button
                     onClick={() => setShowDeleted(!showDeleted)}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
+                    className={`flex items-center gap-2 rounded-xl px-4 text-sm font-medium transition-all duration-300 min-h-[44px] ${
                         showDeleted
                             ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] shadow-sm ring-1 ring-[rgb(var(--color-primary))]/20'
                             : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))] hover:shadow-sm'
                     }`}
                 >
                     {showDeleted ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-                    {showDeleted ? 'Showing Deleted' : 'Show Deleted'}
+                    <span className="hidden sm:inline">{showDeleted ? 'Showing Deleted' : 'Show Deleted'}</span>
+                    <span className="sm:hidden">{showDeleted ? 'Deleted' : 'Deleted'}</span>
                 </button>
             </motion.div>
 
@@ -291,7 +297,7 @@ export default function Roles() {
             </motion.div>
 
             {/* Create Modal */}
-            <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create Role">
+            <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create Role" maxWidth="max-w-full sm:max-w-lg">
                 <div className="space-y-4" onKeyDown={handleCreateKeyDown}>
                     <FormField
                         label="Role Name"
@@ -303,18 +309,18 @@ export default function Roles() {
                         placeholder="e.g. Administrator"
                         disabled={isSubmitting}
                     />
-                    <div className="flex justify-end gap-3 pt-2">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
                         <button
                             onClick={() => setIsCreateOpen(false)}
                             disabled={isSubmitting}
-                            className="glass-button-secondary !px-4 !py-2 text-sm"
+                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleCreate}
                             disabled={isSubmitting}
-                            className="glass-button-primary !px-4 !py-2 text-sm"
+                            className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center"
                         >
                             {isSubmitting ? (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -327,7 +333,7 @@ export default function Roles() {
             </Modal>
 
             {/* Edit Modal */}
-            <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Role">
+            <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Role" maxWidth="max-w-full sm:max-w-lg">
                 <div className="space-y-4" onKeyDown={handleEditKeyDown}>
                     <FormField
                         label="Role Name"
@@ -339,18 +345,18 @@ export default function Roles() {
                         placeholder="e.g. Administrator"
                         disabled={isSubmitting}
                     />
-                    <div className="flex justify-end gap-3 pt-2">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
                         <button
                             onClick={() => setIsEditOpen(false)}
                             disabled={isSubmitting}
-                            className="glass-button-secondary !px-4 !py-2 text-sm"
+                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleEdit}
                             disabled={isSubmitting}
-                            className="glass-button-primary !px-4 !py-2 text-sm"
+                            className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center"
                         >
                             {isSubmitting ? (
                                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

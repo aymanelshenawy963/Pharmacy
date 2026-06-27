@@ -8,7 +8,7 @@ const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="relative p-2 rounded-full hover:bg-bg-subtle transition-colors focus:outline-none focus:ring-2 focus:ring-primary overflow-hidden"
+      className="relative flex items-center justify-center h-10 w-10 rounded-xl text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-text))] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]/50 overflow-hidden"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       <div className="relative w-5 h-5">
@@ -20,7 +20,7 @@ const ThemeToggle = () => {
             rotate: theme === 'dark' ? 0 : 90
           }}
           transition={{ type: 'spring', stiffness: 200, damping: 10 }}
-          className="absolute inset-0 text-secondary"
+          className="absolute inset-0 text-[rgb(var(--color-primary))]"
         >
           <Moon size={20} />
         </motion.div>
@@ -33,7 +33,7 @@ const ThemeToggle = () => {
             rotate: theme === 'light' ? 0 : -90
           }}
           transition={{ type: 'spring', stiffness: 200, damping: 10 }}
-          className="absolute inset-0 text-secondary"
+          className="absolute inset-0 text-[rgb(var(--color-primary))]"
         >
           <Sun size={20} />
         </motion.div>

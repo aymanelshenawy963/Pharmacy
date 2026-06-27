@@ -25,10 +25,10 @@ public class UserService(UserManager<User> userManager, IMapper mapper,
     public async Task<IEnumerable<UserToReturnDTO>> GetAllUsersAsync(CancellationToken cancellationToken) =>
         await (from u in _context.Users
                join ur in _context.UserRoles
-               on u.Id equals ur.UserId
+               on u.Id equals ur.UserId into userRoles
+               from ur in userRoles.DefaultIfEmpty()
                join r in _context.Roles
                on ur.RoleId equals r.Id into roles
-               where !roles.Any(x => x.Name == DefaultRoles.Customer)
                select new
                        {
                            u.Id,

@@ -99,30 +99,25 @@ export default function Users() {
     const [error, setError] = useState(null);
     const [search, setSearch] = useState('');
 
-    // Create modal
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createForm, setCreateForm] = useState(INITIAL_CREATE_FORM);
     const [createErrors, setCreateErrors] = useState({});
     const [isCreating, setIsCreating] = useState(false);
 
-    // Edit modal
     const [showEditModal, setShowEditModal] = useState(false);
     const [editUserId, setEditUserId] = useState(null);
     const [editForm, setEditForm] = useState(INITIAL_EDIT_FORM);
     const [editErrors, setEditErrors] = useState({});
     const [isEditing, setIsEditing] = useState(false);
 
-    // View modal
     const [showViewModal, setShowViewModal] = useState(false);
     const [viewUser, setViewUser] = useState(null);
     const [viewLoading, setViewLoading] = useState(false);
 
-    // Toggle status dialog
     const [showToggleDialog, setShowToggleDialog] = useState(false);
     const [toggleTarget, setToggleTarget] = useState(null);
     const [isToggling, setIsToggling] = useState(false);
 
-    // Unlock dialog
     const [showUnlockDialog, setShowUnlockDialog] = useState(false);
     const [unlockTarget, setUnlockTarget] = useState(null);
     const [isUnlocking, setIsUnlocking] = useState(false);
@@ -145,7 +140,7 @@ export default function Users() {
             const data = await roleService.getAll();
             setAvailableRoles(Array.isArray(data) ? data : []);
         } catch {
-            // Roles are optional, don't block the page
+            // Roles are optional
         }
     }, []);
 
@@ -171,7 +166,6 @@ export default function Users() {
         return role?.name || role?.roleName || '';
     };
 
-    // ── Create ────────────────────────────────────────────────────────────
     const openCreateModal = () => {
         setCreateForm(INITIAL_CREATE_FORM);
         setCreateErrors({});
@@ -226,7 +220,6 @@ export default function Users() {
         }
     };
 
-    // ── Edit ──────────────────────────────────────────────────────────────
     const openEditModal = (user) => {
         setEditUserId(user.id);
         setEditForm({
@@ -288,7 +281,6 @@ export default function Users() {
         }
     };
 
-    // ── View ──────────────────────────────────────────────────────────────
     const openViewModal = async (user) => {
         setShowViewModal(true);
         setViewLoading(true);
@@ -303,7 +295,6 @@ export default function Users() {
         }
     };
 
-    // ── Toggle Status ─────────────────────────────────────────────────────
     const openToggleDialog = (user) => {
         setToggleTarget(user);
         setShowToggleDialog(true);
@@ -328,7 +319,6 @@ export default function Users() {
         }
     };
 
-    // ── Unlock ────────────────────────────────────────────────────────────
     const openUnlockDialog = (user) => {
         setUnlockTarget(user);
         setShowUnlockDialog(true);
@@ -349,33 +339,32 @@ export default function Users() {
         }
     };
 
-    // ── Table columns ─────────────────────────────────────────────────────
     const columns = [
         {
             key: 'name',
             header: 'Name',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-sm font-semibold ring-2 ring-[rgb(var(--color-primary))]/5 transition-all duration-300 group-hover:ring-[rgb(var(--color-primary))]/20">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-sm font-semibold">
                         {(row.firstName || '?')[0]?.toUpperCase()}
                         {(row.lastName || '')[0]?.toUpperCase()}
                     </div>
-                    <span className="font-medium">
+                    <span className="font-medium truncate">
                         {row.firstName} {row.lastName}
                     </span>
                 </div>
             ),
         },
         {
+            key: 'userName',
+            header: 'Username',
+        },
+        {
             key: 'email',
             header: 'Email',
             render: (row) => (
-                <span className="text-[rgb(var(--color-text-muted))]">{row.email}</span>
+                <span className="text-[rgb(var(--color-text-muted))] text-sm truncate block max-w-full">{row.email}</span>
             ),
-        },
-        {
-            key: 'userName',
-            header: 'Username',
         },
         {
             key: 'roles',
@@ -386,13 +375,13 @@ export default function Users() {
                     return <span className="text-[rgb(var(--color-text-muted))] text-xs">No roles</span>;
                 }
                 return (
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1">
                         {roles.map((role, i) => (
                             <span
                                 key={i}
-                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))] transition-all duration-200 hover:bg-[rgb(var(--color-primary))]/15 hover:shadow-sm"
+                                className="inline-flex items-center gap-0.5 rounded-full bg-[rgb(var(--color-primary))]/10 px-1.5 py-0.5 text-[11px] font-medium text-[rgb(var(--color-primary))]"
                             >
-                                <Shield size={10} />
+                                <Shield size={9} />
                                 {getRoleName(role)}
                             </span>
                         ))}
@@ -414,33 +403,33 @@ export default function Users() {
         {
             key: 'actions',
             header: '',
-            width: '180px',
+            width: 'auto',
             render: (row) => (
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openViewModal(row)}
-                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="View details"
                     >
                         <Eye size={16} />
                     </button>
                     <button
                         onClick={() => openEditModal(row)}
-                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Edit user"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => openToggleDialog(row)}
-                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-amber-500/10 hover:text-amber-500 transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-amber-500/10 hover:text-amber-500 transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title={row.isDisabled ? 'Enable user' : 'Disable user'}
                     >
                         {row.isDisabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                     </button>
                     <button
                         onClick={() => openUnlockDialog(row)}
-                        className="group relative rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-emerald-500/10 hover:text-emerald-500 transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-emerald-500/10 hover:text-emerald-500 transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Unlock account"
                     >
                         <Unlock size={16} />
@@ -450,15 +439,14 @@ export default function Users() {
         },
     ];
 
-    // ── Role checkboxes for forms ─────────────────────────────────────────
     const renderRoleCheckboxes = (selectedRoles, onToggle, error) => (
         <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-[rgb(var(--color-text))]">
                 Roles <span className="ml-1 text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-2 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-3 transition-all duration-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-3">
                 {availableRoles.length === 0 ? (
-                    <p className="col-span-2 text-xs text-[rgb(var(--color-text-muted))]">
+                    <p className="col-span-1 sm:col-span-2 text-xs text-[rgb(var(--color-text-muted))]">
                         No roles available
                     </p>
                 ) : (
@@ -468,7 +456,7 @@ export default function Users() {
                         return (
                             <label
                                 key={roleName}
-                                className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
+                                className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 min-h-[44px] ${
                                     isChecked
                                         ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] shadow-sm'
                                         : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))] hover:shadow-sm'
@@ -495,7 +483,7 @@ export default function Users() {
             variants={pageVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
         >
             <motion.div variants={itemVariants}>
                 <PageHeader
@@ -504,36 +492,34 @@ export default function Users() {
                     action={
                         <button
                             onClick={openCreateModal}
-                            className="glass-button-primary flex items-center gap-2"
+                            className="glass-button-primary flex items-center gap-2 !px-3 sm:!px-4 min-h-[44px]"
                         >
                             <UserPlus size={18} />
-                            Add User
+                            <span className="hidden sm:inline">Add User</span>
                         </button>
                     }
                 />
             </motion.div>
 
-            {/* Toolbar */}
             <motion.div
                 variants={itemVariants}
-                className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
                 <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Search users by name, email, or username..."
-                    className="w-full sm:max-w-sm transition-all duration-300 focus-within:shadow-glow"
+                    placeholder="Search users..."
+                    className="w-full sm:max-w-sm"
                 />
                 <button
                     onClick={fetchUsers}
-                    className="glass-button-secondary flex items-center gap-2 !px-3 !py-2 text-sm"
+                    className="glass-button-secondary flex items-center gap-2 !px-3 min-h-[44px] text-sm self-start"
                 >
                     <RefreshCw size={16} />
-                    Refresh
+                    <span className="hidden sm:inline">Refresh</span>
                 </button>
             </motion.div>
 
-            {/* Table */}
             <motion.div variants={itemVariants}>
                 <DataTable
                     columns={columns}
@@ -550,12 +536,12 @@ export default function Users() {
                 />
             </motion.div>
 
-            {/* ── Create User Modal ── */}
+            {/* Create User Modal */}
             <Modal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 title="Create New User"
-                maxWidth="max-w-lg"
+                maxWidth="max-w-full sm:max-w-lg"
             >
                 <form onSubmit={handleCreateSubmit} className="space-y-4">
                     <FormField
@@ -577,7 +563,7 @@ export default function Users() {
                         required
                         placeholder="johndoe"
                     />
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                             label="First Name"
                             name="firstName"
@@ -612,18 +598,18 @@ export default function Users() {
                         handleCreateRoleToggle,
                         createErrors.roles
                     )}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-[rgb(var(--color-border))]">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-[rgb(var(--color-border))]">
                         <button
                             type="button"
                             onClick={() => setShowCreateModal(false)}
-                            className="glass-button-secondary !px-4 !py-2 text-sm"
+                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isCreating}
-                            className="glass-button-primary !px-4 !py-2 text-sm flex items-center gap-2"
+                            className="glass-button-primary !px-4 !py-2.5 text-sm flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto"
                         >
                             {isCreating ? (
                                 <LoadingSpinner size="sm" />
@@ -636,12 +622,12 @@ export default function Users() {
                 </form>
             </Modal>
 
-            {/* ── Edit User Modal ── */}
+            {/* Edit User Modal */}
             <Modal
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 title="Edit User"
-                maxWidth="max-w-lg"
+                maxWidth="max-w-full sm:max-w-lg"
             >
                 <form onSubmit={handleEditSubmit} className="space-y-4">
                     <FormField
@@ -663,7 +649,7 @@ export default function Users() {
                         required
                         placeholder="johndoe"
                     />
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <FormField
                             label="First Name"
                             name="firstName"
@@ -688,18 +674,18 @@ export default function Users() {
                         handleEditRoleToggle,
                         editErrors.roles
                     )}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-[rgb(var(--color-border))]">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-[rgb(var(--color-border))]">
                         <button
                             type="button"
                             onClick={() => setShowEditModal(false)}
-                            className="glass-button-secondary !px-4 !py-2 text-sm"
+                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isEditing}
-                            className="glass-button-primary !px-4 !py-2 text-sm flex items-center gap-2"
+                            className="glass-button-primary !px-4 !py-2.5 text-sm flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto"
                         >
                             {isEditing ? (
                                 <LoadingSpinner size="sm" />
@@ -712,53 +698,53 @@ export default function Users() {
                 </form>
             </Modal>
 
-            {/* ── View User Modal ── */}
+            {/* View User Modal */}
             <Modal
                 isOpen={showViewModal}
                 onClose={() => setShowViewModal(false)}
                 title="User Details"
-                maxWidth="max-w-md"
+                maxWidth="max-w-full sm:max-w-md"
             >
                 {viewLoading ? (
                     <div className="flex items-center justify-center py-12">
                         <LoadingSpinner size="lg" />
                     </div>
                 ) : viewUser ? (
-                    <div className="space-y-5">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-xl font-bold shadow-inner ring-2 ring-[rgb(var(--color-primary))]/10">
+                    <div className="space-y-4 sm:space-y-5">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="flex h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] text-lg sm:text-xl font-bold ring-2 ring-[rgb(var(--color-primary))]/10">
                                 {(viewUser.firstName || '?')[0]?.toUpperCase()}
                                 {(viewUser.lastName || '')[0]?.toUpperCase()}
                             </div>
-                            <div>
-                                <h3 className="font-serif text-lg font-bold text-[rgb(var(--color-text))]">
+                            <div className="min-w-0">
+                                <h3 className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
                                     {viewUser.firstName} {viewUser.lastName}
                                 </h3>
-                                <p className="text-sm text-[rgb(var(--color-text-muted))]">
+                                <p className="text-sm text-[rgb(var(--color-text-muted))] truncate">
                                     @{viewUser.userName}
                                 </p>
                             </div>
                         </div>
 
                         <div className="rounded-xl border border-[rgb(var(--color-border))] divide-y divide-[rgb(var(--color-border))] overflow-hidden">
-                            <div className="flex items-center justify-between px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
-                                <span className="text-sm text-[rgb(var(--color-text-muted))]">Email</span>
-                                <span className="text-sm font-medium text-[rgb(var(--color-text))]">{viewUser.email}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 gap-1">
+                                <span className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))]">Email</span>
+                                <span className="text-xs sm:text-sm font-medium text-[rgb(var(--color-text))] break-all">{viewUser.email}</span>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
-                                <span className="text-sm text-[rgb(var(--color-text-muted))]">Username</span>
-                                <span className="text-sm font-medium text-[rgb(var(--color-text))]">{viewUser.userName}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 gap-1">
+                                <span className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))]">Username</span>
+                                <span className="text-xs sm:text-sm font-medium text-[rgb(var(--color-text))]">{viewUser.userName}</span>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
-                                <span className="text-sm text-[rgb(var(--color-text-muted))]">Status</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 gap-1">
+                                <span className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))]">Status</span>
                                 <StatusBadge
                                     active={!viewUser.isDisabled}
                                     activeText="Active"
                                     inactiveText="Disabled"
                                 />
                             </div>
-                            <div className="px-4 py-3 hover:bg-[rgb(var(--color-bg-subtle))]/50 transition-colors duration-200">
-                                <span className="text-sm text-[rgb(var(--color-text-muted))]">Roles</span>
+                            <div className="px-4 py-3">
+                                <span className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))]">Roles</span>
                                 <div className="mt-2 flex flex-wrap gap-1.5">
                                     {(viewUser.roles || []).length === 0 ? (
                                         <span className="text-xs text-[rgb(var(--color-text-muted))]">No roles assigned</span>
@@ -766,7 +752,7 @@ export default function Users() {
                                         (viewUser.roles || []).map((role, i) => (
                                             <span
                                                 key={i}
-                                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))] transition-all duration-200 hover:bg-[rgb(var(--color-primary))]/15"
+                                                className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-primary))]/10 px-2.5 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))]"
                                             >
                                                 <Shield size={10} />
                                                 {getRoleName(role)}
@@ -777,20 +763,20 @@ export default function Users() {
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-2">
+                        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
                             <button
                                 onClick={() => {
                                     setShowViewModal(false);
                                     openEditModal(viewUser);
                                 }}
-                                className="glass-button-secondary flex items-center gap-2 !px-4 !py-2 text-sm"
+                                className="glass-button-secondary flex items-center justify-center gap-2 !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                             >
                                 <Pencil size={14} />
                                 Edit
                             </button>
                             <button
                                 onClick={() => setShowViewModal(false)}
-                                className="glass-button-primary !px-4 !py-2 text-sm"
+                                className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                             >
                                 Close
                             </button>
@@ -799,7 +785,6 @@ export default function Users() {
                 ) : null}
             </Modal>
 
-            {/* ── Toggle Status Dialog ── */}
             <ConfirmDialog
                 isOpen={showToggleDialog}
                 onClose={() => setShowToggleDialog(false)}
@@ -815,7 +800,6 @@ export default function Users() {
                 isLoading={isToggling}
             />
 
-            {/* ── Unlock Dialog ── */}
             <ConfirmDialog
                 isOpen={showUnlockDialog}
                 onClose={() => setShowUnlockDialog(false)}

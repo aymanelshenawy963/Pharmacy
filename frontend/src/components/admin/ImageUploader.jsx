@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
@@ -23,6 +23,21 @@ const previewVariants = {
 
 export default function ImageUploader({ files, onChange, maxFiles = 5, error }) {
     const [isDragging, setIsDragging] = useState(false);
+    const objectUrlsRef = useRef([]);
+
+    useEffect(() => {
+        return () => {
+            objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+            objectUrlsRef.current = [];
+        };
+    }, []);
+
+    const getFileUrl = useCallback((file) => {
+        if (typeof file === 'string') return file;
+        const url = URL.createObjectURL(file);
+        objectUrlsRef.current.push(url);
+        return url;
+    }, []);
 
     const handleDragOver = useCallback((e) => {
         e.preventDefault();
@@ -56,6 +71,14 @@ export default function ImageUploader({ files, onChange, maxFiles = 5, error }) 
     };
 
     const removeFile = (index) => {
+        const file = files[index];
+        if (typeof file !== 'string') {
+            const url = objectUrlsRef.current.find((u) => u === URL.createObjectURL(file));
+            if (url) {
+                URL.revokeObjectURL(url);
+                objectUrlsRef.current = objectUrlsRef.current.filter((u) => u !== url);
+            }
+        }
         onChange(files.filter((_, i) => i !== index));
     };
 
@@ -67,7 +90,7 @@ export default function ImageUploader({ files, onChange, maxFiles = 5, error }) 
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all duration-300 ${
+                className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 sm:p-8 transition-all duration-300 ${
                     isDragging
                         ? 'border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))]/5 shadow-lg shadow-[rgb(var(--color-primary))]/10'
                         : 'border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-primary))]/50 hover:bg-[rgb(var(--color-bg-subtle))]/30'
@@ -101,7 +124,7 @@ export default function ImageUploader({ files, onChange, maxFiles = 5, error }) 
                     >
                         <AnimatePresence>
                             {files.map((file, index) => {
-                                const url = typeof file === 'string' ? file : URL.createObjectURL(file);
+                                const url = getFileUrl(file);
                                 return (
                                     <motion.div
                                         key={index}
@@ -117,7 +140,7 @@ export default function ImageUploader({ files, onChange, maxFiles = 5, error }) 
                                         <button
                                             type="button"
                                             onClick={() => removeFile(index)}
-                                            className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/80 hover:scale-110 active:scale-90"
+                                            className="absolute top-1.5 right-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-black/80 hover:scale-110 active:scale-90 sm:opacity-100"
                                             aria-label="Remove image"
                                         >
                                             <X size={12} />

@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Package, Plus, Pencil, Trash2, RefreshCw, Filter, ChevronDown, IndianRupee, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { productService } from '../../services/productService';
 import { categoryService } from '../../services/categoryService';
+import { parseApiError } from '../../utils/apiErrorHandler';
 import PageHeader from '../../components/admin/PageHeader';
 import SearchInput from '../../components/admin/SearchInput';
 import DataTable from '../../components/admin/DataTable';
@@ -75,7 +76,7 @@ function StockIndicator({ stock }) {
         label = 'In Stock';
     }
     return (
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${bg} ${color}`}>
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold ${bg} ${color}`}>
             <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
             {stock} ({label})
         </span>
@@ -109,42 +110,16 @@ export default function Products() {
     const categoryRef = useRef(null);
     const searchTimeout = useRef(null);
 
-    useEffect(() => {
-        fetchCategories();
-    }, []);
-
-    useEffect(() => {
-        fetchProducts();
-    }, [pageIndex, sort, categoryFilter]);
-
-    useEffect(() => {
-        if (searchTimeout.current) clearTimeout(searchTimeout.current);
-        searchTimeout.current = setTimeout(() => {
-            setPageIndex(1);
-            fetchProducts();
-        }, 300);
-        return () => clearTimeout(searchTimeout.current);
-    }, [search]);
-
-    useEffect(() => {
-        function handleClickOutside(e) {
-            if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
-            if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryOpen(false);
-        }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    async function fetchCategories() {
+    const fetchCategories = useCallback(async () => {
         try {
             const data = await categoryService.getAll();
             setCategories(data);
         } catch {
             toast.error('Failed to load categories');
         }
-    }
+    }, []);
 
-    async function fetchProducts() {
+    const fetchProducts = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
@@ -161,11 +136,47 @@ export default function Products() {
             setTotalPages(res.totalPages || 1);
             setTotalCount(res.totalCount || 0);
         } catch (err) {
-            setError(err.message || 'Failed to load products');
+            const msgs = parseApiError(err);
+            setError(msgs.join(' '));
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [pageIndex, sort, search, categoryFilter]);
+
+    useEffect(() => {
+        fetchCategories();
+    }, [fetchCategories]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
+    useEffect(() => {
+        if (searchTimeout.current) clearTimeout(searchTimeout.current);
+        searchTimeout.current = setTimeout(() => {
+            setPageIndex(1);
+        }, 300);
+        return () => clearTimeout(searchTimeout.current);
+    }, [search]);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
+            if (categoryRef.current && !categoryRef.current.contains(e.target)) setCategoryOpen(false);
+        }
+        function handleEsc(e) {
+            if (e.key === 'Escape') {
+                setSortOpen(false);
+                setCategoryOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleEsc);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEsc);
+        };
+    }, []);
 
     function resetForm() {
         setForm(INITIAL_FORM);
@@ -297,19 +308,18 @@ export default function Products() {
         {
             key: 'product',
             header: 'Product',
-            width: '300px',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:ring-1 group-hover:ring-[rgb(var(--color-primary))]/20">
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] shadow-sm">
                         {row.photos?.[0] ? (
                             <img src={row.photos[0]} alt={row.name} className="h-full w-full object-cover" />
                         ) : (
                             <div className="flex h-full w-full items-center justify-center bg-[rgb(var(--color-bg-subtle))]">
-                                <Package size={20} className="text-[rgb(var(--color-text-muted))]" />
+                                <Package size={18} className="text-[rgb(var(--color-text-muted))]" />
                             </div>
                         )}
                     </div>
-                    <span className="font-medium">{row.name}</span>
+                    <span className="font-medium truncate">{row.name}</span>
                 </div>
             ),
         },
@@ -317,7 +327,7 @@ export default function Products() {
             key: 'categoryName',
             header: 'Category',
             render: (row) => (
-                <span className="rounded-lg bg-[rgb(var(--color-primary))]/10 px-2.5 py-1 text-xs font-medium text-[rgb(var(--color-primary))] transition-all duration-200 hover:bg-[rgb(var(--color-primary))]/15">
+                <span className="inline-block rounded-lg bg-[rgb(var(--color-primary))]/10 px-2 py-0.5 text-xs font-medium text-[rgb(var(--color-primary))]">
                     {row.categoryName}
                 </span>
             ),
@@ -327,10 +337,10 @@ export default function Products() {
             header: 'Price',
             render: (row) => (
                 <div className="flex items-center gap-1">
-                    <IndianRupee size={14} className="text-[rgb(var(--color-text-muted))]" />
-                    <span className="font-semibold">{row.newPrice}</span>
+                    <IndianRupee size={12} className="text-[rgb(var(--color-text-muted))]" />
+                    <span className="font-semibold text-sm">{row.newPrice}</span>
                     {row.oldPrice > row.newPrice && (
-                        <span className="ml-1 text-xs text-[rgb(var(--color-text-muted))] line-through">{row.oldPrice}</span>
+                        <span className="text-xs text-[rgb(var(--color-text-muted))] line-through">{row.oldPrice}</span>
                     )}
                 </div>
             ),
@@ -342,11 +352,11 @@ export default function Products() {
         },
         {
             key: 'requiresPrescription',
-            header: 'Rx Required',
+            header: 'Rx',
             render: (row) => (
-                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold transition-all duration-200 ${
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
                     row.requiresPrescription
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 ring-1 ring-purple-500/10'
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                         : 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400'
                 }`}>
                     {row.requiresPrescription ? 'Rx' : 'OTC'}
@@ -355,34 +365,34 @@ export default function Products() {
         },
         {
             key: 'topSelling',
-            header: 'Top Selling',
+            header: 'Top',
             render: (row) => (
                 row.topSelling ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 ring-1 ring-amber-500/10 transition-all duration-200 hover:bg-amber-200/70">
-                        <Star size={12} fill="currentColor" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Star size={10} fill="currentColor" />
                         Top
                     </span>
                 ) : (
-                    <span className="text-xs text-[rgb(var(--color-text-muted))]">—</span>
+                    <span className="text-xs text-[rgb(var(--color-text-muted))]">-</span>
                 )
             ),
         },
         {
             key: 'actions',
             header: 'Actions',
-            width: '140px',
+            width: 'auto',
             render: (row) => (
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => openEditModal(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/10 transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/10 transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Edit"
                     >
                         <Pencil size={16} />
                     </button>
                     <button
                         onClick={() => openDeleteDialog(row)}
-                        className="rounded-lg p-2 text-red-500 hover:bg-red-500/10 transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="rounded-lg p-2 text-red-500 hover:bg-red-500/10 transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
                         title="Delete"
                     >
                         <Trash2 size={16} />
@@ -415,7 +425,7 @@ export default function Products() {
                 placeholder="Product description"
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                     label="New Price"
                     name="newPrice"
@@ -438,7 +448,7 @@ export default function Products() {
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                     label="Stock"
                     name="stock"
@@ -462,7 +472,7 @@ export default function Products() {
                 />
             </div>
 
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
                 <FormField
                     label="Requires Prescription"
                     name="requiresPrescription"
@@ -519,34 +529,35 @@ export default function Products() {
     const currentSortLabel = SORT_OPTIONS.find(o => o.value === sort)?.label || 'Sort';
     const currentCategoryLabel = categoryFilter
         ? categories.find(c => String(c.id) === String(categoryFilter))?.name || 'Category'
-        : 'All Categories';
+        : 'All';
 
     return (
         <motion.div
             variants={pageVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4 sm:gap-6"
         >
             <motion.div variants={itemVariants}>
                 <PageHeader
                     title="Products"
-                    description={`Manage your product inventory (${totalCount} total)`}
+                    description={`${totalCount} total products`}
                     action={
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             <button
                                 onClick={fetchProducts}
-                                className="glass-button-secondary flex items-center gap-2 !px-3 !py-2.5 text-sm"
+                                className="glass-button-secondary flex items-center gap-2 !px-3 min-h-[44px] text-sm"
                                 title="Refresh"
                             >
                                 <RefreshCw size={16} />
+                                <span className="hidden sm:inline">Refresh</span>
                             </button>
                             <button
                                 onClick={openCreateModal}
-                                className="glass-button-primary flex items-center gap-2 !px-4 !py-2.5 text-sm"
+                                className="glass-button-primary flex items-center gap-2 !px-3 sm:!px-4 min-h-[44px] text-sm"
                             >
                                 <Plus size={16} />
-                                Add Product
+                                <span className="hidden sm:inline">Add Product</span>
                             </button>
                         </div>
                     }
@@ -555,23 +566,24 @@ export default function Products() {
 
             <motion.div
                 variants={itemVariants}
-                className="flex flex-col gap-4 sm:flex-row sm:items-center"
+                className="flex flex-col gap-3 sm:flex-row sm:items-center"
             >
                 <SearchInput
                     value={search}
                     onChange={setSearch}
                     placeholder="Search products..."
-                    className="w-full sm:max-w-xs transition-all duration-300 focus-within:shadow-glow"
+                    className="w-full sm:max-w-xs"
                 />
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <div className="relative" ref={sortRef}>
                         <button
                             onClick={() => setSortOpen(!sortOpen)}
-                            className="glass-button-secondary flex items-center gap-2 !px-3 !py-2 text-sm"
+                            className="glass-button-secondary flex items-center gap-2 !px-3 min-h-[44px] text-sm"
                         >
                             <Filter size={14} />
-                            {currentSortLabel}
+                            <span className="hidden sm:inline">{currentSortLabel}</span>
+                            <span className="sm:hidden">Sort</span>
                             <ChevronDown size={14} className={`transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
                         </button>
                         {sortOpen && (
@@ -579,13 +591,13 @@ export default function Products() {
                                 initial={{ opacity: 0, y: -8, scale: 0.96 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                                className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl"
+                                className="absolute left-0 z-20 mt-1 w-56 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl"
                             >
                                 {SORT_OPTIONS.map(opt => (
                                     <button
                                         key={opt.value}
                                         onClick={() => { setSort(opt.value); setSortOpen(false); }}
-                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-all duration-150 ${
+                                        className={`flex w-full items-center px-4 py-3 text-left text-sm transition-all duration-150 min-h-[44px] ${
                                             sort === opt.value
                                                 ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
                                                 : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
@@ -601,10 +613,11 @@ export default function Products() {
                     <div className="relative" ref={categoryRef}>
                         <button
                             onClick={() => setCategoryOpen(!categoryOpen)}
-                            className="glass-button-secondary flex items-center gap-2 !px-3 !py-2 text-sm"
+                            className="glass-button-secondary flex items-center gap-2 !px-3 min-h-[44px] text-sm"
                         >
                             <Package size={14} />
-                            {currentCategoryLabel}
+                            <span className="hidden sm:inline">{currentCategoryLabel}</span>
+                            <span className="sm:hidden">Cat</span>
                             <ChevronDown size={14} className={`transition-transform duration-200 ${categoryOpen ? 'rotate-180' : ''}`} />
                         </button>
                         {categoryOpen && (
@@ -612,11 +625,11 @@ export default function Products() {
                                 initial={{ opacity: 0, y: -8, scale: 0.96 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 transition={{ duration: 0.15, ease: 'easeOut' }}
-                                className="absolute left-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl max-h-60 overflow-y-auto"
+                                className="absolute left-0 z-20 mt-1 w-56 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] shadow-xl max-h-60 overflow-y-auto"
                             >
                                 <button
                                     onClick={() => { setCategoryFilter(''); setCategoryOpen(false); }}
-                                    className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-all duration-150 ${
+                                    className={`flex w-full items-center px-4 py-3 text-left text-sm transition-all duration-150 min-h-[44px] ${
                                         !categoryFilter
                                             ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
                                             : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
@@ -628,7 +641,7 @@ export default function Products() {
                                     <button
                                         key={cat.id}
                                         onClick={() => { setCategoryFilter(String(cat.id)); setCategoryOpen(false); }}
-                                        className={`flex w-full items-center px-4 py-2.5 text-left text-sm transition-all duration-150 ${
+                                        className={`flex w-full items-center px-4 py-3 text-left text-sm transition-all duration-150 min-h-[44px] ${
                                             String(categoryFilter) === String(cat.id)
                                                 ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
                                                 : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
@@ -662,21 +675,21 @@ export default function Products() {
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 title="Add Product"
-                maxWidth="max-w-2xl"
+                maxWidth="max-w-full sm:max-w-2xl"
             >
                 {renderForm()}
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
                     <button
                         onClick={() => setShowCreateModal(false)}
                         disabled={isSubmitting}
-                        className="glass-button-secondary !px-4 !py-2 text-sm"
+                        className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleCreate}
                         disabled={isSubmitting}
-                        className="glass-button-primary !px-4 !py-2 text-sm"
+                        className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center"
                     >
                         {isSubmitting ? (
                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -691,21 +704,21 @@ export default function Products() {
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 title="Edit Product"
-                maxWidth="max-w-2xl"
+                maxWidth="max-w-full sm:max-w-2xl"
             >
                 {renderForm()}
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-3">
                     <button
                         onClick={() => setShowEditModal(false)}
                         disabled={isSubmitting}
-                        className="glass-button-secondary !px-4 !py-2 text-sm"
+                        className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleUpdate}
                         disabled={isSubmitting}
-                        className="glass-button-primary !px-4 !py-2 text-sm"
+                        className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center"
                     >
                         {isSubmitting ? (
                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

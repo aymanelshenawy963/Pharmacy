@@ -19,7 +19,7 @@ const itemVariants = {
 };
 
 export default function EmptyState({
-    icon = 'Inbox',
+    icon: IconComponent = Inbox,
     title = 'No data found',
     description = 'There are no items to display.',
     action = null,
@@ -29,27 +29,27 @@ export default function EmptyState({
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col items-center justify-center py-20 px-6"
+            className="flex flex-col items-center justify-center py-12 sm:py-20 px-4 sm:px-6"
         >
             <motion.div
                 variants={itemVariants}
-                className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg-subtle))] ring-1 ring-[rgb(var(--color-border))]"
+                className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg-subtle))] ring-1 ring-[rgb(var(--color-border))]"
             >
-                <Inbox className="h-9 w-9 text-[rgb(var(--color-text-muted))]" />
+                <IconComponent className="h-7 w-7 sm:h-9 sm:w-9 text-[rgb(var(--color-text-muted))]" />
             </motion.div>
             <motion.h3
                 variants={itemVariants}
-                className="mt-5 font-serif text-lg font-bold text-[rgb(var(--color-text))]"
+                className="mt-4 sm:mt-5 font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] text-center"
             >
                 {title}
             </motion.h3>
             <motion.p
                 variants={itemVariants}
-                className="mt-2 max-w-sm text-center text-sm leading-relaxed text-[rgb(var(--color-text-muted))]"
+                className="mt-2 max-w-xs sm:max-w-sm text-center text-xs sm:text-sm leading-relaxed text-[rgb(var(--color-text-muted))]"
             >
                 {description}
             </motion.p>
-            {action && <motion.div variants={itemVariants} className="mt-6">{action}</motion.div>}
+            {action && <motion.div variants={itemVariants} className="mt-5 sm:mt-6 w-full sm:w-auto">{action}</motion.div>}
         </motion.div>
     );
 }

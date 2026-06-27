@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EmptyState from './EmptyState';
-import LoadingSpinner from './LoadingSpinner';
 
 function SkeletonRow({ columns }) {
     return (
@@ -17,9 +16,9 @@ function SkeletonRow({ columns }) {
 
 function SkeletonTable({ columns }) {
     return (
-        <div className="glass-card overflow-hidden">
+        <div className="glass-card">
             <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left text-sm" style={{ minWidth: 800 }}>
                     <thead>
                         <tr className="border-b border-[rgb(var(--color-border))]">
                             {columns.map((col) => (
@@ -85,7 +84,7 @@ export default function DataTable({
                 className="glass-card p-6"
             >
                 <div className="flex flex-col items-center gap-4 py-8">
-                    <p className="text-sm text-red-500">{error}</p>
+                    <p className="text-sm text-red-500 text-center">{error}</p>
                     {onRetry && (
                         <button
                             onClick={onRetry}
@@ -100,16 +99,16 @@ export default function DataTable({
     }
 
     return (
-        <div className="glass-card overflow-hidden">
+        <div className="glass-card">
             <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left text-sm" style={{ minWidth: 800 }}>
                     <thead>
                         <tr className="border-b border-[rgb(var(--color-border))]">
                             {columns.map((col) => (
                                 <th
                                     key={col.key}
                                     className="whitespace-nowrap px-4 py-3.5 text-xs font-semibold uppercase tracking-wider text-[rgb(var(--color-text-muted))] bg-[rgb(var(--color-bg-subtle))]"
-                                    style={col.width ? { width: col.width } : undefined}
+                                    style={col.width && col.width !== 'auto' ? { width: col.width } : undefined}
                                 >
                                     {col.header}
                                 </th>
@@ -156,16 +155,16 @@ export default function DataTable({
                     variants={paginationVariants}
                     initial="hidden"
                     animate="visible"
-                    className="flex items-center justify-between border-t border-[rgb(var(--color-border))] px-4 py-3"
+                    className="flex items-center justify-between border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-3 py-3 sm:px-4"
                 >
                     <p className="text-xs text-[rgb(var(--color-text-muted))]">
                         Page {pageIndex} of {totalPages}
                     </p>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                         <button
                             onClick={() => onPageChange(pageIndex - 1)}
                             disabled={pageIndex <= 1}
-                            className="glass-button-secondary !p-2 !rounded-lg disabled:opacity-30 transition-all duration-200 hover:scale-105 active:scale-95"
+                            className="glass-button-secondary !p-2 !rounded-lg disabled:opacity-30 transition-all duration-200 hover:scale-105 active:scale-95 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         >
                             <ChevronLeft size={16} />
                         </button>
@@ -184,7 +183,7 @@ export default function DataTable({
                                 <button
                                     key={page}
                                     onClick={() => onPageChange(page)}
-                                    className={`h-8 w-8 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105 active:scale-95 ${
+                                    className={`h-9 w-9 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center ${
                                         page === pageIndex
                                             ? 'bg-[rgb(var(--color-primary))] text-white shadow-md shadow-[rgb(var(--color-primary))]/25'
                                             : 'text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] hover:text-[rgb(var(--color-text))]'
@@ -197,7 +196,7 @@ export default function DataTable({
                         <button
                             onClick={() => onPageChange(pageIndex + 1)}
                             disabled={pageIndex >= totalPages}
-                            className="glass-button-secondary !p-2 !rounded-lg disabled:opacity-30 transition-all duration-200 hover:scale-105 active:scale-95"
+                            className="glass-button-secondary !p-2 !rounded-lg disabled:opacity-30 transition-all duration-200 hover:scale-105 active:scale-95 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         >
                             <ChevronRight size={16} />
                         </button>
