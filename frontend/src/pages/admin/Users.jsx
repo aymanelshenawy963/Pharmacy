@@ -222,12 +222,14 @@ export default function Users() {
 
     const openEditModal = (user) => {
         setEditUserId(user.id);
+        const userRoleNames = (user.roles || []).map(getRoleName);
+        const availableRoleNames = availableRoles.map(getRoleName);
         setEditForm({
             email: user.email || '',
             userName: user.userName || '',
             firstName: user.firstName || '',
             lastName: user.lastName || '',
-            roles: (user.roles || []).map(getRoleName),
+            roles: userRoleNames.filter((r) => availableRoleNames.includes(r)),
         });
         setEditErrors({});
         setShowEditModal(true);

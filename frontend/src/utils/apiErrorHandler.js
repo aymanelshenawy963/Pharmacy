@@ -24,6 +24,11 @@ export const parseApiError = (error) => {
         }
     }
 
+    // Use the actual error message from the server if available
+    if (error.message && !error.message.startsWith('HTTP ')) {
+        return [error.message];
+    }
+
     // Default HTTP Status messages fallback
     switch (error.status) {
         case 400: return ["Please check the information you entered."];
