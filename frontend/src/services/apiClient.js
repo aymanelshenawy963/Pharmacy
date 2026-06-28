@@ -1,6 +1,7 @@
 import { authStorage } from './authStorage';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
+// const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
+const BASE_URL = 'https://localhost:7293';
 const MAX_429_RETRIES = 3;
 const RETRY_BASE_DELAY = 2000;
 

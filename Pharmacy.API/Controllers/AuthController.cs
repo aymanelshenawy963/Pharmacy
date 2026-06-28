@@ -59,17 +59,17 @@ public class AuthController(IAuthService authService) : ControllerBase
              : BadRequest(new ResponseAPI(400, error));
     }
 
-    [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailDTO confirmEmailDTO)
-    {
-        var (isSuccess, error) = await _authService.ConfirmEmailAsync(confirmEmailDTO);
+    //[HttpGet("confirm-email")]
+    //public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailDTO confirmEmailDTO)
+    //{
+    //    var (isSuccess, error) = await _authService.ConfirmEmailAsync(confirmEmailDTO);
 
-        if (isSuccess)
-            return Ok(new ResponseAPI(200,"Email confirmed successfully, you can now log in"));
+    //    if (isSuccess)
+    //        return Ok(new ResponseAPI(200,"Email confirmed successfully, you can now log in"));
 
-        return error == "Email is already confirmed" ? Conflict(new ResponseAPI(409, error))
-             : BadRequest(new ResponseAPI(400, error));
-    }
+    //    return error == "Email is already confirmed" ? Conflict(new ResponseAPI(409, error))
+    //         : BadRequest(new ResponseAPI(400, error));
+    //}
 
     [HttpPost("confirm-email")]
     public async Task<IActionResult> ConfirmEmailByOtp([FromBody] ConfirmEmailOtpDTO request)

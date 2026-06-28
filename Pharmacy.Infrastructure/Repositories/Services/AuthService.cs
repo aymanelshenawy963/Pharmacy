@@ -219,36 +219,36 @@ public class AuthService(UserManager<User> userManager,
     }
 
 
-    public async Task<(bool IsSuccess, string? Error)> ConfirmEmailAsync(ConfirmEmailDTO requst)
-    {
-        if (await _userManager.FindByIdAsync(requst.UserId) is not { } user )
-            return (false, "Invalid code");
+    //public async Task<(bool IsSuccess, string? Error)> ConfirmEmailAsync(ConfirmEmailDTO requst)
+    //{
+    //    if (await _userManager.FindByIdAsync(requst.UserId) is not { } user)
+    //        return (false, "Invalid code");
 
-        if (user.EmailConfirmed)
-            return (false, "Email is already confirmed");
+    //    if (user.EmailConfirmed)
+    //        return (false, "Email is already confirmed");
 
-        var code = requst.Code;
+    //    var code = requst.Code;
 
-        try
-        {
-            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-        }
-        catch(FormatException)
-        {
-            return (false, "Invalid code");
-        }
+    //    try
+    //    {
+    //        code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+    //    }
+    //    catch (FormatException)
+    //    {
+    //        return (false, "Invalid code");
+    //    }
 
-        var result = await _userManager.ConfirmEmailAsync(user, code);
+    //    var result = await _userManager.ConfirmEmailAsync(user, code);
 
-        if (result.Succeeded)
-        {
-            await _userManager.AddToRolesAsync(user, new[] { DefaultRoles.Customer });
-            return (true, null);
-        }
+    //    if (result.Succeeded)
+    //    {
+    //        await _userManager.AddToRolesAsync(user, new[] { DefaultRoles.Customer });
+    //        return (true, null);
+    //    }
 
-        var error = result.Errors.First().Description;
-        return (false, error);
-    }
+    //    var error = result.Errors.First().Description;
+    //    return (false, error);
+    //}
 
     public async Task<(bool IsSuccess, string? Error)> ConfirmEmailByOtpAsync(ConfirmEmailOtpDTO request)
     {
