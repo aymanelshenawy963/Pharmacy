@@ -81,8 +81,7 @@ export default function Prescription() {
             />
 
             {/* ─── Hero ─── */}
-            <section className="bg-lofi relative overflow-hidden">
-                <div className="absolute inset-0 bg-bg/80 dark:bg-bg/90 backdrop-blur-[40px] z-0" />
+            <section className="bg-bg-subtle relative overflow-hidden">
                 <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -121,13 +120,13 @@ export default function Prescription() {
                         className="space-y-6 lg:sticky lg:top-28"
                     >
                         {/* Pharmacist review card */}
-                        <motion.div variants={sideItem} className="glass-card p-6 bg-primary/5">
+                        <motion.div variants={sideItem} className="bg-surface p-6 rounded-2xl border border-border shadow-sm bg-primary/5">
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-transform duration-300 hover:scale-110">
                                     <Icon name="ShieldCheck" className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <p className="font-serif text-xl font-medium text-text">Pharmacist Reviewed</p>
+                                    <p className="font-sans text-xl font-medium text-text">Pharmacist Reviewed</p>
                                     <p className="mt-2 text-sm text-text-muted leading-relaxed">
                                         Every prescription is personally verified by our licensed pharmacist before dispatch. If anything needs clarification, we'll contact you directly.
                                     </p>
@@ -136,13 +135,13 @@ export default function Prescription() {
                         </motion.div>
 
                         {/* Accepted files card */}
-                        <motion.div variants={sideItem} className="glass-card p-6">
+                        <motion.div variants={sideItem} className="bg-surface p-6 rounded-2xl border border-border shadow-sm">
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary border border-secondary/20 transition-transform duration-300 hover:scale-110">
                                     <Icon name="FileText" className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <p className="font-serif text-xl font-medium text-text">Accepted Files</p>
+                                    <p className="font-sans text-xl font-medium text-text">Accepted Files</p>
                                     <p className="mt-2 text-sm text-text-muted leading-relaxed">
                                         JPG, PNG, and PDF are supported. Keep the file readable and include a clear patient name on the prescription.
                                     </p>
@@ -161,13 +160,13 @@ export default function Prescription() {
                         </motion.div>
 
                         {/* Fast support card */}
-                        <motion.div variants={sideItem} className="glass-card p-6">
+                        <motion.div variants={sideItem} className="bg-surface p-6 rounded-2xl border border-border shadow-sm">
                             <div className="flex items-start gap-4">
                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-transform duration-300 hover:scale-110">
                                     <Icon name="MessageCircle" className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <p className="font-serif text-xl font-medium text-text">Need Help?</p>
+                                    <p className="font-sans text-xl font-medium text-text">Need Help?</p>
                                     <p className="mt-2 text-sm text-text-muted leading-relaxed">
                                         Use the contact page or WhatsApp if you need help before uploading your prescription.
                                     </p>
@@ -222,10 +221,10 @@ export default function Prescription() {
                                 <motion.div
                                     variants={stepVariants}
                                     whileHover={{ y: -6, scale: 1.02 }}
-                                    className="relative z-10 flex w-full max-w-[280px] flex-col items-center text-center glass-card p-6 border-transparent hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                                    className="relative z-10 flex w-full max-w-[280px] flex-col items-center text-center bg-surface p-6 rounded-2xl border border-border shadow-sm hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                                 >
                                     <div className="relative mb-6">
-                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-bg shadow-sm text-primary font-serif text-2xl font-bold transition-all duration-300 group-hover/step:scale-110 group-hover/step:shadow-md">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-bg shadow-sm text-primary font-sans text-2xl font-bold transition-all duration-300 group-hover/step:scale-110 group-hover/step:shadow-md">
                                             {index + 1}
                                         </div>
                                         <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform duration-300 group-hover/step:scale-110">
@@ -233,7 +232,7 @@ export default function Prescription() {
                                         </div>
                                     </div>
 
-                                    <h3 className="mb-3 font-serif text-xl font-medium text-text transition-colors duration-200 group-hover/step:text-primary">
+                                    <h3 className="mb-3 font-sans text-xl font-medium text-text transition-colors duration-200 group-hover/step:text-primary">
                                         {step.title}
                                     </h3>
                                     <p className="text-sm text-text-muted">

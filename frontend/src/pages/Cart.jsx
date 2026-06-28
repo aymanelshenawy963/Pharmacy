@@ -27,14 +27,13 @@ export default function Cart() {
         return (
             <>
                 <Seo title="Cart" description="Review the items in your pharmacy cart." />
-                <section className="min-h-[calc(100vh-72px)] bg-lofi relative flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-bg/80 dark:bg-bg/90 backdrop-blur-[50px] z-0" />
+                <section className="min-h-[calc(100vh-72px)] bg-bg-subtle relative flex items-center justify-center p-4">
 
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="glass-card max-w-md w-full p-12 text-center relative z-10"
+                        className="bg-surface max-w-md w-full p-12 text-center relative z-10 rounded-2xl border border-border shadow-sm"
                     >
                         <motion.div
                             animate={{ y: [0, -10, 0] }}
@@ -43,7 +42,7 @@ export default function Cart() {
                         >
                             <Icon name="ShoppingCart" className="h-10 w-10" />
                         </motion.div>
-                        <h1 className="font-serif text-3xl font-semibold text-text mb-3">Your cart is empty</h1>
+                        <h1 className="font-sans text-3xl font-semibold text-text mb-3">Your cart is empty</h1>
                         <p className="text-text-muted mb-8 leading-relaxed">
                             Browse our curated collection of medicines and wellness essentials to start your order.
                         </p>
@@ -84,7 +83,7 @@ export default function Cart() {
                                         exit={{ opacity: 0, x: 30, scale: 0.95 }}
                                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                                         key={item.id}
-                                        className="glass-card flex flex-col gap-6 p-5 sm:flex-row relative group"
+                                        className="bg-surface flex flex-col gap-6 p-5 sm:flex-row relative group rounded-2xl border border-border shadow-sm"
                                     >
                                         <div className="relative h-40 w-full sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-bg">
                                             <img
@@ -99,7 +98,7 @@ export default function Cart() {
                                             <div className="flex items-start justify-between gap-4">
                                                 <div>
                                                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">{item.category}</p>
-                                                    <h2 className="font-serif text-xl font-medium text-text line-clamp-1">{item.name}</h2>
+                                                    <h2 className="font-sans text-xl font-medium text-text line-clamp-1">{item.name}</h2>
                                                     <p className="text-sm text-text-muted mt-1">{item.brand}</p>
                                                 </div>
                                                 <button
@@ -158,9 +157,9 @@ export default function Cart() {
                             transition={{ delay: 0.15 }}
                             className="space-y-6 lg:sticky lg:top-28 h-fit"
                         >
-                            <div className="glass-card p-6 md:p-8">
+                            <div className="bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-sm">
                                 <div className="flex items-center justify-between border-b border-border pb-6 mb-6">
-                                    <h2 className="font-serif text-2xl font-semibold text-text">Order summary</h2>
+                                    <h2 className="font-sans text-2xl font-semibold text-text">Order summary</h2>
                                     <button type="button" onClick={clearCart} className="text-sm font-medium text-text-muted hover:text-red-500 transition-colors duration-200">
                                         Clear cart
                                     </button>
@@ -183,7 +182,7 @@ export default function Cart() {
                                                 initial={{ scale: 0.95, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 transition={{ duration: 0.25 }}
-                                                className="font-serif text-3xl font-bold text-text"
+                                                className="font-sans text-3xl font-bold text-text"
                                             >
                                                 ₹{total}
                                             </motion.span>
@@ -193,7 +192,7 @@ export default function Cart() {
                                 </div>
                             </div>
 
-                            <div className="glass-card p-6 md:p-8">
+                            <div className="bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-sm">
                                 <label className="block text-sm font-medium text-text mb-3">
                                     Promo code
                                 </label>

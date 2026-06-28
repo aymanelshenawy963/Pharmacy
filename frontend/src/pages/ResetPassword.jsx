@@ -99,8 +99,7 @@ export default function ResetPassword() {
     ];
 
     return (
-        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi relative overflow-hidden">
-            <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/70 backdrop-blur-sm" />
+        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-bg-subtle relative overflow-hidden">
 
             {/* Decorative floating elements */}
             <motion.div
@@ -134,7 +133,7 @@ export default function ResetPassword() {
                 <div className="relative">
                     {/* Gradient border effect */}
                     <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-[rgb(var(--color-primary))]/20 via-transparent to-[rgb(var(--color-primary))]/10 opacity-60" />
-                    <div className="glass-card p-8 sm:p-10 relative rounded-3xl">
+                    <div className="bg-surface p-8 sm:p-10 relative rounded-3xl border border-border shadow-sm">
                         <motion.div variants={container} initial="hidden" animate="show">
                             {/* Icon */}
                             <motion.div variants={fadeUp} className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10">
@@ -147,7 +146,7 @@ export default function ResetPassword() {
                                 </motion.div>
                             </motion.div>
 
-                            <motion.h2 variants={fadeUp} className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
+                            <motion.h2 variants={fadeUp} className="font-sans text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
                                 Reset your password
                             </motion.h2>
                             <motion.p variants={fadeUp} className="text-sm text-[rgb(var(--color-text-muted))] mb-8 leading-relaxed">

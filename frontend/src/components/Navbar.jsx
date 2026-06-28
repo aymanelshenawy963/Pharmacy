@@ -131,7 +131,7 @@ export default function Navbar() {
         <header
             className={`sticky top-0 z-50 border-b transition-all duration-300 ${
                 scrolled
-                    ? 'border-[rgb(var(--color-border))] bg-[var(--glass-bg)] backdrop-blur-md shadow-[var(--shadow-md)]'
+                    ? 'border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/95 backdrop-blur-md shadow-[var(--shadow-sm)]'
                     : 'border-transparent bg-transparent backdrop-blur-none shadow-none'
             }`}
         >
@@ -141,7 +141,7 @@ export default function Navbar() {
                     <div className="bg-[rgb(var(--color-primary))]/10 p-2 rounded-xl group-hover:bg-[rgb(var(--color-primary))]/20 transition-all duration-300 group-hover:shadow-[var(--shadow-glow)]">
                         <Icon name="Activity" className="h-5 w-5 text-[rgb(var(--color-primary))]" />
                     </div>
-                    <p className="font-serif text-base sm:text-lg font-bold tracking-tight text-[#00685f] dark:text-[#38b2ac]">
+                    <p className="font-sans text-base sm:text-lg font-bold tracking-tight text-[#00685f] dark:text-[#38b2ac]">
                         Jaya Medical Store
                     </p>
                 </Link>
@@ -312,7 +312,7 @@ export default function Navbar() {
                         >
                             {/* Drawer header */}
                             <div className="flex items-center justify-between border-b border-[rgb(var(--color-border))] px-5 py-4">
-                                <p className="font-serif text-base font-bold text-[rgb(var(--color-text))]">
+                                <p className="font-sans text-base font-bold text-[rgb(var(--color-text))]">
                                     Menu
                                 </p>
                                 <button

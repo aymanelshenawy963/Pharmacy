@@ -23,10 +23,10 @@ export default function Reveal({ children, className = '', delay = 0, direction 
     }, []);
 
     const directionStyles = {
-        up: { transform: visible ? 'translateY(0)' : 'translateY(24px)' },
-        down: { transform: visible ? 'translateY(0)' : 'translateY(-24px)' },
-        left: { transform: visible ? 'translateX(0)' : 'translateX(24px)' },
-        right: { transform: visible ? 'translateX(0)' : 'translateX(-24px)' },
+        up: { transform: visible ? 'translateY(0)' : 'translateY(16px)' },
+        down: { transform: visible ? 'translateY(0)' : 'translateY(-16px)' },
+        left: { transform: visible ? 'translateX(0)' : 'translateX(16px)' },
+        right: { transform: visible ? 'translateX(0)' : 'translateX(-16px)' },
     };
 
     return (
@@ -36,7 +36,7 @@ export default function Reveal({ children, className = '', delay = 0, direction 
             style={{
                 opacity: visible ? 1 : 0,
                 transform: (directionStyles[direction] || directionStyles.up).transform,
-                transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+                transition: `opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
             }}
         >
             {children}

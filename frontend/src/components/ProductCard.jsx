@@ -23,7 +23,7 @@ function ProductCard({ product }) {
 
     return (
         <article className="h-full group">
-            <div className="glass-card glass-card-hover flex flex-col h-full overflow-hidden hover:-translate-y-1 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <div className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md hover:border-[rgb(var(--color-primary))]/20">
                 <Link to={`/products/${product.id}`} className="flex flex-col flex-grow">
                     {/* Image Section */}
                     <div className="relative overflow-hidden bg-[rgb(var(--color-bg-subtle))] aspect-square sm:aspect-[4/3] flex-shrink-0">
@@ -33,7 +33,7 @@ function ProductCard({ product }) {
                             loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
 
                         {/* Badges */}
                         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
@@ -62,7 +62,7 @@ function ProductCard({ product }) {
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))] mb-1.5">
                             {product.category}
                         </p>
-                        <h3 className="font-serif text-base font-semibold leading-tight text-[rgb(var(--color-text))] mb-1.5 line-clamp-2">
+                        <h3 className="font-sans text-base font-semibold leading-tight text-[rgb(var(--color-text))] mb-1.5 line-clamp-2">
                             {product.name}
                         </h3>
                         <p className="text-xs text-[rgb(var(--color-text-muted))] line-clamp-2 mb-3 flex-grow">

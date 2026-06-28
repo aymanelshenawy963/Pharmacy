@@ -153,8 +153,8 @@ export default function Categories() {
             header: 'Name',
             render: (row) => (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-teal-500/10 ring-1 ring-teal-500/10">
-                        <FolderTree size={16} className="text-teal-500" />
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 ring-1 ring-[rgb(var(--color-primary))]/10">
+                        <FolderTree size={16} className="text-[rgb(var(--color-primary))]" />
                     </div>
                     <span className="font-medium">{row.name}</span>
                 </div>

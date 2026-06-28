@@ -6,7 +6,7 @@ export default function HowItWorks({ steps }) {
             {steps.map((step, index) => (
                 <div
                     key={step.title}
-                    className="glass-card glass-card-hover relative p-6 hover:-translate-y-0.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+                    className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm relative p-6 transition-all duration-300 hover:shadow-md hover:border-[rgb(var(--color-primary))]/20 animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
                     style={{ animationDelay: `${index * 0.1}s` }}
                 >
                     <div className="flex items-center justify-between">
@@ -17,7 +17,7 @@ export default function HowItWorks({ steps }) {
                             0{index + 1}
                         </div>
                     </div>
-                    <h3 className="mt-5 font-serif text-lg font-bold text-[rgb(var(--color-text))]">{step.title}</h3>
+                    <h3 className="mt-5 font-sans text-lg font-bold text-[rgb(var(--color-text))]">{step.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">{step.text}</p>
                     {index < steps.length - 1 ? (
                         <div className="absolute right-4 top-1/2 hidden h-px w-12 bg-[rgb(var(--color-border))] xl:block" />

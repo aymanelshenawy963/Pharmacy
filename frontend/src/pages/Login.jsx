@@ -166,7 +166,7 @@ export default function Login() {
                             <ShieldCheck className="h-10 w-10 text-white" />
                         </motion.div>
                     </div>
-                    <h1 className="font-serif text-4xl font-bold mb-4 leading-tight text-white">
+                    <h1 className="font-sans text-4xl font-bold mb-4 leading-tight text-white">
                         Your health,{' '}
                         <span className="bg-gradient-to-r from-teal-200 via-emerald-200 to-teal-300 bg-clip-text text-transparent">
                             our priority.
@@ -210,7 +210,7 @@ export default function Login() {
                     className="w-full max-w-md"
                 >
                     <motion.div variants={fadeUp} className="mb-8">
-                        <h2 className="font-serif text-3xl font-bold text-[rgb(var(--color-text))]">
+                        <h2 className="font-sans text-3xl font-bold text-[rgb(var(--color-text))]">
                             Welcome back
                         </h2>
                         <p className="mt-2 text-[rgb(var(--color-text-muted))]">

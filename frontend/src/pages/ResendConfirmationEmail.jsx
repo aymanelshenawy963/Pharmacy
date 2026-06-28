@@ -69,15 +69,14 @@ export default function ResendConfirmationEmail() {
     /* ── Success state ── */
     if (isSuccess) {
         return (
-            <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi relative overflow-hidden">
-                <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/70 backdrop-blur-sm" />
+            <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-bg-subtle relative overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                     className="relative z-10 w-full max-w-md"
                 >
-                    <div className="glass-card p-10 text-center">
+                    <div className="bg-surface p-10 text-center rounded-2xl border border-border shadow-sm">
                         <motion.div
                             initial={{ scale: 0, rotate: -30 }}
                             animate={{ scale: 1, rotate: 0 }}
@@ -90,7 +89,7 @@ export default function ResendConfirmationEmail() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.4 }}
-                            className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-3"
+                            className="font-sans text-2xl font-bold text-[rgb(var(--color-text))] mb-3"
                         >
                             Email sent!
                         </motion.h2>
@@ -124,8 +123,7 @@ export default function ResendConfirmationEmail() {
 
     /* ── Form state ── */
     return (
-        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi relative overflow-hidden">
-            <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/70 backdrop-blur-sm" />
+            <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-bg-subtle relative overflow-hidden">
 
             {/* Decorative floating elements */}
             <motion.div
@@ -158,7 +156,7 @@ export default function ResendConfirmationEmail() {
 
                 <div className="relative">
                     <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-[rgb(var(--color-primary))]/20 via-transparent to-[rgb(var(--color-primary))]/10 opacity-60" />
-                    <div className="glass-card p-8 sm:p-10 relative rounded-3xl">
+                    <div className="bg-surface p-8 sm:p-10 relative rounded-3xl border border-border shadow-sm">
                         <motion.div variants={container} initial="hidden" animate="show">
                             <motion.div variants={fadeUp} className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--color-primary))]/10">
                                 <motion.div
@@ -170,7 +168,7 @@ export default function ResendConfirmationEmail() {
                                 </motion.div>
                             </motion.div>
 
-                            <motion.h2 variants={fadeUp} className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
+                            <motion.h2 variants={fadeUp} className="font-sans text-2xl font-bold text-[rgb(var(--color-text))] mb-2">
                                 Resend confirmation
                             </motion.h2>
                             <motion.p variants={fadeUp} className="text-sm text-[rgb(var(--color-text-muted))] mb-8 leading-relaxed">

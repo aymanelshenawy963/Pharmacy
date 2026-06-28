@@ -15,10 +15,10 @@ export default function BackToTop() {
         <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className={`glass-icon-button fixed bottom-24 right-8 z-40 !h-11 !w-11 shadow-[var(--shadow-lg)] hover:shadow-[var(--shadow-xl)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`inline-flex items-center justify-center h-11 w-11 rounded-full bg-[rgb(var(--color-primary))] text-white shadow-lg hover:shadow-xl hover:bg-[rgb(var(--color-primary-dark))] transition-all duration-300 fixed bottom-24 right-8 z-40 ${
                 visible
                     ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
-                    : 'opacity-0 translate-y-5 scale-90 pointer-events-none'
+                    : 'opacity-0 translate-y-4 scale-90 pointer-events-none'
             }`}
             aria-label="Back to top"
         >

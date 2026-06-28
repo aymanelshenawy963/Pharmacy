@@ -137,7 +137,7 @@ export default function ProfileSettings() {
                         <User className="h-7 w-7 sm:h-8 sm:w-8 text-[rgb(var(--color-primary))]" />
                     </div>
                     <div className="min-w-0">
-                        <p className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
+                        <p className="font-sans text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
                             {user?.firstName} {user?.lastName}
                         </p>
                         <p className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))] truncate">{user?.email}</p>

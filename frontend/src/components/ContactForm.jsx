@@ -50,10 +50,10 @@ export default function ContactForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="glass-card space-y-5 p-6">
+        <form onSubmit={handleSubmit} className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm space-y-5 p-6">
             <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">Contact form</p>
-                <h2 className="mt-2 font-serif text-2xl font-bold text-[rgb(var(--color-text))]">Send a message to the store</h2>
+                <h2 className="mt-2 font-sans text-2xl font-bold text-[rgb(var(--color-text))]">Send a message to the store</h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

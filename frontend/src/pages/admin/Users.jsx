@@ -719,7 +719,7 @@ export default function Users() {
                                 {(viewUser.lastName || '')[0]?.toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                                <h3 className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
+                                <h3 className="font-sans text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
                                     {viewUser.firstName} {viewUser.lastName}
                                 </h3>
                                 <p className="text-sm text-[rgb(var(--color-text-muted))] truncate">

@@ -54,7 +54,7 @@ export default function ProductDetail() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="mx-auto w-full max-w-2xl glass-card p-12 text-center"
+                    className="mx-auto w-full max-w-2xl bg-surface p-12 text-center rounded-2xl border border-border shadow-sm"
                 >
                     <motion.div
                         animate={{ y: [0, -6, 0] }}
@@ -63,7 +63,7 @@ export default function ProductDetail() {
                     >
                         <Icon name="PackageSearch" className="h-10 w-10" />
                     </motion.div>
-                    <h1 className="mt-6 font-serif text-3xl font-semibold text-text">Product not found</h1>
+                    <h1 className="mt-6 font-sans text-3xl font-semibold text-text">Product not found</h1>
                     <p className="mt-3 text-base text-text-muted">This product is not in our catalog.</p>
                     <button
                         type="button"
@@ -113,7 +113,7 @@ export default function ProductDetail() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                             whileHover={{ scale: 1.01 }}
-                            className="glass-card overflow-hidden group cursor-zoom-in"
+                            className="bg-surface overflow-hidden group cursor-zoom-in rounded-2xl border border-border shadow-sm"
                         >
                             <div className="relative bg-bg-subtle aspect-[4/3] w-full overflow-hidden">
                                 <img
@@ -186,7 +186,7 @@ export default function ProductDetail() {
                             </motion.div>
 
                             {/* Price card */}
-                            <motion.div variants={infoItem} className="glass-card p-8">
+                            <motion.div variants={infoItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
                                 <div className="flex flex-wrap items-end justify-between gap-6">
                                     <div>
                                         <div className="flex items-baseline gap-3">
@@ -194,7 +194,7 @@ export default function ProductDetail() {
                                                 key={product.price}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
-                                                className="font-serif text-4xl font-bold text-text"
+                                                className="font-sans text-4xl font-bold text-text"
                                             >
                                                 ₹{product.price}
                                             </motion.p>
@@ -277,7 +277,7 @@ export default function ProductDetail() {
                             )}
 
                             {/* Tabs */}
-                            <motion.div variants={infoItem} className="glass-card p-7">
+                            <motion.div variants={infoItem} className="bg-surface p-7 rounded-2xl border border-border shadow-sm">
                                 <div className="flex flex-wrap gap-2 border-b border-border pb-4 mb-5">
                                     {tabs.map((tab) => (
                                         <motion.button

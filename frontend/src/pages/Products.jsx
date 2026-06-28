@@ -104,8 +104,7 @@ export default function Products() {
             />
 
             {/* Hero header */}
-            <section className="bg-lofi border-b border-border relative overflow-hidden">
-                <div className="absolute inset-0 bg-bg/70 dark:bg-bg/85 backdrop-blur-[40px] z-0" />
+            <section className="bg-bg-subtle border-b border-border relative overflow-hidden">
                 <div className="mx-auto max-w-7xl px-4 py-12 md:py-20 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -118,7 +117,7 @@ export default function Products() {
                                 <Icon name="Pill" className="h-4 w-4" /> Our Products
                             </span>
                             <h1 className="display-heading !mb-2">
-                                Browse our <span className="text-primary italic font-normal">curated</span> collection
+                                Browse our <span className="text-primary">curated</span> collection
                             </h1>
                             <p className="text-lg text-text-muted mt-4">
                                 Filter by category, brand, prescription requirement, or price. Find exactly what you need with calm, clear navigation.
@@ -129,7 +128,7 @@ export default function Products() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: 0.2, duration: 0.4 }}
-                            className="glass-card px-6 py-3 flex items-center gap-3"
+                            className="bg-surface px-6 py-3 flex items-center gap-3 rounded-2xl border border-border shadow-sm"
                         >
                             <div className="bg-primary/20 p-2 rounded-lg">
                                 <Icon name="PackageSearch" className="h-5 w-5 text-primary" />
@@ -152,12 +151,12 @@ export default function Products() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="glass-card p-5 h-fit sticky top-24"
+                        className="bg-surface p-5 h-fit sticky top-24 rounded-2xl border border-border shadow-sm"
                     >
                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
                             <div className="flex items-center gap-2">
                                 <Icon name="Filter" className="h-4 w-4 text-primary" />
-                                <h2 className="font-serif text-lg font-semibold text-text">Filters</h2>
+                                <h2 className="font-sans text-lg font-semibold text-text">Filters</h2>
                             </div>
                             <button
                                 type="button"
@@ -280,7 +279,7 @@ export default function Products() {
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: i * 0.08, duration: 0.4 }}
-                                            className="glass-card h-[420px] animate-pulse overflow-hidden flex flex-col"
+                                            className="bg-surface h-[420px] animate-pulse overflow-hidden flex flex-col rounded-2xl border border-border shadow-sm"
                                         >
                                             <div className="h-48 bg-gradient-to-r from-border/40 via-border/60 to-border/40 animate-shimmer" />
                                             <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
@@ -318,7 +317,7 @@ export default function Products() {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                                    className="glass-card flex flex-col items-center justify-center py-20 px-8 text-center"
+                                    className="bg-surface flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-border shadow-sm"
                                 >
                                     <motion.div
                                         animate={{ y: [0, -8, 0] }}
@@ -327,7 +326,7 @@ export default function Products() {
                                     >
                                         <Icon name="PackageSearch" className="h-10 w-10 opacity-50" />
                                     </motion.div>
-                                    <h2 className="font-serif text-3xl font-semibold text-text mb-3">
+                                    <h2 className="font-sans text-3xl font-semibold text-text mb-3">
                                         No products found
                                     </h2>
                                     <p className="max-w-md text-base text-text-muted mb-8">

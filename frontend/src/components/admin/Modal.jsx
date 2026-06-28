@@ -105,7 +105,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
                         aria-label={title}
                     >
                         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4 rounded-t-2xl">
-                            <h2 className="font-serif text-lg sm:text-xl font-bold text-[rgb(var(--color-text))]">
+                            <h2 className="font-sans text-lg sm:text-xl font-bold text-[rgb(var(--color-text))]">
                                 {title}
                             </h2>
                             <button

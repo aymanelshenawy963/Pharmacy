@@ -50,7 +50,7 @@ export default function About() {
                     <div className="space-y-16 sm:space-y-24">
                         {/* ─── Owner Section ─── */}
                         <Reveal>
-                            <div className="glass-card overflow-hidden group/owner">
+                            <div className="bg-surface overflow-hidden group/owner rounded-2xl border border-border shadow-sm">
                                 <div className="grid md:grid-cols-[0.8fr_1.2fr]">
                                     <div className="relative h-[300px] w-full bg-bg md:h-auto overflow-hidden">
                                         <img
@@ -60,13 +60,13 @@ export default function About() {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent md:hidden" />
                                         <div className="absolute bottom-6 left-6 md:hidden">
-                                            <h3 className="font-serif text-2xl font-medium text-white">{ownerProfile.name}</h3>
+                                            <h3 className="font-sans text-2xl font-medium text-white">{ownerProfile.name}</h3>
                                             <p className="text-xs font-bold tracking-widest text-white/80 uppercase">{ownerProfile.title}</p>
                                         </div>
                                     </div>
                                     <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
                                         <div className="hidden md:block">
-                                            <h2 className="font-serif text-3xl font-bold text-text lg:text-4xl">
+                                            <h2 className="font-sans text-3xl font-bold text-text lg:text-4xl">
                                                 Madan Mohan Mishra
                                             </h2>
                                             <p className="mt-2 text-xs font-bold uppercase tracking-widest text-primary">
@@ -76,7 +76,7 @@ export default function About() {
                                         <p className="mt-6 text-base leading-relaxed text-text-muted md:mt-8">
                                             With over {new Date().getFullYear() - 2010} years of retail pharmacy experience, Madan Mohan Mishra has shaped the store around careful counseling, accurate product handling, and consistent follow-up.
                                         </p>
-                                        <blockquote className="mt-8 border-l-2 border-primary pl-6 font-serif text-xl italic leading-relaxed text-text transition-colors duration-300 hover:border-primary/60">
+                                        <blockquote className="mt-8 border-l-2 border-primary pl-6 font-sans text-xl italic leading-relaxed text-text transition-colors duration-300 hover:border-primary/60">
                                             "{ownerProfile.quote}"
                                         </blockquote>
 
@@ -118,12 +118,12 @@ export default function About() {
                                         variants={staggerItem}
                                         whileHover={{ y: -8, scale: 1.02 }}
                                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                        className="glass-card p-8 group transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
+                                        className="bg-surface p-8 group rounded-2xl border border-border shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5"
                                     >
                                         <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-primary/10">
                                             <Icon name={card.iconKey} className="h-6 w-6" />
                                         </div>
-                                        <h3 className="font-serif text-xl font-semibold text-text mb-3 transition-colors duration-200 group-hover:text-primary">
+                                        <h3 className="font-sans text-xl font-semibold text-text mb-3 transition-colors duration-200 group-hover:text-primary">
                                             {card.title}
                                         </h3>
                                         <p className="text-sm leading-relaxed text-text-muted">
@@ -136,7 +136,7 @@ export default function About() {
 
                         {/* ─── Milestones Section ─── */}
                         <Reveal>
-                            <div className="glass-card p-8 md:p-12 lg:p-16 bg-primary/5 border-primary/20 relative overflow-hidden">
+                            <div className="bg-surface p-8 md:p-12 lg:p-16 rounded-2xl border border-border shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px]" />
 
                                 <div className="mb-12 text-center relative z-10">
@@ -157,12 +157,12 @@ export default function About() {
                                             key={milestone.year}
                                             variants={staggerItem}
                                             whileHover={{ y: -6, scale: 1.02 }}
-                                            className="glass-card p-6 border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group/ms"
+                                            className="bg-surface p-6 border-border rounded-2xl border shadow-sm hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group/ms"
                                         >
                                             <div className="mb-4 inline-flex rounded-lg bg-bg px-3 py-1 text-[11px] font-bold tracking-widest text-primary border border-primary/20 shadow-sm transition-all duration-300 group-hover/ms:bg-primary/10 group-hover/ms:border-primary/30">
                                                 {milestone.year}
                                             </div>
-                                            <h3 className="font-serif text-xl font-semibold text-text mb-2 transition-colors duration-200 group-hover/ms:text-primary">
+                                            <h3 className="font-sans text-xl font-semibold text-text mb-2 transition-colors duration-200 group-hover/ms:text-primary">
                                                 {milestone.title}
                                             </h3>
                                             <p className="text-sm leading-relaxed text-text-muted">
@@ -178,12 +178,12 @@ export default function About() {
                         <Reveal className="grid gap-6 lg:grid-cols-2">
                             <motion.div
                                 whileHover={{ y: -4 }}
-                                className="glass-card p-8 md:p-10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group/cert"
+                                className="bg-surface p-8 md:p-10 rounded-2xl border border-border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group/cert"
                             >
                                 <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-secondary/10 text-secondary border border-secondary/20 transition-all duration-300 group-hover/cert:scale-110 group-hover/cert:bg-secondary/20">
                                     <Icon name="FileBadge" className="h-6 w-6" />
                                 </div>
-                                <h3 className="font-serif text-2xl font-semibold text-text mb-4">
+                                <h3 className="font-sans text-2xl font-semibold text-text mb-4">
                                     Current Documentation
                                 </h3>
                                 <p className="text-base leading-relaxed text-text-muted">
@@ -192,12 +192,12 @@ export default function About() {
                             </motion.div>
                             <motion.div
                                 whileHover={{ y: -4 }}
-                                className="glass-card p-8 md:p-10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group/miss"
+                                className="bg-surface p-8 md:p-10 rounded-2xl border border-border shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group/miss"
                             >
                                 <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 transition-all duration-300 group-hover/miss:scale-110 group-hover/miss:bg-primary/20">
                                     <Icon name="Target" className="h-6 w-6" />
                                 </div>
-                                <h3 className="font-serif text-2xl font-semibold text-text mb-4">
+                                <h3 className="font-sans text-2xl font-semibold text-text mb-4">
                                     Our Mission
                                 </h3>
                                 <p className="text-base leading-relaxed text-text-muted">

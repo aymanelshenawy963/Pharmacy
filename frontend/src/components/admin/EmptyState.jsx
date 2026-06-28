@@ -11,7 +11,7 @@ export default function EmptyState({
             <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg-subtle))] ring-1 ring-[rgb(var(--color-border))]">
                 <IconComponent className="h-7 w-7 sm:h-9 sm:w-9 text-[rgb(var(--color-text-muted))]" />
             </div>
-            <h3 className="mt-4 sm:mt-5 font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] text-center">
+            <h3 className="mt-4 sm:mt-5 font-sans text-base sm:text-lg font-bold text-[rgb(var(--color-text))] text-center">
                 {title}
             </h3>
             <p className="mt-2 max-w-xs sm:max-w-sm text-center text-xs sm:text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">

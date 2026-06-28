@@ -41,7 +41,7 @@ function SidebarContent({ onNavigate, user, onLogout }) {
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10">
                         <Activity className="h-5 w-5 text-[rgb(var(--color-primary))]" />
                     </div>
-                    <span className="font-serif text-lg font-bold text-[rgb(var(--color-text))]">
+                    <span className="font-sans text-lg font-bold text-[rgb(var(--color-text))]">
                         {isAdmin ? 'Jaya Admin' : 'Jaya'}
                     </span>
                 </NavLink>

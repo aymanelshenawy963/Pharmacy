@@ -6,7 +6,7 @@ export default function FloatingWhatsApp() {
             href={storeInfo.whatsapp}
             target="_blank"
             rel="noreferrer"
-            className="fixed bottom-8 right-8 z-50 inline-flex items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] animate-[scaleIn_0.5s_cubic-bezier(0.16,1,0.3,1)_1s_both]"
+            className="fixed bottom-8 right-8 z-50 inline-flex items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 transition-all duration-300 animate-[scaleIn_0.5s_cubic-bezier(0.16,1,0.3,1)_1s_both]"
             style={{ height: '52px', width: '52px' }}
             aria-label="Chat on WhatsApp"
         >

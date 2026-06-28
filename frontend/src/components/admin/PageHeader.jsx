@@ -28,7 +28,7 @@ export default function PageHeader({ title, description, action = null }) {
             <div className="min-w-0">
                 <motion.h1
                     variants={itemVariants}
-                    className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-[rgb(var(--color-text))] leading-tight"
+                    className="font-sans text-xl sm:text-2xl md:text-3xl font-bold text-[rgb(var(--color-text))] leading-tight"
                 >
                     {title}
                 </motion.h1>

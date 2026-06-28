@@ -104,8 +104,8 @@ export default function Contact() {
                     >
                         {/* ─── Left Column: Contact Form ─── */}
                         <div className="md:col-span-7">
-                            <div className="glass-card h-full p-8 md:p-12">
-                                <h2 className="font-serif text-3xl font-semibold text-text mb-8">
+                            <div className="bg-surface h-full p-8 md:p-12 rounded-2xl border border-border shadow-sm">
+                                <h2 className="font-sans text-3xl font-semibold text-text mb-8">
                                     Send a Message
                                 </h2>
 
@@ -224,8 +224,8 @@ export default function Contact() {
                             className="flex flex-col gap-8 md:col-span-5"
                         >
                             {/* Store Details Card */}
-                            <motion.div variants={staggerItem} className="glass-card p-8">
-                                <h3 className="font-serif text-2xl font-semibold text-primary mb-6">
+                                <motion.div variants={staggerItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+                                <h3 className="font-sans text-2xl font-semibold text-primary mb-6">
                                     Store Details
                                 </h3>
 
@@ -253,7 +253,7 @@ export default function Contact() {
                             </motion.div>
 
                             {/* Owner Card */}
-                            <motion.div variants={staggerItem} className="glass-card p-6 bg-primary/5">
+                                <motion.div variants={staggerItem} className="bg-surface p-6 rounded-2xl border border-border shadow-sm">
                                 <div className="flex items-center gap-6">
                                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-border shadow-sm transition-transform duration-300 hover:scale-105">
                                         <img
@@ -264,7 +264,7 @@ export default function Contact() {
                                         />
                                     </div>
                                     <div>
-                                        <h4 className="font-serif text-xl font-medium text-text">
+                                        <h4 className="font-sans text-xl font-medium text-text">
                                             {ownerProfile.name}
                                         </h4>
                                         <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-primary">
@@ -285,7 +285,7 @@ export default function Contact() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, amount: 0.2 }}
                         transition={{ duration: 0.6, ease: 'easeOut' }}
-                        className="glass-card overflow-hidden mt-16 h-[400px] w-full relative"
+                        className="bg-surface overflow-hidden mt-16 h-[400px] w-full relative rounded-2xl border border-border shadow-sm"
                     >
                         <iframe
                             title="Jaya Medical Store location"

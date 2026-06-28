@@ -58,7 +58,7 @@ export default function FAQ() {
                                 <motion.div
                                     key={item.question}
                                     variants={staggerItem}
-                                    className={`glass-card overflow-hidden transition-all duration-300 ${isOpen ? 'border-primary/30 shadow-lg shadow-primary/5' : 'hover:border-primary/20 hover:shadow-md'}`}
+                                    className={`bg-surface overflow-hidden rounded-2xl border border-border shadow-sm transition-all duration-300 ${isOpen ? 'border-primary/30 shadow-lg shadow-primary/5' : 'hover:border-primary/20 hover:shadow-md'}`}
                                 >
                                     <button
                                         type="button"
@@ -66,7 +66,7 @@ export default function FAQ() {
                                         className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left focus:outline-none group/faq"
                                         aria-expanded={isOpen}
                                     >
-                                        <span className={`font-serif text-xl font-medium transition-colors duration-200 ${isOpen ? 'text-primary' : 'text-text group-hover/faq:text-primary'}`}>
+                                        <span className={`font-sans text-xl font-medium transition-colors duration-200 ${isOpen ? 'text-primary' : 'text-text group-hover/faq:text-primary'}`}>
                                             {item.question}
                                         </span>
                                         <div className={`p-2 rounded-full transition-all duration-300 ${isOpen ? 'bg-primary/10 text-primary' : 'text-text-muted group-hover/faq:bg-bg-subtle group-hover/faq:text-primary'}`}>
@@ -105,9 +105,9 @@ export default function FAQ() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2, duration: 0.5 }}
-                        className="mt-16 text-center glass-card p-8 bg-primary/5 border-primary/20"
+                        className="mt-16 text-center bg-surface p-8 rounded-2xl border border-primary/20 shadow-sm"
                     >
-                        <h3 className="font-serif text-2xl mb-3 text-text">Still have questions?</h3>
+                        <h3 className="font-sans text-2xl mb-3 text-text">Still have questions?</h3>
                         <p className="text-text-muted mb-6">Can't find the answer you're looking for? Please contact our friendly team.</p>
                         <a href="/contact" className="glass-button-primary inline-flex">
                             Get in Touch

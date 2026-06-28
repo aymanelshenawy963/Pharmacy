@@ -21,7 +21,7 @@ export default function Footer() {
                 {/* Brand column */}
                 <div className="space-y-6 animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.06s_both]">
                     <div>
-                        <p className="font-serif text-2xl font-bold tracking-tight">
+                        <p className="font-sans text-2xl font-bold tracking-tight">
                             Jaya Medical Store
                         </p>
                         <p className="mt-4 max-w-md text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">

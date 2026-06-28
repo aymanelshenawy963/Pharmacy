@@ -30,8 +30,7 @@ export default function CheckEmail() {
     const email = location.state?.email || '';
 
     return (
-        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-lofi relative overflow-hidden">
-            <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/70 backdrop-blur-sm" />
+        <div className="flex min-h-screen items-center justify-center px-6 py-24 bg-bg-subtle relative overflow-hidden">
 
             {/* Decorative floating elements */}
             <motion.div
@@ -64,7 +63,7 @@ export default function CheckEmail() {
 
                 <div className="relative">
                     <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-[rgb(var(--color-primary))]/20 via-transparent to-[rgb(var(--color-primary))]/10 opacity-60" />
-                    <div className="glass-card p-10 text-center relative rounded-3xl">
+                    <div className="bg-surface p-10 text-center relative rounded-3xl border border-border shadow-sm">
                         <motion.div variants={container} initial="hidden" animate="show">
                             {/* Animated email icon */}
                             <motion.div variants={fadeUp} className="mb-6 mx-auto relative">
@@ -80,7 +79,7 @@ export default function CheckEmail() {
                                 </div>
                             </motion.div>
 
-                            <motion.h2 variants={fadeUp} className="font-serif text-2xl font-bold text-[rgb(var(--color-text))] mb-3">
+                            <motion.h2 variants={fadeUp} className="font-sans text-2xl font-bold text-[rgb(var(--color-text))] mb-3">
                                 Check your email
                             </motion.h2>
                             <motion.p variants={fadeUp} className="text-[rgb(var(--color-text-muted))] text-sm mb-2">
