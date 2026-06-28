@@ -13,12 +13,26 @@ import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import FormField from '../../components/admin/FormField';
 import ImageUploader from '../../components/admin/ImageUploader';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
+
 const SORT_OPTIONS = [
     { value: 'priceasc', label: 'Price: Low to High' },
     { value: 'pricedesc', label: 'Price: High to Low' },
     { value: 'nameasc', label: 'Name: A to Z' },
     { value: 'namedesc', label: 'Name: Z to A' },
 ];
+
+function getPhotoUrl(photo) {
+    if (!photo) return '';
+    if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
+    return `${API_BASE_URL}${photo.startsWith('/') ? photo : `/${photo}`}`;
+}
+
+async function urlToFile(url, filename) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type });
+}
 
 const INITIAL_FORM = {
     name: '',
@@ -189,7 +203,7 @@ export default function Products() {
         setShowCreateModal(true);
     }
 
-    function openEditModal(product) {
+    async function openEditModal(product) {
         setSelectedProduct(product);
         setForm({
             name: product.name || '',
@@ -203,8 +217,19 @@ export default function Products() {
             stripCount: product.stripCount ?? '',
             topSelling: product.topSelling || false,
         });
-        setPhotos(product.photos?.map(url => url) || []);
         setFormErrors(INITIAL_ERRORS);
+
+        if (product.photos?.length > 0) {
+            const existingFiles = await Promise.all(
+                product.photos.map((url, i) =>
+                    urlToFile(getPhotoUrl(url), `existing-${i}.jpg`).catch(() => null)
+                )
+            );
+            setPhotos(existingFiles.filter(Boolean));
+        } else {
+            setPhotos([]);
+        }
+
         setShowEditModal(true);
     }
 
@@ -229,7 +254,7 @@ export default function Products() {
         if (!form.name.trim()) errors.name = 'Name is required';
         if (!form.description.trim()) errors.description = 'Description is required';
         if (!form.newPrice || Number(form.newPrice) <= 0) errors.newPrice = 'Valid price is required';
-        if (!form.oldPrice || Number(form.oldPrice) <= 0) errors.oldPrice = 'Valid old price is required';
+        if (form.oldPrice && Number(form.oldPrice) < 0) errors.oldPrice = 'Old price cannot be negative';
         if (!form.stock || Number(form.stock) < 0) errors.stock = 'Valid stock is required';
         if (!form.categoryId) errors.categoryId = 'Category is required';
         if (photos.length === 0) errors.photos = 'At least one photo is required';
@@ -242,11 +267,11 @@ export default function Products() {
         fd.append('Name', form.name.trim());
         fd.append('Description', form.description.trim());
         fd.append('NewPrice', Number(form.newPrice));
-        fd.append('OldPrice', Number(form.oldPrice));
+        fd.append('OldPrice', form.oldPrice ? Number(form.oldPrice) : 0);
         fd.append('Stock', Number(form.stock));
         fd.append('RequiresPrescription', form.requiresPrescription);
         fd.append('HasStrips', form.hasStrips);
-        fd.append('StripCount', form.hasStrips ? (Number(form.stripCount) || '') : '');
+        if (form.hasStrips && form.stripCount) fd.append('StripCount', Number(form.stripCount));
         fd.append('TopSelling', form.topSelling);
         fd.append('CategoryId', Number(form.categoryId));
         photos.forEach(file => {
@@ -266,7 +291,8 @@ export default function Products() {
             resetForm();
             fetchProducts();
         } catch (err) {
-            toast.error(err.message || 'Failed to create product');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -283,7 +309,8 @@ export default function Products() {
             resetForm();
             fetchProducts();
         } catch (err) {
-            toast.error(err.message || 'Failed to update product');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -298,7 +325,8 @@ export default function Products() {
             setSelectedProduct(null);
             fetchProducts();
         } catch (err) {
-            toast.error(err.message || 'Failed to delete product');
+            const msgs = parseApiError(err);
+            toast.error(msgs.join(' '));
         } finally {
             setIsSubmitting(false);
         }
@@ -312,7 +340,7 @@ export default function Products() {
                 <div className="flex items-center gap-3">
                     <div className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 overflow-hidden rounded-xl border border-[rgb(var(--color-border))] shadow-sm">
                         {row.photos?.[0] ? (
-                            <img src={row.photos[0]} alt={row.name} className="h-full w-full object-cover" />
+                            <img src={getPhotoUrl(row.photos[0])} alt={row.name} className="h-full w-full object-cover" />
                         ) : (
                             <div className="flex h-full w-full items-center justify-center bg-[rgb(var(--color-bg-subtle))]">
                                 <Package size={18} className="text-[rgb(var(--color-text-muted))]" />
@@ -511,9 +539,9 @@ export default function Products() {
                 <label className="text-sm font-medium text-[rgb(var(--color-text))]">
                     Photos <span className="ml-1 text-red-500">*</span>
                 </label>
-                {selectedProduct && photos.some(p => typeof p === 'string') && (
+                {selectedProduct && photos.length > 0 && (
                     <p className="text-xs text-amber-500">
-                        Note: Uploading new images will replace all existing images.
+                        Note: Saving will re-upload all images. Existing images will be replaced.
                     </p>
                 )}
                 <ImageUploader

@@ -2,6 +2,24 @@ import { apiGet, apiPost, apiPut } from './apiClient';
 import { authStorage } from './authStorage';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
+const MAX_429_RETRIES = 3;
+const RETRY_BASE_DELAY = 2000;
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url, options) {
+    let response = await fetch(url, options);
+    if (response.status === 429) {
+        for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
+            await sleep(RETRY_BASE_DELAY * attempt);
+            response = await fetch(url, options);
+            if (response.status !== 429) break;
+        }
+    }
+    return response;
+}
 
 export const authService = {
     /**
@@ -55,7 +73,7 @@ export const authService = {
      * Throws 409 if already confirmed
      */
     async resendConfirmationEmail(email) {
-        const response = await fetch(`${BASE_URL}/Auth/resend-confirmation-email`, {
+        const response = await fetchWithRetry(`${BASE_URL}/Auth/resend-confirmation-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),

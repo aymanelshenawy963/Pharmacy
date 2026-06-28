@@ -1,6 +1,24 @@
 import { apiGet, apiRequest } from './apiClient';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
+const MAX_429_RETRIES = 3;
+const RETRY_BASE_DELAY = 2000;
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url, options) {
+    let response = await fetch(url, options);
+    if (response.status === 429) {
+        for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
+            await sleep(RETRY_BASE_DELAY * attempt);
+            response = await fetch(url, options);
+            if (response.status !== 429) break;
+        }
+    }
+    return response;
+}
 
 export const productService = {
     async getAll(params = {}) {
@@ -13,7 +31,7 @@ export const productService = {
 
     async create(formData) {
         const token = (await import('./authStorage')).authStorage.getToken();
-        const response = await fetch(`${BASE_URL}/api/Products`, {
+        const response = await fetchWithRetry(`${BASE_URL}/api/Products`, {
             method: 'POST',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
             body: formData,
@@ -39,7 +57,7 @@ export const productService = {
 
     async update(id, formData) {
         const token = (await import('./authStorage')).authStorage.getToken();
-        const response = await fetch(`${BASE_URL}/api/Products/${id}`, {
+        const response = await fetchWithRetry(`${BASE_URL}/api/Products/${id}`, {
             method: 'PUT',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
             body: formData,

@@ -1,9 +1,15 @@
 import { authStorage } from './authStorage';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
+const MAX_429_RETRIES = 3;
+const RETRY_BASE_DELAY = 2000;
 
 let isRefreshing = false;
 let refreshSubscribers = [];
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function onRefreshed(token) {
     refreshSubscribers.forEach((cb) => cb(token));
@@ -93,7 +99,16 @@ export async function apiRequest(endpoint, options = {}, isRetry = false) {
 
     const config = { ...options, headers };
 
-    const response = await fetch(url, config);
+    let response = await fetch(url, config);
+
+    // Handle 429 — retry with exponential backoff
+    if (response.status === 429) {
+        for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
+            await sleep(RETRY_BASE_DELAY * attempt);
+            response = await fetch(url, config);
+            if (response.status !== 429) break;
+        }
+    }
 
     // Handle 401 — try to refresh token (but not if we're already in refresh flow)
     if (response.status === 401 && !isRetry && authStorage.getRefreshToken()) {
