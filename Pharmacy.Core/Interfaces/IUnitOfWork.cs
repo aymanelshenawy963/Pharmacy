@@ -4,10 +4,15 @@ namespace Pharmacy.Core.interfaces;
 
 public interface IUnitOfWork
 {
-    public ICategoryRepository CategoryRepository { get; }
-    public IProductRepository ProductRepository { get; }
-    public IPhotoRepository PhotoRepository { get; }
-    public IBasketRepository BasketRepository { get; }
-    //public IAuthRepository Auth { get; }
+    ICategoryRepository CategoryRepository { get; }
+    IProductRepository ProductRepository { get; }
+    IPhotoRepository PhotoRepository { get; }
+    IBasketRepository BasketRepository { get; }
+    IOrderRepository OrderRepository { get; }
 
+    /// <summary>
+    /// Persists all staged changes in a single database transaction.
+    /// Returns the number of state entries written.
+    /// </summary>
+    Task<int> SaveAsync();
 }

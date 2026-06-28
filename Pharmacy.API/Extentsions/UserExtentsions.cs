@@ -5,6 +5,9 @@ namespace Pharmacy.API.Extentsions;
 public static class UserExtentsions
 {
     public static string? GetUserId(this ClaimsPrincipal user) =>
-     user.FindFirstValue(ClaimTypes.NameIdentifier);
+        user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    public static string? GetUserEmail(this ClaimsPrincipal user) =>
+        user.FindFirstValue(ClaimTypes.Email);
 }
 
