@@ -76,13 +76,13 @@ export default function Cart() {
                     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] xl:grid-cols-[1.2fr_0.8fr]">
                         <div className="space-y-4">
                             <AnimatePresence mode="popLayout">
-                                {items.map((item, index) => (
+                                {items.map((item) => (
                                     <motion.div
                                         layout
-                                        initial={{ opacity: 0, x: -30, scale: 0.97 }}
-                                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, x: 30, scale: 0.95 }}
-                                        transition={{ duration: 0.35, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                                         key={item.id}
                                         className="glass-card flex flex-col gap-6 p-5 sm:flex-row relative group"
                                     >
@@ -102,19 +102,17 @@ export default function Cart() {
                                                     <h2 className="font-serif text-xl font-medium text-text line-clamp-1">{item.name}</h2>
                                                     <p className="text-sm text-text-muted mt-1">{item.brand}</p>
                                                 </div>
-                                                <motion.button
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
+                                                <button
                                                     type="button"
                                                     onClick={() => {
                                                         removeFromCart(item.id);
                                                         toast.success(`${item.name} removed`);
                                                     }}
-                                                    className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors duration-200"
+                                                    className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all duration-200 hover:scale-110 active:scale-90"
                                                     aria-label="Remove item"
                                                 >
                                                     <Icon name="Trash2" className="h-5 w-5" />
-                                                </motion.button>
+                                                </button>
                                             </div>
 
                                             <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
@@ -124,33 +122,28 @@ export default function Cart() {
                                                 </div>
 
                                                 <div className="flex items-center rounded-xl border border-border bg-bg/50 p-1">
-                                                    <motion.button
-                                                        whileTap={{ scale: 0.9 }}
+                                                    <button
                                                         type="button"
                                                         onClick={() => setItemQuantity(item.id, Math.max(1, item.quantity - 1))}
-                                                        className="p-1.5 hover:bg-surface rounded-lg transition-colors text-text-muted hover:text-text"
+                                                        className="p-1.5 hover:bg-surface rounded-lg transition-all duration-200 text-text-muted hover:text-text active:scale-90"
                                                         aria-label="Decrease quantity"
                                                     >
                                                         <Icon name="Minus" className="h-4 w-4" />
-                                                    </motion.button>
-                                                    <motion.span
+                                                    </button>
+                                                    <span
                                                         key={item.quantity}
-                                                        initial={{ scale: 0.8, opacity: 0 }}
-                                                        animate={{ scale: 1, opacity: 1 }}
-                                                        transition={{ duration: 0.2 }}
-                                                        className="w-10 text-center text-sm font-semibold text-text"
+                                                        className="w-10 text-center text-sm font-semibold text-text animate-[scaleIn_0.2s_ease]"
                                                     >
                                                         {item.quantity}
-                                                    </motion.span>
-                                                    <motion.button
-                                                        whileTap={{ scale: 0.9 }}
+                                                    </span>
+                                                    <button
                                                         type="button"
                                                         onClick={() => setItemQuantity(item.id, item.quantity + 1)}
-                                                        className="p-1.5 hover:bg-surface rounded-lg transition-colors text-text-muted hover:text-text"
+                                                        className="p-1.5 hover:bg-surface rounded-lg transition-all duration-200 text-text-muted hover:text-text active:scale-90"
                                                         aria-label="Increase quantity"
                                                     >
                                                         <Icon name="Plus" className="h-4 w-4" />
-                                                    </motion.button>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -187,9 +180,9 @@ export default function Cart() {
                                             <span className="text-base font-semibold text-text">Total</span>
                                             <motion.span
                                                 key={total}
-                                                initial={{ scale: 0.9, opacity: 0 }}
+                                                initial={{ scale: 0.95, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
-                                                transition={{ duration: 0.3 }}
+                                                transition={{ duration: 0.25 }}
                                                 className="font-serif text-3xl font-bold text-text"
                                             >
                                                 ₹{total}
@@ -211,15 +204,13 @@ export default function Cart() {
                                         placeholder="Enter code (e.g. JAYA10)"
                                         className="w-full rounded-xl border border-border bg-bg px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm placeholder:text-text-muted/60"
                                     />
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
+                                    <button
                                         type="button"
                                         onClick={applyPromo}
-                                        className="glass-button-secondary px-6"
+                                        className="glass-button-secondary px-6 hover:scale-[1.03] active:scale-[0.97] transition-transform duration-200"
                                     >
                                         Apply
-                                    </motion.button>
+                                    </button>
                                 </div>
 
                                 <Link
@@ -240,14 +231,9 @@ export default function Cart() {
 
 function SummaryRow({ label, value, valueClass = "text-text" }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex items-center justify-between"
-        >
+        <div className="flex items-center justify-between">
             <span className="text-text-muted">{label}</span>
             <span className={`font-medium ${valueClass}`}>{value}</span>
-        </motion.div>
+        </div>
     );
 }

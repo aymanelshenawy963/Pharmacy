@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
-import { ownerProfile, storeInfo } from '../data/products';
+import { ownerProfile, storeInfo } from '../data/store';
 
 const initialForm = {
     name: '',

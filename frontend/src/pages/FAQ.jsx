@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
-import { faqItems } from '../data/products';
+import { faqItems } from '../data/store';
 
 const staggerContainer = {
     hidden: { opacity: 0 },

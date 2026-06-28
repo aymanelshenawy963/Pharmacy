@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
 import toast from 'react-hot-toast';
-import { contactSubjects } from '../data/products';
+import { contactSubjects } from '../data/store';
 import Icon from './Icons';
 
 const initialForm = {
@@ -122,12 +121,10 @@ export default function ContactForm() {
                 />
             </label>
 
-            <motion.button
+            <button
                 type="submit"
                 disabled={sending}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                className="glass-button-primary w-full !py-3"
+                className="glass-button-primary w-full !py-3 hover:scale-[1.01] active:scale-[0.98] transition-transform duration-200"
             >
                 {sending ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -137,7 +134,7 @@ export default function ContactForm() {
                         <Icon name="Send" className="h-4 w-4" />
                     </>
                 )}
-            </motion.button>
+            </button>
         </form>
     );
 }

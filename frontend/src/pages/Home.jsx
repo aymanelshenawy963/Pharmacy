@@ -124,6 +124,9 @@ export default function Home() {
                             className="h-full w-full object-cover object-right bg-transparent mix-blend-normal"
                             alt="Capsules and soft product composition"
                             src={import.meta.env.BASE_URL + 'images/heroimage.webp'}
+                            fetchPriority="high"
+                            width="1200"
+                            height="800"
                         />
                         <div className="pointer-events-none absolute inset-y-0 left-0 w-[18%] bg-gradient-to-r from-[#b2dfde] via-[#b2dfde]/85 to-transparent" />
                         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-b from-transparent via-[#b2dfde]/70 to-[#b2dfde]" />
@@ -268,6 +271,9 @@ export default function Home() {
                                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         alt={card.title}
                                         src={card.image}
+                                        loading="lazy"
+                                        width="600"
+                                        height="400"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 group-hover:via-black/30" />
                                     <div className="absolute bottom-0 left-0 p-8 md:p-10 w-full transition-transform duration-500 group-hover:translate-y-[-4px]">
@@ -285,6 +291,9 @@ export default function Home() {
                                                 className="absolute inset-0 h-full w-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
                                                 alt={card.title}
                                                 src={card.image}
+                                                loading="lazy"
+                                                width="400"
+                                                height="400"
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 transition-all duration-500 group-hover:via-black/50" />
                                         </>
@@ -365,6 +374,9 @@ export default function Home() {
                             className="h-full w-full object-cover transition-transform duration-700 group-hover/owner:scale-105"
                             alt="Madan Mohan Mishra"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvLR3jdxYJOrAIhUGI00WIuVfHFtqPy3-XgSkwQLQHqugGoqmYpqsZecRw6mhaUfUy71UpewC33x5BM_9ICyj2bK9yHfckn5uAn8wV7XSJDDhnFYIU62S9T-904OxYNG9SLYbLW4SgzbCCBitIPaKB3I6pIaJVlnuZ3nYLzgkmSV4cr70WEfsaxWHNJ-bOPvkjSfn5-8XdRuIN2sGao0AKiWPqInpq6OhlEcYVEPHhoNSC5k86ktriB55v4mmYhpg8nW6pefT14Mw"
+                            loading="lazy"
+                            width="600"
+                            height="750"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-0 left-0 p-8 text-white transition-transform duration-500 group-hover/owner:translate-y-[-4px]">

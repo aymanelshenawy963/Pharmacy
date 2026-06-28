@@ -1,14 +1,9 @@
-import { motion } from 'framer-motion';
-import { ownerProfile } from '../data/products';
+import { ownerProfile } from '../data/store';
 import Icon from './Icons';
 
 export default function OwnerCard({ compact = false }) {
     return (
-        <motion.div
-            whileHover={{ y: -3 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 20 }}
-            className={`glass-card overflow-hidden ${compact ? 'p-5' : 'p-6'}`}
-        >
+        <div className={`glass-card overflow-hidden hover:-translate-y-0.5 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${compact ? 'p-5' : 'p-6'}`}>
             <div className={`flex ${compact ? 'items-center gap-4' : 'flex-col gap-5'} `}>
                 <div className={`relative ${compact ? 'h-20 w-20' : 'h-40 w-40'} flex-shrink-0`}>
                     <img
@@ -32,6 +27,6 @@ export default function OwnerCard({ compact = false }) {
                     </div>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }

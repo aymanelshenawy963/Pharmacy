@@ -1,18 +1,7 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { footerLinks, ownerProfile, socialLinks, storeInfo } from '../data/products';
+import { footerLinks, ownerProfile, socialLinks, storeInfo } from '../data/store';
 import Icon from './Icons';
-
-const container = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.06 } },
-};
-
-const item = {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
-};
 
 export default function Footer() {
     const year = new Date().getFullYear();
@@ -28,15 +17,9 @@ export default function Footer() {
             {/* Subtle background glow */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-[rgb(var(--color-primary))]/5 blur-[100px] pointer-events-none" />
 
-            <motion.div
-                variants={container}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.1 }}
-                className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.4fr_0.6fr_0.6fr_1fr] lg:gap-16 lg:px-8 relative z-10"
-            >
+            <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.4fr_0.6fr_0.6fr_1fr] lg:gap-16 lg:px-8 relative z-10">
                 {/* Brand column */}
-                <motion.div variants={item} className="space-y-6">
+                <div className="space-y-6 animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.06s_both]">
                     <div>
                         <p className="font-serif text-2xl font-bold tracking-tight">
                             Jaya Medical Store
@@ -77,10 +60,10 @@ export default function Footer() {
                             </a>
                         ))}
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Quick Links */}
-                <motion.div variants={item}>
+                <div className="animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.12s_both]">
                     <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">
                         Quick Links
                     </p>
@@ -96,10 +79,10 @@ export default function Footer() {
                             </Link>
                         ))}
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Legal links */}
-                <motion.div variants={item}>
+                <div className="animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.18s_both]">
                     <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">
                         Legal
                     </p>
@@ -119,10 +102,10 @@ export default function Footer() {
                             </Link>
                         ))}
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Newsletter + Contact column */}
-                <motion.div variants={item} className="space-y-8">
+                <div className="space-y-8 animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.24s_both]">
                     <div>
                         <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">
                             Stay Updated
@@ -165,8 +148,8 @@ export default function Footer() {
                             <span>{storeInfo.hours}</span>
                         </div>
                     </div>
-                </motion.div>
-            </motion.div>
+                </div>
+            </div>
 
             {/* Bottom bar */}
             <div className="border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg))]">

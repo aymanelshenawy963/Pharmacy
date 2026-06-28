@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import Icon from './Icons';
 
 export default function CategoryCard({ category }) {
     return (
-        <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 220, damping: 20 }}>
+        <div className="hover:-translate-y-1 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
             <Link
                 to={`/products?category=${encodeURIComponent(category.slug)}`}
                 className="group glass-card glass-card-hover block p-5"
@@ -19,6 +18,6 @@ export default function CategoryCard({ category }) {
                     <Icon name="ArrowRight" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </div>
             </Link>
-        </motion.div>
+        </div>
     );
 }

@@ -7,6 +7,7 @@ import BackToTop from './components/BackToTop';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import PageLoader from './components/PageLoader';
 import AuthHeader from './components/AuthHeader';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
@@ -68,16 +69,18 @@ function Layout() {
             <FloatingWhatsApp />
             <BackToTop />
             <main>
-                <Suspense fallback={<PageLoader />}>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={location.pathname}
-                            {...pageTransition}
-                        >
-                            <Outlet />
-                        </motion.div>
-                    </AnimatePresence>
-                </Suspense>
+                <ErrorBoundary>
+                    <Suspense fallback={<PageLoader />}>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={location.pathname}
+                                {...pageTransition}
+                            >
+                                <Outlet />
+                            </motion.div>
+                        </AnimatePresence>
+                    </Suspense>
+                </ErrorBoundary>
             </main>
             <Footer />
         </div>
@@ -91,19 +94,21 @@ function AuthLayout() {
         <div className="min-h-screen bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
             <ScrollToTop />
             <AuthHeader />
-            <Suspense fallback={<PageLoader />}>
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={location.pathname}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                    >
-                        <Outlet />
-                    </motion.div>
-                </AnimatePresence>
-            </Suspense>
+            <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location.pathname}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        >
+                            <Outlet />
+                        </motion.div>
+                    </AnimatePresence>
+                </Suspense>
+            </ErrorBoundary>
         </div>
     );
 }

@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { footerLinks } from '../data/products';
+import { footerLinks } from '../data/store';
 import Icon from './Icons';
 import ThemeToggle from './ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,50 +43,44 @@ function SectionTitle({ children }) {
     );
 }
 
-function MobileNavLink({ to, icon: IconComp, label, badge, delay }) {
+const MobileNavLink = memo(function MobileNavLink({ to, icon: IconComp, label, badge }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay, duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+        <NavLink
+            to={to}
+            className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium transition-all duration-200 min-h-[48px] group ${
+                    isActive
+                        ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
+                        : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
+                }`
+            }
         >
-            <NavLink
-                to={to}
-                className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium transition-all duration-200 min-h-[48px] group ${
-                        isActive
-                            ? 'bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]'
-                            : 'text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-bg-subtle))]'
-                    }`
-                }
-            >
-                {({ isActive }) => (
-                    <>
-                        <span
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 ${
-                                isActive
-                                    ? 'bg-[rgb(var(--color-primary))]/15 text-[rgb(var(--color-primary))]'
-                                    : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] group-hover:bg-[rgb(var(--color-primary))]/10 group-hover:text-[rgb(var(--color-primary))]'
-                            }`}
-                        >
-                            <IconComp size={18} />
+            {({ isActive }) => (
+                <>
+                    <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 ${
+                            isActive
+                                ? 'bg-[rgb(var(--color-primary))]/15 text-[rgb(var(--color-primary))]'
+                                : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] group-hover:bg-[rgb(var(--color-primary))]/10 group-hover:text-[rgb(var(--color-primary))]'
+                        }`}
+                    >
+                        <IconComp size={18} />
+                    </span>
+                    <span className="flex-1">{label}</span>
+                    {badge != null && badge > 0 && (
+                        <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[rgb(var(--color-secondary))] px-1.5 text-[10px] font-bold text-white">
+                            {badge}
                         </span>
-                        <span className="flex-1">{label}</span>
-                        {badge != null && badge > 0 && (
-                            <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[rgb(var(--color-secondary))] px-1.5 text-[10px] font-bold text-white">
-                                {badge}
-                            </span>
-                        )}
-                        <ChevronRight
-                            size={16}
-                            className="text-[rgb(var(--color-text-muted))] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                        />
-                    </>
-                )}
-            </NavLink>
-        </motion.div>
+                    )}
+                    <ChevronRight
+                        size={16}
+                        className="text-[rgb(var(--color-text-muted))] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    />
+                </>
+            )}
+        </NavLink>
     );
-}
+});
 
 export default function Navbar() {
     const { cartCount } = useCart();
@@ -137,7 +131,7 @@ export default function Navbar() {
         <header
             className={`sticky top-0 z-50 border-b transition-all duration-300 ${
                 scrolled
-                    ? 'border-[rgb(var(--color-border))] bg-[var(--glass-bg)] backdrop-blur-xl shadow-[var(--shadow-md)]'
+                    ? 'border-[rgb(var(--color-border))] bg-[var(--glass-bg)] backdrop-blur-md shadow-[var(--shadow-md)]'
                     : 'border-transparent bg-transparent backdrop-blur-none shadow-none'
             }`}
         >
@@ -388,33 +382,29 @@ export default function Navbar() {
                                         to={shoppingLinks[0].to}
                                         icon={shoppingLinks[0].icon}
                                         label={shoppingLinks[0].label}
-                                        delay={0.1}
                                     />
                                     <MobileNavLink
                                         to="/cart"
                                         icon={ShoppingCart}
                                         label="Cart"
                                         badge={cartCount}
-                                        delay={0.14}
                                     />
                                     <MobileNavLink
                                         to={shoppingLinks[1].to}
                                         icon={shoppingLinks[1].icon}
                                         label={shoppingLinks[1].label}
-                                        delay={0.18}
                                     />
                                 </div>
 
                                 {/* Support section */}
                                 <SectionTitle>Support</SectionTitle>
                                 <div className="flex flex-col gap-1">
-                                    {supportLinks.map((link, i) => (
+                                    {supportLinks.map((link) => (
                                         <MobileNavLink
                                             key={link.to}
                                             to={link.to}
                                             icon={link.icon}
                                             label={link.label}
-                                            delay={0.22 + i * 0.04}
                                         />
                                     ))}
                                 </div>
@@ -428,7 +418,6 @@ export default function Navbar() {
                                                 to="/admin/products"
                                                 icon={LayoutDashboard}
                                                 label="Dashboard"
-                                                delay={0.34}
                                             />
                                         </div>
                                     </>

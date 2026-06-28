@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
-import { storeInfo } from '../data/products';
+import { storeInfo } from '../data/store';
 
 const staggerContainer = {
     hidden: { opacity: 0 },

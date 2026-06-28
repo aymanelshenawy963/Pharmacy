@@ -1,14 +1,12 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Check local storage or system preference
     if (typeof window !== 'undefined') {
       const storedTheme = localStorage.getItem('theme');
       if (storedTheme) return storedTheme;
-      
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     return 'light';
@@ -21,12 +19,14 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
+  }, []);
+
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

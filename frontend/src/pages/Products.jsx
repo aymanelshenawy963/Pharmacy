@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import ProductCard from '../components/ProductCard';
 import Icon from '../components/Icons';
+import { useDebounce } from '../hooks/useDebounce';
 import { productBrands, productCategories, products } from '../data/products';
 
 const sortOptions = [
@@ -42,13 +43,12 @@ export default function Products() {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
 
+    const debouncedSearch = useDebounce(search, 300);
     const perPage = 8;
 
     useEffect(() => {
-        setLoading(true);
-        const timer = window.setTimeout(() => setLoading(false), 800);
-        return () => window.clearTimeout(timer);
-    }, [searchParams, category, brand, priceCap, rxOnly, search, sortBy, currentPage]);
+        setLoading(false);
+    }, [searchParams, category, brand, priceCap, rxOnly, debouncedSearch, sortBy, currentPage]);
 
     useEffect(() => {
         setCategory(searchParams.get('category') || 'All');
@@ -56,32 +56,32 @@ export default function Products() {
     }, [searchParams]);
 
     const filteredProducts = useMemo(() => {
-        const query = search.trim().toLowerCase();
+        const query = debouncedSearch.trim().toLowerCase();
 
-        const result = products
-            .filter((product) => (category === 'All' ? true : product.category === category))
-            .filter((product) => (brand === 'All' ? true : product.brand === brand))
-            .filter((product) => (rxOnly ? product.requiresPrescription : true))
-            .filter((product) => product.price <= priceCap)
-            .filter((product) => {
-                if (!query) return true;
-                return [product.name, product.brand, product.description, product.category]
-                    .join(' ')
-                    .toLowerCase()
-                    .includes(query);
-            });
+        const result = products.reduce((acc, product) => {
+            if (category !== 'All' && product.category !== category) return acc;
+            if (brand !== 'All' && product.brand !== brand) return acc;
+            if (rxOnly && !product.requiresPrescription) return acc;
+            if (product.price > priceCap) return acc;
+            if (query) {
+                const haystack = `${product.name} ${product.brand} ${product.description} ${product.category}`.toLowerCase();
+                if (!haystack.includes(query)) return acc;
+            }
+            acc.push(product);
+            return acc;
+        }, []);
 
         switch (sortBy) {
             case 'price-low':
-                return result.sort((left, right) => left.price - right.price);
+                return result.sort((a, b) => a.price - b.price);
             case 'price-high':
-                return result.sort((left, right) => right.price - left.price);
+                return result.sort((a, b) => b.price - a.price);
             case 'newest':
-                return result.sort((left, right) => right.id - left.id);
+                return result.sort((a, b) => b.id - a.id);
             default:
                 return result;
         }
-    }, [brand, category, priceCap, search, rxOnly, sortBy]);
+    }, [brand, category, priceCap, debouncedSearch, rxOnly, sortBy]);
 
     const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
     const pageItems = filteredProducts.slice((currentPage - 1) * perPage, currentPage * perPage);

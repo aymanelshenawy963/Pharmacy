@@ -1,10 +1,10 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import Icon from './Icons';
 
-export default function ProductCard({ product }) {
+function ProductCard({ product }) {
     const { addToCart } = useCart();
     const discount = Math.max(0, Math.round(((product.mrp - product.price) / product.mrp) * 100));
 
@@ -22,12 +22,8 @@ export default function ProductCard({ product }) {
     };
 
     return (
-        <motion.article
-            whileHover={{ y: -4 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="h-full"
-        >
-            <div className="glass-card glass-card-hover group flex flex-col h-full overflow-hidden">
+        <article className="h-full group">
+            <div className="glass-card glass-card-hover flex flex-col h-full overflow-hidden hover:-translate-y-1 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 <Link to={`/products/${product.id}`} className="flex flex-col flex-grow">
                     {/* Image Section */}
                     <div className="relative overflow-hidden bg-[rgb(var(--color-bg-subtle))] aspect-square sm:aspect-[4/3] flex-shrink-0">
@@ -38,17 +34,13 @@ export default function ProductCard({ product }) {
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        
+
                         {/* Badges */}
                         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
                             {discount > 0 && (
-                                <motion.span
-                                    initial={{ scale: 0.8, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    className="rounded-lg bg-[rgb(var(--color-primary))] px-2.5 py-1 text-xs font-bold text-white shadow-md"
-                                >
+                                <span className="rounded-lg bg-[rgb(var(--color-primary))] px-2.5 py-1 text-xs font-bold text-white shadow-md animate-[scaleIn_0.3s_cubic-bezier(0.16,1,0.3,1)_both]">
                                     {discount}% OFF
-                                </motion.span>
+                                </span>
                             )}
                             {product.requiresPrescription && (
                                 <span className="rounded-lg bg-[rgb(var(--color-secondary))] px-2.5 py-1 text-xs font-bold text-white shadow-md">
@@ -96,17 +88,18 @@ export default function ProductCard({ product }) {
 
                 {/* Add to cart */}
                 <div className="p-3 pt-0">
-                    <motion.button
+                    <button
                         type="button"
                         onClick={handleAddToCart}
-                        whileTap={{ scale: 0.97 }}
-                        className="w-full glass-button-primary !rounded-xl !py-2.5 !text-sm justify-center"
+                        className="w-full glass-button-primary !rounded-xl !py-2.5 !text-sm justify-center active:scale-[0.97] transition-transform duration-150"
                     >
                         <Icon name="ShoppingCart" className="h-3.5 w-3.5" />
                         Add to Cart
-                    </motion.button>
+                    </button>
                 </div>
             </div>
-        </motion.article>
+        </article>
     );
 }
+
+export default memo(ProductCard);

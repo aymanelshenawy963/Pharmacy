@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Reveal from '../components/Reveal';
 import Icon from '../components/Icons';
-import { milestones, valueCards, ownerProfile } from '../data/products';
+import { milestones, valueCards, ownerProfile } from '../data/store';
 
 const staggerContainer = {
     hidden: { opacity: 0 },

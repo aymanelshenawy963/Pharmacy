@@ -1,18 +1,13 @@
-import { motion } from 'framer-motion';
 import Icon from './Icons';
 
 export default function HowItWorks({ steps }) {
     return (
         <div className="grid gap-4 lg:grid-cols-3">
             {steps.map((step, index) => (
-                <motion.div
+                <div
                     key={step.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ delay: index * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    whileHover={{ y: -3 }}
-                    className="glass-card glass-card-hover relative p-6"
+                    className="glass-card glass-card-hover relative p-6 hover:-translate-y-0.5 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                 >
                     <div className="flex items-center justify-between">
                         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[rgb(var(--color-secondary))]/10 text-[rgb(var(--color-secondary))]">
@@ -27,7 +22,7 @@ export default function HowItWorks({ steps }) {
                     {index < steps.length - 1 ? (
                         <div className="absolute right-4 top-1/2 hidden h-px w-12 bg-[rgb(var(--color-border))] xl:block" />
                     ) : null}
-                </motion.div>
+                </div>
             ))}
         </div>
     );
