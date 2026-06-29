@@ -145,8 +145,10 @@ export default function Users() {
     }, []);
 
     useEffect(() => {
+        const controller = new AbortController();
         fetchUsers();
         fetchRoles();
+        return () => controller.abort();
     }, [fetchUsers, fetchRoles]);
 
     const filteredUsers = useMemo(() => {

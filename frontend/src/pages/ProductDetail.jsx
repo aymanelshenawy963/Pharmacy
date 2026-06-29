@@ -1,20 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Reveal from '../components/Reveal';
 import Icon from '../components/Icons';
 import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
+import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
+import { formatPrice } from '../utils/currency';
+import { parseApiError } from '../utils/apiErrorHandler';
 import toast from 'react-hot-toast';
 
-const tabs = [
-    { key: 'details', label: 'Details', icon: 'FileText' },
-    { key: 'uses', label: 'Uses', icon: 'CheckCircle2' },
-    { key: 'sideEffects', label: 'Side Effects', icon: 'ShieldCheck' },
-    { key: 'directions', label: 'Directions', icon: 'ClipboardList' },
-];
+const PLACEHOLDER_IMG = 'https://placehold.co/800x800/f7fbfa/0d9488?text=No+Image';
 
 const staggerInfo = {
     hidden: { opacity: 0 },
@@ -33,20 +30,122 @@ const infoItem = {
     }
 };
 
+function normalizeProduct(p) {
+    return {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.newPrice,
+        mrp: p.oldPrice,
+        stock: p.stock,
+        category: p.categoryName,
+        categoryId: p.categoryId,
+        image: p.photos?.[0] || null,
+        requiresPrescription: p.requiresPrescription,
+        topSelling: p.topSelling,
+    };
+}
+
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState('details');
+    const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const product = products.find((item) => item.id === Number(id));
-    const relatedProducts = useMemo(
-        () => products.filter((item) => item.category === product?.category && item.id !== product?.id).slice(0, 4),
-        [product],
-    );
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        setError(null);
+        setProduct(null);
+        setRelatedProducts([]);
 
-    if (!product) {
+        (async () => {
+            try {
+                const data = await productService.getById(id);
+                if (cancelled) return;
+                const normalized = normalizeProduct(data);
+                setProduct(normalized);
+
+                // Fetch related products by category
+                if (normalized.categoryId) {
+                    try {
+                        const related = await productService.getAll({
+                            CategoryId: normalized.categoryId,
+                            PageSize: 6,
+                            PageNumber: 1,
+                        });
+                        if (!cancelled) {
+                            const items = (related.data || [])
+                                .map(normalizeProduct)
+                                .filter((p) => p.id !== normalized.id)
+                                .slice(0, 4);
+                            setRelatedProducts(items);
+                        }
+                    } catch {
+                        // Related products are non-critical
+                    }
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    if (err.status === 404) {
+                        setError('not_found');
+                    } else {
+                        const msgs = parseApiError(err);
+                        setError(msgs.join(' '));
+                        toast.error(msgs.join(' '));
+                    }
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [id]);
+
+    const handleAddToCart = async () => {
+        if (!product) return;
+        const added = await addToCart(product, quantity);
+        if (added) {
+            toast.success(`${quantity} × ${product.name} added to cart.`);
+        }
+    };
+
+    // Loading state
+    if (loading) {
+        return (
+            <>
+                <Seo title="Loading..." description="Loading product details." />
+                <div className="border-b border-border bg-bg/50 backdrop-blur-md">
+                    <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 text-sm text-text-muted sm:px-6 lg:px-8">
+                        <div className="h-4 w-16 bg-border rounded-full animate-pulse" />
+                        <div className="h-4 w-4 bg-border rounded-full animate-pulse" />
+                        <div className="h-4 w-32 bg-border rounded-full animate-pulse" />
+                    </div>
+                </div>
+                <section className="bg-surface min-h-[calc(100vh-72px)]">
+                    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+                        <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr]">
+                            <div className="bg-bg-subtle aspect-[4/3] rounded-2xl animate-pulse" />
+                            <div className="space-y-6">
+                                <div className="h-4 w-24 bg-border rounded-full animate-pulse" />
+                                <div className="h-10 w-3/4 bg-border rounded-full animate-pulse" />
+                                <div className="h-6 w-1/2 bg-border/60 rounded-full animate-pulse" />
+                                <div className="h-40 bg-border/30 rounded-2xl animate-pulse" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </>
+        );
+    }
+
+    // Not found state
+    if (error === 'not_found' || (!loading && !product)) {
         return (
             <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 min-h-[60vh] flex flex-col justify-center">
                 <Seo title="Product not found" description="The requested product could not be found." />
@@ -78,18 +177,44 @@ export default function ProductDetail() {
         );
     }
 
-    const discount = Math.max(0, Math.round(((product.mrp - product.price) / product.mrp) * 100));
+    // Error state
+    if (error) {
+        return (
+            <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 min-h-[60vh] flex flex-col justify-center">
+                <Seo title="Error" description="Failed to load product." />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mx-auto w-full max-w-2xl bg-surface p-12 text-center rounded-2xl border border-border shadow-sm"
+                >
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-red-50 text-red-500 border border-red-200">
+                        <Icon name="AlertTriangle" className="h-10 w-10" />
+                    </div>
+                    <h1 className="mt-6 font-sans text-3xl font-semibold text-text">Something went wrong</h1>
+                    <p className="mt-3 text-base text-text-muted">{error}</p>
+                    <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="glass-button-primary mt-8 inline-flex items-center"
+                    >
+                        <Icon name="RefreshCw" className="mr-2 h-4 w-4" />
+                        Try Again
+                    </button>
+                </motion.div>
+            </section>
+        );
+    }
 
-    const handleAddToCart = () => {
-        addToCart(product, quantity);
-        toast.success(`${quantity} × ${product.name} added to cart.`);
-    };
+    const image = product.image || PLACEHOLDER_IMG;
+    const price = product.price ?? 0;
+    const mrp = product.mrp ?? 0;
+    const discount = mrp > price ? Math.max(0, Math.round(((mrp - price) / mrp) * 100)) : 0;
 
     return (
         <>
             <Seo
                 title={product.name}
-                description={`${product.name} by ${product.brand} — composition, pricing, uses, and directions.`}
+                description={`${product.name} — pricing and details.`}
             />
 
             {/* Breadcrumb */}
@@ -97,6 +222,17 @@ export default function ProductDetail() {
                 <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 text-sm text-text-muted sm:px-6 lg:px-8">
                     <Link to="/products" className="transition-colors hover:text-primary">Products</Link>
                     <Icon name="ChevronRight" className="h-3.5 w-3.5" />
+                    {product.category && (
+                        <>
+                            <Link
+                                to={`/products?category=${encodeURIComponent(product.category)}`}
+                                className="transition-colors hover:text-primary"
+                            >
+                                {product.category}
+                            </Link>
+                            <Icon name="ChevronRight" className="h-3.5 w-3.5" />
+                        </>
+                    )}
                     <span className="text-text font-semibold">{product.name}</span>
                 </div>
             </div>
@@ -117,7 +253,7 @@ export default function ProductDetail() {
                         >
                             <div className="relative bg-bg-subtle aspect-[4/3] w-full overflow-hidden">
                                 <img
-                                    src={product.image}
+                                    src={image}
                                     alt={product.name}
                                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     loading="lazy"
@@ -160,29 +296,14 @@ export default function ProductDetail() {
                         >
                             {/* Header */}
                             <motion.div variants={infoItem}>
-                                <span className="kicker !mb-3">
-                                    {product.category}
-                                </span>
+                                {product.category && (
+                                    <span className="kicker !mb-3">
+                                        {product.category}
+                                    </span>
+                                )}
                                 <h1 className="display-heading text-4xl sm:text-5xl !mb-2 text-balance">
                                     {product.name}
                                 </h1>
-                                <p className="text-base text-text-muted mt-3">
-                                    by <span className="font-semibold text-text">{product.manufacturer}</span>
-                                </p>
-                            </motion.div>
-
-                            {/* Meta badges */}
-                            <motion.div variants={infoItem} className="flex flex-wrap gap-2.5">
-                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-text-muted transition-all duration-200 hover:border-primary/30 hover:bg-primary/5">
-                                    <Icon name="Pill" className="h-3.5 w-3.5 text-primary" />
-                                    {product.composition}
-                                </span>
-                                <span className="inline-flex items-center rounded-lg border border-border bg-bg-subtle px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-text-muted transition-all duration-200 hover:border-primary/30 hover:bg-primary/5">
-                                    {product.brand}
-                                </span>
-                                <span className="inline-flex items-center rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
-                                    {product.badge}
-                                </span>
                             </motion.div>
 
                             {/* Price card */}
@@ -191,20 +312,25 @@ export default function ProductDetail() {
                                     <div>
                                         <div className="flex items-baseline gap-3">
                                             <motion.p
-                                                key={product.price}
+                                                key={price}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 className="font-sans text-4xl font-bold text-text"
                                             >
-                                                ₹{product.price}
+                                                {formatPrice(price)}
                                             </motion.p>
                                             {discount > 0 && (
-                                                <p className="text-lg font-medium text-text-muted line-through">₹{product.mrp}</p>
+                                                <p className="text-lg font-medium text-text-muted line-through">{formatPrice(mrp)}</p>
                                             )}
                                         </div>
                                         <p className="mt-1 text-sm text-text-muted">
                                             Inclusive of all taxes
                                         </p>
+                                        {product.stock > 0 && (
+                                            <p className="mt-1 text-xs text-green-600 font-medium">
+                                                In stock ({product.stock} available)
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Quantity */}
@@ -276,44 +402,18 @@ export default function ProductDetail() {
                                 </motion.div>
                             )}
 
-                            {/* Tabs */}
-                            <motion.div variants={infoItem} className="bg-surface p-7 rounded-2xl border border-border shadow-sm">
-                                <div className="flex flex-wrap gap-2 border-b border-border pb-4 mb-5">
-                                    {tabs.map((tab) => (
-                                        <motion.button
-                                            key={tab.key}
-                                            whileTap={{ scale: 0.95 }}
-                                            type="button"
-                                            onClick={() => setActiveTab(tab.key)}
-                                            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 ${
-                                                activeTab === tab.key
-                                                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                                    : 'text-text-muted hover:bg-bg hover:text-text'
-                                            }`}
-                                        >
-                                            <Icon name={tab.icon} className="h-4 w-4" />
-                                            {tab.label}
-                                        </motion.button>
-                                    ))}
-                                </div>
-                                <div className="relative min-h-[120px]">
-                                    <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={activeTab}
-                                            initial={{ opacity: 0, y: 8 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -8 }}
-                                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                                            className="text-base leading-relaxed text-text-muted absolute inset-0"
-                                        >
-                                            {activeTab === 'details' && <p>{product.details}</p>}
-                                            {activeTab === 'uses' && <ListBlock items={product.uses} />}
-                                            {activeTab === 'sideEffects' && <ListBlock items={product.sideEffects} />}
-                                            {activeTab === 'directions' && <ListBlock items={product.directions} />}
-                                        </motion.div>
-                                    </AnimatePresence>
-                                </div>
-                            </motion.div>
+                            {/* Description */}
+                            {product.description && (
+                                <motion.div variants={infoItem} className="bg-surface p-7 rounded-2xl border border-border shadow-sm">
+                                    <h3 className="font-sans text-lg font-semibold text-text mb-3 flex items-center gap-2">
+                                        <Icon name="FileText" className="h-5 w-5 text-primary" />
+                                        Description
+                                    </h3>
+                                    <p className="text-base leading-relaxed text-text-muted">
+                                        {product.description}
+                                    </p>
+                                </motion.div>
+                            )}
                         </motion.div>
                     </Reveal>
                 </div>
@@ -349,26 +449,5 @@ export default function ProductDetail() {
                 </section>
             )}
         </>
-    );
-}
-
-function ListBlock({ items }) {
-    return (
-        <ul className="space-y-4">
-            {items.map((item) => (
-                <motion.li
-                    key={item}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex items-start gap-4"
-                >
-                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                        <Icon name="CheckCircle2" className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-text-muted">{item}</span>
-                </motion.li>
-            ))}
-        </ul>
     );
 }

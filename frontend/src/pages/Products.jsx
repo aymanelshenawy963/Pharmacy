@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import ProductCard from '../components/ProductCard';
 import Icon from '../components/Icons';
 import { useDebounce } from '../hooks/useDebounce';
-import { productBrands, productCategories, products } from '../data/products';
+import { productService } from '../services/productService';
+import { categoryService } from '../services/categoryService';
+import { parseApiError } from '../utils/apiErrorHandler';
+import toast from 'react-hot-toast';
 
 const sortOptions = [
-    { value: 'popular', label: 'Popularity' },
-    { value: 'price-low', label: 'Price: Low → High' },
-    { value: 'price-high', label: 'Price: High → Low' },
-    { value: 'newest', label: 'Newest First' },
+    { value: '', label: 'Default' },
+    { value: 'priceasc', label: 'Price: Low → High' },
+    { value: 'pricedesc', label: 'Price: High → Low' },
+    { value: 'nameasc', label: 'Name: A → Z' },
+    { value: 'namedesc', label: 'Name: Z → A' },
 ];
 
 const staggerGrid = {
@@ -32,67 +36,105 @@ const gridItem = {
     }
 };
 
+function normalizeProduct(p) {
+    return {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.newPrice,
+        mrp: p.oldPrice,
+        category: p.categoryName,
+        image: p.photos?.[0] || null,
+        requiresPrescription: p.requiresPrescription,
+    };
+}
+
 export default function Products() {
     const [searchParams] = useSearchParams();
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState(searchParams.get('category') || 'All');
-    const [brand, setBrand] = useState('All');
-    const [sortBy, setSortBy] = useState('popular');
-    const [priceCap, setPriceCap] = useState(3000);
-    const [rxOnly, setRxOnly] = useState(false);
+    const [sortBy, setSortBy] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const debouncedSearch = useDebounce(search, 300);
-    const perPage = 8;
+    const [products, setProducts] = useState([]);
+    const [totalCount, setTotalCount] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [categories, setCategories] = useState([]);
+
+    const debouncedSearch = useDebounce(search, 400);
+    const perPage = 6;
+    const categoriesRef = useRef(categories);
+    categoriesRef.current = categories;
+
+    // Fetch categories on mount
+    useEffect(() => {
+        const controller = new AbortController();
+        (async () => {
+            try {
+                const data = await categoryService.getAll();
+                if (!controller.signal.aborted) setCategories(Array.isArray(data) ? data : []);
+            } catch {
+                // Categories will be empty; filter dropdown shows only "All"
+            }
+        })();
+        return () => controller.abort();
+    }, []);
+
+    // Fetch products when filters change
+    const fetchProducts = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const params = { PageSize: perPage, PageNumber: currentPage };
+            if (debouncedSearch.trim()) params.Search = debouncedSearch.trim();
+            if (category !== 'All') {
+                const match = categoriesRef.current.find(
+                    (c) => c.name.toLowerCase() === category.toLowerCase(),
+                );
+                if (match) params.CategoryId = match.id;
+            }
+            if (sortBy) params.Sort = sortBy;
+
+            const data = await productService.getAll(params);
+
+            const items = (data.data || []).map(normalizeProduct);
+            setProducts(items);
+            setTotalCount(data.totalCount ?? items.length);
+            setTotalPages(data.totalPages ?? 1);
+        } catch (err) {
+            const msgs = parseApiError(err);
+            setError(msgs.join(' '));
+            setProducts([]);
+            setTotalCount(0);
+            setTotalPages(1);
+            toast.error(msgs.join(' '));
+        } finally {
+            setLoading(false);
+        }
+    }, [debouncedSearch, category, sortBy, currentPage]);
 
     useEffect(() => {
-        setLoading(false);
-    }, [searchParams, category, brand, priceCap, rxOnly, debouncedSearch, sortBy, currentPage]);
+        const controller = new AbortController();
+        fetchProducts();
+        return () => controller.abort();
+    }, [fetchProducts]);
 
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearch, category, sortBy]);
+
+    // Sync category from URL params
     useEffect(() => {
         setCategory(searchParams.get('category') || 'All');
-        setCurrentPage(1);
     }, [searchParams]);
-
-    const filteredProducts = useMemo(() => {
-        const query = debouncedSearch.trim().toLowerCase();
-
-        const result = products.reduce((acc, product) => {
-            if (category !== 'All' && product.category !== category) return acc;
-            if (brand !== 'All' && product.brand !== brand) return acc;
-            if (rxOnly && !product.requiresPrescription) return acc;
-            if (product.price > priceCap) return acc;
-            if (query) {
-                const haystack = `${product.name} ${product.brand} ${product.description} ${product.category}`.toLowerCase();
-                if (!haystack.includes(query)) return acc;
-            }
-            acc.push(product);
-            return acc;
-        }, []);
-
-        switch (sortBy) {
-            case 'price-low':
-                return result.sort((a, b) => a.price - b.price);
-            case 'price-high':
-                return result.sort((a, b) => b.price - a.price);
-            case 'newest':
-                return result.sort((a, b) => b.id - a.id);
-            default:
-                return result;
-        }
-    }, [brand, category, priceCap, debouncedSearch, rxOnly, sortBy]);
-
-    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
-    const pageItems = filteredProducts.slice((currentPage - 1) * perPage, currentPage * perPage);
 
     const resetFilters = () => {
         setSearch('');
         setCategory('All');
-        setBrand('All');
-        setSortBy('popular');
-        setPriceCap(3000);
-        setRxOnly(false);
+        setSortBy('');
         setCurrentPage(1);
     };
 
@@ -100,7 +142,7 @@ export default function Products() {
         <>
             <Seo
                 title="Products"
-                description="Browse medicines, vitamins, baby care, personal care, diabetic care, and surgical supplies at Jaya Medical Store."
+                description="Browse medicines, vitamins, and wellness essentials at Jaya Medical Store."
             />
 
             {/* Hero header */}
@@ -120,7 +162,7 @@ export default function Products() {
                                 Browse our <span className="text-primary">curated</span> collection
                             </h1>
                             <p className="text-lg text-text-muted mt-4">
-                                Filter by category, brand, prescription requirement, or price. Find exactly what you need with calm, clear navigation.
+                                Filter by category, search by name, or sort to find exactly what you need.
                             </p>
                         </div>
 
@@ -135,7 +177,7 @@ export default function Products() {
                             </div>
                             <div>
                                 <p className="text-sm text-text-muted font-medium">Showing</p>
-                                <p className="text-lg font-bold text-text">{filteredProducts.length} items</p>
+                                <p className="text-lg font-bold text-text">{totalCount} items</p>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -191,46 +233,11 @@ export default function Products() {
                                     className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
                                 >
-                                    {productCategories.map((option) => (
-                                        <option key={option} value={option}>{option}</option>
+                                    <option value="All">All Categories</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
                                     ))}
                                 </select>
-                            </label>
-
-                            {/* Brand */}
-                            <label className="block space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Brand</span>
-                                <select
-                                    value={brand}
-                                    onChange={(e) => setBrand(e.target.value)}
-                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
-                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
-                                >
-                                    <option value="All">All Brands</option>
-                                    {productBrands.map((option) => (
-                                        <option key={option} value={option}>{option}</option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            {/* Price range */}
-                            <label className="block space-y-1.5">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Price Range</span>
-                                <div className="rounded-lg border border-border bg-bg p-3 transition-all duration-300 hover:border-primary/30">
-                                    <input
-                                        type="range"
-                                        min="50"
-                                        max="3000"
-                                        step="1"
-                                        value={priceCap}
-                                        onChange={(e) => setPriceCap(Number(e.target.value))}
-                                        className="w-full accent-primary h-1.5 bg-border rounded-lg appearance-none cursor-pointer"
-                                    />
-                                    <div className="mt-3 flex items-center justify-between text-[11px] text-text-muted">
-                                        <span>₹50</span>
-                                        <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md transition-all duration-200">Up to ₹{priceCap}</span>
-                                    </div>
-                                </div>
                             </label>
 
                             {/* Sort By */}
@@ -247,17 +254,6 @@ export default function Products() {
                                     ))}
                                 </select>
                             </label>
-
-                            {/* Rx only */}
-                            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-bg px-3 py-3 text-[13px] font-medium text-text transition-all duration-300 hover:border-primary hover:bg-primary/5 mt-2 group/rx">
-                                <input
-                                    type="checkbox"
-                                    checked={rxOnly}
-                                    onChange={(e) => setRxOnly(e.target.checked)}
-                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary transition-colors duration-200"
-                                />
-                                <span className="transition-colors duration-200 group-hover/rx:text-primary">Prescription required</span>
-                            </label>
                         </div>
                     </motion.aside>
 
@@ -271,7 +267,7 @@ export default function Products() {
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.3 }}
-                                    className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
+                                    className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                                 >
                                     {Array.from({ length: 6 }).map((_, i) => (
                                         <motion.div
@@ -297,15 +293,37 @@ export default function Products() {
                                         </motion.div>
                                     ))}
                                 </motion.div>
-                            ) : pageItems.length ? (
+                            ) : error ? (
+                                <motion.div
+                                    key="error"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="bg-surface flex flex-col items-center justify-center py-20 px-8 text-center rounded-2xl border border-border shadow-sm"
+                                >
+                                    <div className="flex h-24 w-24 items-center justify-center rounded-full bg-red-50 border border-red-200 text-red-500 mb-6">
+                                        <Icon name="AlertTriangle" className="h-10 w-10" />
+                                    </div>
+                                    <h2 className="font-sans text-3xl font-semibold text-text mb-3">
+                                        Something went wrong
+                                    </h2>
+                                    <p className="max-w-md text-base text-text-muted mb-8">
+                                        {error}
+                                    </p>
+                                    <button onClick={fetchProducts} className="glass-button-primary">
+                                        <Icon name="RefreshCw" className="h-4 w-4" />
+                                        Try Again
+                                    </button>
+                                </motion.div>
+                            ) : products.length ? (
                                 <motion.div
                                     key="content"
                                     variants={staggerGrid}
                                     initial="hidden"
                                     animate="visible"
-                                    className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
+                                    className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                                 >
-                                    {pageItems.map((product) => (
+                                    {products.map((product) => (
                                         <motion.div key={product.id} variants={gridItem}>
                                             <ProductCard product={product} />
                                         </motion.div>
@@ -341,7 +359,7 @@ export default function Products() {
                         </AnimatePresence>
 
                         {/* Pagination */}
-                        {!loading && totalPages > 1 && (
+                        {!loading && !error && totalPages > 1 && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}

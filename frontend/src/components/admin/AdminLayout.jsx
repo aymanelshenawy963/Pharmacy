@@ -7,6 +7,7 @@ import {
     Shield,
     FolderTree,
     Package,
+    ShoppingBag,
     User,
     Lock,
     LogOut,
@@ -29,6 +30,7 @@ const navItems = [
 const accountItems = [
     { label: 'Profile', to: '/account/profile', icon: User },
     { label: 'Security', to: '/account/security', icon: Lock },
+    { label: 'My Orders', to: '/account/orders', icon: ShoppingBag },
 ];
 
 function SidebarContent({ onNavigate, user, onLogout }) {

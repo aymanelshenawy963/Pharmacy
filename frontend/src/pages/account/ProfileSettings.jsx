@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { User, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/profileService';
+import { parseApiError } from '../../utils/apiErrorHandler';
 import PageHeader from '../../components/admin/PageHeader';
 import FormField from '../../components/admin/FormField';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
@@ -37,7 +38,9 @@ export default function ProfileSettings() {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
+        const controller = new AbortController();
         fetchProfile();
+        return () => controller.abort();
     }, []);
 
     async function fetchProfile() {
@@ -48,7 +51,8 @@ export default function ProfileSettings() {
             setFormData({ firstName: data.firstName, lastName: data.lastName });
             setInitialData({ firstName: data.firstName, lastName: data.lastName });
         } catch (err) {
-            setServerError(err.message || 'Failed to load profile');
+            const msgs = parseApiError(err);
+            setServerError(msgs.join(' '));
         } finally {
             setIsLoading(false);
         }
@@ -95,7 +99,8 @@ export default function ProfileSettings() {
                 });
                 setErrors((prev) => ({ ...prev, ...apiErrors }));
             }
-            setServerError(err.message || 'Failed to update profile');
+            const msgs = parseApiError(err);
+            setServerError(msgs.join(' '));
         } finally {
             setIsSaving(false);
         }

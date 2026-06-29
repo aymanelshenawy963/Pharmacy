@@ -1,24 +1,32 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { formatPrice } from '../utils/currency';
 import toast from 'react-hot-toast';
 import Icon from './Icons';
 
+const PLACEHOLDER_IMG = 'https://placehold.co/800x800/f7fbfa/0d9488?text=No+Image';
+
 function ProductCard({ product }) {
     const { addToCart } = useCart();
-    const discount = Math.max(0, Math.round(((product.mrp - product.price) / product.mrp) * 100));
+    const price = product.price ?? 0;
+    const mrp = product.mrp ?? 0;
+    const discount = mrp > price ? Math.max(0, Math.round(((mrp - price) / mrp) * 100)) : 0;
+    const image = product.image || PLACEHOLDER_IMG;
 
-    const handleAddToCart = (e) => {
+    const handleAddToCart = async (e) => {
         e.preventDefault();
-        addToCart(product);
-        toast.success(
-            <div className="flex items-center gap-2">
-                <div className="bg-[rgb(var(--color-primary))]/15 p-1 rounded-lg">
-                    <img src={product.image} alt="" className="w-6 h-6 object-cover rounded-md" />
+        const added = await addToCart(product);
+        if (added) {
+            toast.success(
+                <div className="flex items-center gap-2">
+                    <div className="bg-[rgb(var(--color-primary))]/15 p-1 rounded-lg">
+                        <img src={image} alt="" className="w-6 h-6 object-cover rounded-md" />
+                    </div>
+                    <span className="text-sm font-medium">Added to cart</span>
                 </div>
-                <span className="text-sm font-medium">Added to cart</span>
-            </div>
-        );
+            );
+        }
     };
 
     return (
@@ -28,12 +36,11 @@ function ProductCard({ product }) {
                     {/* Image Section */}
                     <div className="relative overflow-hidden bg-[rgb(var(--color-bg-subtle))] aspect-square sm:aspect-[4/3] flex-shrink-0">
                         <img
-                            src={product.image}
+                            src={image}
                             alt={product.name}
                             loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-
 
                         {/* Badges */}
                         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
@@ -72,16 +79,18 @@ function ProductCard({ product }) {
                         {/* Price */}
                         <div className="flex items-end justify-between gap-2 mt-auto">
                             <div>
-                                <p className="text-xl font-bold text-[rgb(var(--color-text))]">&rupee;{product.price}</p>
+                                <p className="text-xl font-bold text-[rgb(var(--color-text))]">{formatPrice(price)}</p>
                                 {discount > 0 && (
                                     <p className="text-[11px] text-[rgb(var(--color-text-muted))]">
-                                        MRP <span className="line-through">&rupee;{product.mrp}</span>
+                                        MRP <span className="line-through">{formatPrice(mrp)}</span>
                                     </p>
                                 )}
                             </div>
-                            <span className="rounded-lg bg-[rgb(var(--color-bg-subtle))] border border-[rgb(var(--color-border))] px-2 py-0.5 text-[10px] font-medium text-[rgb(var(--color-text-muted))]">
-                                {product.brand}
-                            </span>
+                            {product.category && (
+                                <span className="rounded-lg bg-[rgb(var(--color-bg-subtle))] border border-[rgb(var(--color-border))] px-2 py-0.5 text-[10px] font-medium text-[rgb(var(--color-text-muted))]">
+                                    {product.category}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </Link>

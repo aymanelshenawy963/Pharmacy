@@ -13,6 +13,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
 const Prescription = lazy(() => import('./pages/Prescription'));
 const Contact = lazy(() => import('./pages/Contact'));
 const About = lazy(() => import('./pages/About'));
@@ -39,6 +40,8 @@ const AdminCategories = lazy(() => import('./pages/admin/Categories'));
 const AdminProducts = lazy(() => import('./pages/admin/Products'));
 const ProfileSettings = lazy(() => import('./pages/account/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/account/SecuritySettings'));
+const Orders = lazy(() => import('./pages/account/Orders'));
+const OrderDetail = lazy(() => import('./pages/account/OrderDetail'));
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminProtectedRoute from './routes/AdminProtectedRoute';
@@ -140,6 +143,7 @@ export default function App() {
                 {/* Protected routes */}
                 <Route element={<ProtectedRoute />}>
                     <Route path="cart" element={<Cart />} />
+                    <Route path="checkout" element={<Checkout />} />
                     <Route path="prescription" element={<Prescription />} />
                 </Route>
 
@@ -173,6 +177,8 @@ export default function App() {
                 <Route path="account" element={<AdminLayoutWrapper />}>
                     <Route path="profile" element={<ProfileSettings />} />
                     <Route path="security" element={<SecuritySettings />} />
+                    <Route path="orders" element={<Orders />} />
+                    <Route path="orders/:id" element={<OrderDetail />} />
                 </Route>
             </Route>
         </Routes>

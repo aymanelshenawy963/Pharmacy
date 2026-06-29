@@ -70,7 +70,7 @@ export default function TermsConditions() {
                             <motion.section variants={sectionItem} className="space-y-4">
                                 <h2 className="font-sans text-2xl font-semibold text-text">3. Pricing and Availability</h2>
                                 <p className="text-base leading-relaxed text-text-muted">
-                                    All prices are listed in Indian Rupees (INR) and are inclusive of applicable taxes unless stated otherwise. Prices and availability of products are subject to change without notice. We make every effort to ensure accurate pricing, but in the event of a pricing error, we reserve the right to cancel the order and notify you.
+                                    All prices are listed in Egyptian Pounds (EGP) and are inclusive of applicable taxes unless stated otherwise. Prices and availability of products are subject to change without notice. We make every effort to ensure accurate pricing, but in the event of a pricing error, we reserve the right to cancel the order and notify you.
                                 </p>
                             </motion.section>
 

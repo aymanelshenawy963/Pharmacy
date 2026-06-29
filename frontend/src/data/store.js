@@ -77,7 +77,7 @@ export const milestones = [
 export const valueCards = [
     { title: 'Genuine Products', text: 'We source from trusted distributors and maintain a careful receiving process.', iconKey: 'ShieldCheck' },
     { title: 'Patient First', text: 'Our recommendations are designed to be practical, clear, and respectful.', iconKey: 'HeartPulse' },
-    { title: 'Affordable Healthcare', text: 'We balance quality with pricing so regular essentials remain accessible.', iconKey: 'BadgeIndianRupee' },
+    { title: 'Affordable Healthcare', text: 'We balance quality with pricing so regular essentials remain accessible.', iconKey: 'BadgeCheck' },
     { title: 'Expert Advice', text: 'A pharmacist-friendly support flow keeps orders accurate and easy to follow.', iconKey: 'Stethoscope' },
 ];
 

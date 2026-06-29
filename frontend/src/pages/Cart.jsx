@@ -1,27 +1,15 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
 import { useCart } from '../context/CartContext';
+import { formatPrice } from '../utils/currency';
 import toast from 'react-hot-toast';
+
+const PLACEHOLDER_IMG = 'https://placehold.co/100x100/f7fbfa/0d9488?text=N/A';
 
 export default function Cart() {
     const { items, setItemQuantity, removeFromCart, clearCart, subtotal } = useCart();
-
-    const deliveryCharge = subtotal > 999 || subtotal === 0 ? 0 : 49;
-    const taxes = Math.round(subtotal * 0.05);
-    const [promoCode, setPromoCode] = useState('JAYA10');
-    const discount = promoCode === 'JAYA10' ? Math.round(subtotal * 0.1) : 0;
-    const total = Math.max(0, subtotal + deliveryCharge + taxes - discount);
-
-    const applyPromo = () => {
-        if (promoCode.trim().toUpperCase() === 'JAYA10') {
-            toast.success('Promo code applied.');
-        } else {
-            toast.error('Promo code not recognized.');
-        }
-    };
 
     if (!items.length) {
         return (
@@ -57,7 +45,7 @@ export default function Cart() {
 
     return (
         <>
-            <Seo title="Cart" description="Review items, apply a promo code, and proceed to checkout." />
+            <Seo title="Cart" description="Review items and proceed to checkout." />
 
             <div className="min-h-[calc(100vh-72px)] bg-surface relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/2 h-96 bg-primary/10 blur-[100px] pointer-events-none" />
@@ -75,19 +63,19 @@ export default function Cart() {
                     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] xl:grid-cols-[1.2fr_0.8fr]">
                         <div className="space-y-4">
                             <AnimatePresence mode="popLayout">
-                                {items.map((item) => (
+                                {items.map((item, index) => (
                                     <motion.div
                                         layout
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, x: 30, scale: 0.95 }}
                                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                                        key={item.id}
+                                        key={item.id ?? `cart-item-${index}`}
                                         className="bg-surface flex flex-col gap-6 p-5 sm:flex-row relative group rounded-2xl border border-border shadow-sm"
                                     >
                                         <div className="relative h-40 w-full sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-bg">
                                             <img
-                                                src={item.image}
+                                                src={item.image || PLACEHOLDER_IMG}
                                                 alt={item.name}
                                                 loading="lazy"
                                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -99,7 +87,6 @@ export default function Cart() {
                                                 <div>
                                                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">{item.category}</p>
                                                     <h2 className="font-sans text-xl font-medium text-text line-clamp-1">{item.name}</h2>
-                                                    <p className="text-sm text-text-muted mt-1">{item.brand}</p>
                                                 </div>
                                                 <button
                                                     type="button"
@@ -116,8 +103,7 @@ export default function Cart() {
 
                                             <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
                                                 <div>
-                                                    <p className="text-xl font-bold text-text">₹{item.price}</p>
-                                                    <p className="text-xs text-text-muted mt-0.5">MRP ₹{item.mrp}</p>
+                                                    <p className="text-xl font-bold text-text">{formatPrice(item.price)}</p>
                                                 </div>
 
                                                 <div className="flex items-center rounded-xl border border-border bg-bg/50 p-1">
@@ -166,60 +152,34 @@ export default function Cart() {
                                 </div>
 
                                 <div className="space-y-4 text-sm">
-                                    <SummaryRow label="Subtotal" value={`₹${subtotal}`} />
-                                    <SummaryRow label="Delivery charge" value={deliveryCharge ? `₹${deliveryCharge}` : 'Free'} />
-                                    <SummaryRow label="GST (5%)" value={`₹${taxes}`} />
-
-                                    {discount > 0 && (
-                                        <SummaryRow label="Promo discount" value={`-₹${discount}`} valueClass="text-green-500 font-medium" />
-                                    )}
+                                    <SummaryRow label="Subtotal" value={formatPrice(subtotal)} />
+                                    <SummaryRow label="Delivery" value="Calculated at checkout" valueClass="text-text-muted italic" />
 
                                     <div className="border-t border-border pt-4 mt-6">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-base font-semibold text-text">Total</span>
+                                            <span className="text-base font-semibold text-text">Subtotal</span>
                                             <motion.span
-                                                key={total}
+                                                key={subtotal}
                                                 initial={{ scale: 0.95, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 transition={{ duration: 0.25 }}
                                                 className="font-sans text-3xl font-bold text-text"
                                             >
-                                                ₹{total}
+                                                {formatPrice(subtotal)}
                                             </motion.span>
                                         </div>
-                                        <p className="text-xs text-text-muted mt-1 text-right">Inclusive of all taxes</p>
+                                        <p className="text-xs text-text-muted mt-1 text-right">Delivery & taxes calculated at checkout</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-sm">
-                                <label className="block text-sm font-medium text-text mb-3">
-                                    Promo code
-                                </label>
-                                <div className="flex gap-3">
-                                    <input
-                                        value={promoCode}
-                                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                                        placeholder="Enter code (e.g. JAYA10)"
-                                        className="w-full rounded-xl border border-border bg-bg px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm placeholder:text-text-muted/60"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={applyPromo}
-                                        className="glass-button-secondary px-6 hover:scale-[1.03] active:scale-[0.97] transition-transform duration-200"
-                                    >
-                                        Apply
-                                    </button>
-                                </div>
-
-                                <Link
-                                    to="/contact"
-                                    className="glass-button-primary w-full mt-6 py-4 justify-center"
-                                >
-                                    Proceed to Checkout
-                                    <Icon name="ArrowRight" className="h-4 w-4 ml-1" />
-                                </Link>
-                            </div>
+                            <Link
+                                to="/checkout"
+                                className="glass-button-primary w-full py-4 justify-center"
+                            >
+                                Proceed to Checkout
+                                <Icon name="ArrowRight" className="h-4 w-4 ml-1" />
+                            </Link>
                         </motion.div>
                     </div>
                 </div>

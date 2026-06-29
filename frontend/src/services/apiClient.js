@@ -1,17 +1,26 @@
 import { authStorage } from './authStorage';
+import { BASE_URL, sleep } from '../config/api';
 
-// const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
-const BASE_URL = 'https://localhost:7293';
 const MAX_429_RETRIES = 3;
 const RETRY_BASE_DELAY = 2000;
+const REQUEST_TIMEOUT = 30000;
+const MAX_NETWORK_RETRIES = 1;
+
+const STATUS_MESSAGES = {
+    400: 'Please check the information you entered.',
+    401: 'Incorrect email or password.',
+    403: "You don't have permission to perform this action.",
+    404: 'The requested resource was not found.',
+    409: 'An account with this information already exists.',
+    429: 'Too many requests. Please try again later.',
+    500: 'Something went wrong. Please try again later.',
+    502: 'Server is temporarily unavailable. Please try again later.',
+    503: 'Service is currently unavailable. Please try again later.',
+};
 
 let isRefreshing = false;
 let refreshSubscribers = [];
 
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
- 
 function onRefreshed(token) {
     refreshSubscribers.forEach((cb) => cb(token));
     refreshSubscribers = [];
@@ -21,13 +30,36 @@ function addRefreshSubscriber(cb) {
     refreshSubscribers.push(cb);
 }
 
+function mergeAbortSignals(userSignal, timeoutSignal) {
+    const controller = new AbortController();
+
+    if (userSignal.aborted) controller.abort();
+    else userSignal.addEventListener('abort', () => controller.abort(), { once: true });
+
+    if (timeoutSignal.aborted) controller.abort();
+    else timeoutSignal.addEventListener('abort', () => controller.abort(), { once: true });
+
+    return controller.signal;
+}
+
+function fetchWithTimeout(url, options, timeout = REQUEST_TIMEOUT) {
+    const controller = new AbortController();
+    const signal = options.signal
+        ? mergeAbortSignals(options.signal, controller.signal)
+        : controller.signal;
+
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    return fetch(url, { ...options, signal }).finally(() => clearTimeout(timeoutId));
+}
+
 async function refreshTokenRequest() {
     const token = authStorage.getToken();
     const refreshToken = authStorage.getRefreshToken();
 
     if (!token || !refreshToken) throw new Error('No tokens available');
 
-    const response = await fetch(`${BASE_URL}/Auth/refresh-token`, {
+    const response = await fetchWithTimeout(`${BASE_URL}/Auth/refresh-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, refreshToken }),
@@ -55,15 +87,14 @@ async function handleResponse(response) {
     }
 
     if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}`;
-        
+        let errorMessage = STATUS_MESSAGES[response.status] || `HTTP ${response.status}`;
+
         if (body) {
             if (typeof body === 'string') {
                 errorMessage = body;
             } else if (body.message) {
                 errorMessage = body.message;
             } else if (body.title && body.errors) {
-                // ASP.NET ValidationProblemDetails
                 const firstErrorKey = Object.keys(body.errors)[0];
                 if (firstErrorKey && body.errors[firstErrorKey].length > 0) {
                     errorMessage = body.errors[firstErrorKey][0];
@@ -85,6 +116,39 @@ async function handleResponse(response) {
     return body;
 }
 
+async function doRefreshAndRetry(url, config, headers, retryFn) {
+    if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+            addRefreshSubscriber(async (newToken) => {
+                try {
+                    const retryHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
+                    const retryResponse = await retryFn(url, { ...config, headers: retryHeaders });
+                    resolve(handleResponse(retryResponse));
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
+    }
+
+    isRefreshing = true;
+    try {
+        const newToken = await refreshTokenRequest();
+        isRefreshing = false;
+        onRefreshed(newToken);
+
+        const retryHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
+        const retryResponse = await retryFn(url, { ...config, headers: retryHeaders });
+        return handleResponse(retryResponse);
+    } catch (refreshError) {
+        isRefreshing = false;
+        refreshSubscribers = [];
+        authStorage.clear();
+        window.location.href = '/login';
+        throw refreshError;
+    }
+}
+
 export async function apiRequest(endpoint, options = {}, isRetry = false) {
     const url = `${BASE_URL}${endpoint}`;
 
@@ -100,73 +164,129 @@ export async function apiRequest(endpoint, options = {}, isRetry = false) {
 
     const config = { ...options, headers };
 
-    let response = await fetch(url, config);
+    let response;
+    try {
+        response = await fetchWithTimeout(url, config);
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            const error = new Error('Request timed out. Please try again.');
+            error.status = 0;
+            error.body = null;
+            error.validationErrors = null;
+            throw error;
+        }
+        const error = new Error('Unable to connect to the server. Please check your internet connection.');
+        error.status = 0;
+        error.body = null;
+        error.validationErrors = null;
+        throw error;
+    }
 
-    // Handle 429 — retry with exponential backoff
     if (response.status === 429) {
         for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
             await sleep(RETRY_BASE_DELAY * attempt);
-            response = await fetch(url, config);
+            try {
+                response = await fetchWithTimeout(url, config);
+            } catch {
+                break;
+            }
             if (response.status !== 429) break;
         }
     }
 
-    // Handle 401 — try to refresh token (but not if we're already in refresh flow)
     if (response.status === 401 && !isRetry && authStorage.getRefreshToken()) {
-        if (isRefreshing) {
-            // Queue until refresh completes
-            return new Promise((resolve, reject) => {
-                addRefreshSubscriber(async (newToken) => {
-                    try {
-                        const retryHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
-                        const retryResponse = await fetch(url, { ...config, headers: retryHeaders });
-                        resolve(handleResponse(retryResponse));
-                    } catch (err) {
-                        reject(err);
-                    }
-                });
-            });
-        }
-
-        isRefreshing = true;
-        try {
-            const newToken = await refreshTokenRequest();
-            isRefreshing = false;
-            onRefreshed(newToken);
-
-            // Retry original request with new token
-            const retryHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
-            const retryResponse = await fetch(url, { ...config, headers: retryHeaders });
-            return handleResponse(retryResponse);
-        } catch (refreshError) {
-            isRefreshing = false;
-            refreshSubscribers = [];
-            authStorage.clear();
-            // Redirect to login
-            window.location.href = '/login';
-            throw refreshError;
-        }
+        return doRefreshAndRetry(url, config, headers, (u, c) => fetchWithTimeout(u, c));
     }
 
     return handleResponse(response);
 }
 
+async function apiRequestWithNetworkRetry(endpoint, options = {}, isRetry = false) {
+    for (let attempt = 0; attempt <= MAX_NETWORK_RETRIES; attempt++) {
+        try {
+            return await apiRequest(endpoint, options, isRetry);
+        } catch (err) {
+            if (err.status === 0 && attempt < MAX_NETWORK_RETRIES) {
+                await sleep(1000 * (attempt + 1));
+                continue;
+            }
+            throw err;
+        }
+    }
+}
+
 export async function apiGet(endpoint, params = {}) {
-    const searchParams = new URLSearchParams(params).toString();
+    const filtered = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+    );
+    const searchParams = new URLSearchParams(filtered).toString();
     const url = searchParams ? `${endpoint}?${searchParams}` : endpoint;
-    return apiRequest(url, { method: 'GET' });
+    return apiRequestWithNetworkRetry(url, { method: 'GET' });
 }
 
 export async function apiPost(endpoint, body) {
-    return apiRequest(endpoint, {
+    return apiRequestWithNetworkRetry(endpoint, {
         method: 'POST',
         body: JSON.stringify(body),
     });
 }
 
 export async function apiPut(endpoint, body) {
-    return apiRequest(endpoint, {
+    return apiRequestWithNetworkRetry(endpoint, {
         method: 'PUT',
-        body: JSON.stringify(body),
+        body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 }
+
+export async function apiFormData(endpoint, method, formData) {
+    const url = `${BASE_URL}${endpoint}`;
+
+    const headers = {};
+    const token = authStorage.getToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    let response;
+    try {
+        response = await fetchWithTimeout(url, { method, headers, body: formData });
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            const error = new Error('Request timed out. Please try again.');
+            error.status = 0;
+            error.body = null;
+            error.validationErrors = null;
+            throw error;
+        }
+        const error = new Error('Unable to connect to the server. Please check your internet connection.');
+        error.status = 0;
+        error.body = null;
+        error.validationErrors = null;
+        throw error;
+    }
+
+    if (response.status === 429) {
+        for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
+            await sleep(RETRY_BASE_DELAY * attempt);
+            try {
+                response = await fetchWithTimeout(url, { method, headers, body: formData });
+            } catch {
+                break;
+            }
+            if (response.status !== 429) break;
+        }
+    }
+
+    if (response.status === 401 && authStorage.getRefreshToken()) {
+        return doRefreshAndRetry(
+            url,
+            { method, body: formData },
+            headers,
+            (u, c) => fetchWithTimeout(u, c),
+        );
+    }
+
+    return handleResponse(response);
+}
+
+export { BASE_URL };

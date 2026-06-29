@@ -17,6 +17,7 @@ public class CategoriesController : BaseController
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
@@ -26,6 +27,7 @@ public class CategoriesController : BaseController
     }
 
     [HttpGet("{id}")] 
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);

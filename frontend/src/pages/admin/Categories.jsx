@@ -59,7 +59,9 @@ export default function Categories() {
     }, []);
 
     useEffect(() => {
+        const controller = new AbortController();
         fetchCategories();
+        return () => controller.abort();
     }, [fetchCategories]);
 
     const filtered = useMemo(() => {

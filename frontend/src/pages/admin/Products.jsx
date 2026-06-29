@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Plus, Pencil, Trash2, RefreshCw, Filter, ChevronDown, IndianRupee, Star } from 'lucide-react';
+import { Package, Plus, Pencil, Trash2, RefreshCw, Filter, ChevronDown, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { productService } from '../../services/productService';
 import { categoryService } from '../../services/categoryService';
+import { formatPrice } from '../../utils/currency';
 import { parseApiError } from '../../utils/apiErrorHandler';
+import { BASE_URL } from '../../config/api';
 import PageHeader from '../../components/admin/PageHeader';
 import SearchInput from '../../components/admin/SearchInput';
 import DataTable from '../../components/admin/DataTable';
@@ -12,8 +14,6 @@ import Modal from '../../components/admin/Modal';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import FormField from '../../components/admin/FormField';
 import ImageUploader from '../../components/admin/ImageUploader';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5223';
 
 const SORT_OPTIONS = [
     { value: 'priceasc', label: 'Price: Low to High' },
@@ -25,7 +25,7 @@ const SORT_OPTIONS = [
 function getPhotoUrl(photo) {
     if (!photo) return '';
     if (photo.startsWith('http://') || photo.startsWith('https://')) return photo;
-    return `${API_BASE_URL}${photo.startsWith('/') ? photo : `/${photo}`}`;
+    return `${BASE_URL}${photo.startsWith('/') ? photo : `/${photo}`}`;
 }
 
 async function urlToFile(url, filename) {
@@ -158,11 +158,15 @@ export default function Products() {
     }, [pageIndex, sort, search, categoryFilter]);
 
     useEffect(() => {
+        const controller = new AbortController();
         fetchCategories();
+        return () => controller.abort();
     }, [fetchCategories]);
 
     useEffect(() => {
+        const controller = new AbortController();
         fetchProducts();
+        return () => controller.abort();
     }, [fetchProducts]);
 
     useEffect(() => {
@@ -365,10 +369,9 @@ export default function Products() {
             header: 'Price',
             render: (row) => (
                 <div className="flex items-center gap-1">
-                    <IndianRupee size={12} className="text-[rgb(var(--color-text-muted))]" />
-                    <span className="font-semibold text-sm">{row.newPrice}</span>
+                    <span className="font-semibold text-sm">{formatPrice(row.newPrice)}</span>
                     {row.oldPrice > row.newPrice && (
-                        <span className="text-xs text-[rgb(var(--color-text-muted))] line-through">{row.oldPrice}</span>
+                        <span className="text-xs text-[rgb(var(--color-text-muted))] line-through">{formatPrice(row.oldPrice)}</span>
                     )}
                 </div>
             ),

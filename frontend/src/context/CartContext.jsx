@@ -1,90 +1,180 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { products } from '../data/products';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { basketService } from '../services/basketService';
+import { useAuth } from './AuthContext';
+import toast from 'react-hot-toast';
 
 const CartContext = createContext(null);
-const STORAGE_KEY = 'jaya-medical-cart';
 
-const readStoredCart = () => {
-    if (typeof window === 'undefined') {
-        return [];
-    }
+function normalizeBasketItem(item) {
+    return {
+        id: item.productId,
+        productId: item.productId,
+        name: item.productName,
+        productName: item.productName,
+        description: item.description || '',
+        image: item.image || '',
+        price: item.price,
+        quantity: item.quantity,
+        category: item.category || '',
+    };
+}
 
-    try {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-            return [];
-        }
+function toBasketItem(product, quantity) {
+    return {
+        id: product.id,
+        productId: product.id,
+        name: product.name,
+        productName: product.name,
+        description: product.description || '',
+        image: product.photos?.[0] || product.image || '',
+        price: product.newPrice ?? product.price,
+        quantity,
+        category: product.categoryName || product.category || '',
+    };
+}
 
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
-    }
-};
+function computeSubtotal(items) {
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
+}
+
+function computeCartCount(items) {
+    return items.reduce((total, item) => total + item.quantity, 0);
+}
 
 export function CartProvider({ children }) {
-    const [items, setItems] = useState(readStoredCart);
+    const { isAuthenticated } = useAuth();
+    const [items, setItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const syncInProgress = useRef(false);
 
+    // Sync basket from backend on mount / auth change
     useEffect(() => {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }, [items]);
-
-    const addToCart = useCallback((product, quantity = 1) => {
-        setItems((currentItems) => {
-            const existing = currentItems.find((item) => item.id === product.id);
-            if (existing) {
-                return currentItems.map((item) =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item,
-                );
-            }
-
-            return [...currentItems, { ...product, quantity }];
-        });
-    }, []);
-
-    const setItemQuantity = useCallback((productId, quantity) => {
-        if (quantity < 1) {
+        if (!isAuthenticated) {
+            setItems([]);
             return;
         }
 
-        setItems((currentItems) =>
-            currentItems.map((item) => (item.id === productId ? { ...item, quantity } : item)),
-        );
+        if (syncInProgress.current) return;
+        syncInProgress.current = true;
+
+        (async () => {
+            setIsLoading(true);
+            try {
+                const basket = await basketService.getBasket();
+                const normalized = (basket.items || []).map(normalizeBasketItem);
+                setItems(normalized);
+            } catch {
+                setItems([]);
+            } finally {
+                setIsLoading(false);
+                syncInProgress.current = false;
+            }
+        })();
+    }, [isAuthenticated]);
+
+    // Persist basket to backend
+    const persistBasket = useCallback(async (updatedItems) => {
+        const basketId = basketService.getBasketId() || basketService.generateBasketId();
+        const payload = {
+            id: basketId,
+            paymentIntentId: null,
+            clientSecret: null,
+            items: updatedItems.map((item) => ({
+                productId: item.productId ?? item.id,
+                productName: item.productName ?? item.name,
+                description: item.description || '',
+                image: item.image || '',
+                price: item.price,
+                quantity: item.quantity,
+                category: item.category || '',
+            })),
+        };
+        try {
+            await basketService.updateBasket(payload);
+        } catch {
+            // Error already shown by basketService; silently swallow to avoid console noise
+        }
     }, []);
 
-    const removeFromCart = useCallback((productId) => {
-        setItems((currentItems) => currentItems.filter((item) => item.id !== productId));
-    }, []);
+    const addToCart = useCallback(async (product, quantity = 1) => {
+        if (!isAuthenticated) {
+            toast.error('Please sign in to add items to your cart.');
+            return false;
+        }
 
-    const clearCart = useCallback(() => setItems([]), []);
+        const newItem = toBasketItem(product, quantity);
 
-    const cartCount = useMemo(
-        () => items.reduce((total, item) => total + item.quantity, 0),
-        [items],
-    );
+        setItems((currentItems) => {
+            const existing = currentItems.find((item) => item.id === newItem.id);
+            const updated = existing
+                ? currentItems.map((item) =>
+                      item.id === newItem.id
+                          ? { ...item, quantity: item.quantity + quantity }
+                          : item,
+                  )
+                : [...currentItems, newItem];
 
-    const subtotal = useMemo(
-        () => items.reduce((total, item) => total + item.price * item.quantity, 0),
-        [items],
-    );
+            persistBasket(updated).catch(() => {});
 
-    const cartProducts = useMemo(
-        () => items.map((item) => products.find((product) => product.id === item.id) || item),
-        [items],
-    );
+            return updated;
+        });
+
+        return true;
+    }, [isAuthenticated, persistBasket]);
+
+    const setItemQuantity = useCallback(async (productId, quantity) => {
+        if (quantity < 1 || !isAuthenticated) return;
+
+        setItems((currentItems) => {
+            const updated = currentItems.map((item) =>
+                item.id === productId ? { ...item, quantity } : item,
+            );
+
+            persistBasket(updated).catch(() => {});
+
+            return updated;
+        });
+    }, [isAuthenticated, persistBasket]);
+
+    const removeFromCart = useCallback(async (productId) => {
+        if (!isAuthenticated) return;
+
+        setItems((currentItems) => {
+            const updated = currentItems.filter((item) => item.id !== productId);
+
+            persistBasket(updated).catch(() => {});
+
+            return updated;
+        });
+    }, [isAuthenticated, persistBasket]);
+
+    const clearCart = useCallback(async () => {
+        if (!isAuthenticated) return;
+
+        setItems([]);
+        try {
+            await basketService.deleteBasket();
+        } catch {
+            // Error handled silently — basket cleared locally
+        }
+    }, [isAuthenticated]);
+
+    const cartCount = useMemo(() => computeCartCount(items), [items]);
+    const subtotal = useMemo(() => computeSubtotal(items), [items]);
 
     const value = useMemo(
         () => ({
             items,
-            cartProducts,
+            cartItems: items,
             cartCount,
             subtotal,
+            isLoading,
             addToCart,
             setItemQuantity,
             removeFromCart,
             clearCart,
         }),
-        [items, cartProducts, cartCount, subtotal, addToCart, setItemQuantity, removeFromCart, clearCart],
+        [items, cartCount, subtotal, isLoading, addToCart, setItemQuantity, removeFromCart, clearCart],
     );
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

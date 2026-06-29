@@ -64,7 +64,9 @@ export default function Roles() {
     }, [showDeleted]);
 
     useEffect(() => {
+        const controller = new AbortController();
         fetchRoles();
+        return () => controller.abort();
     }, [fetchRoles]);
 
     const filteredRoles = useMemo(() => {

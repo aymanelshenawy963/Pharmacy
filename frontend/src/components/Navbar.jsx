@@ -13,6 +13,7 @@ import {
     ShoppingCart,
     Pill,
     FileText,
+    Package,
     Phone,
     Info,
     HelpCircle,
@@ -389,6 +390,13 @@ export default function Navbar() {
                                         label="Cart"
                                         badge={cartCount}
                                     />
+                                    {isAuthenticated && (
+                                        <MobileNavLink
+                                            to="/account/orders"
+                                            icon={Package}
+                                            label="My Orders"
+                                        />
+                                    )}
                                     <MobileNavLink
                                         to={shoppingLinks[1].to}
                                         icon={shoppingLinks[1].icon}

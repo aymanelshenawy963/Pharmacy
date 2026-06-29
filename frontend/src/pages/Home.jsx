@@ -103,7 +103,7 @@ export default function Home() {
                         className="absolute inset-0 h-full w-full object-cover"
                         alt="Capsules and soft product composition"
                         src={import.meta.env.BASE_URL + 'images/heroimage.webp'}
-                        fetchPriority="high"
+                        fetchpriority="high"
                         width="1200"
                         height="800"
                     />
