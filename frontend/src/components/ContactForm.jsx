@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import emailjs from '@emailjs/browser';
-import toast from 'react-hot-toast';
 import { contactSubjects } from '../data/store';
 import Icon from './Icons';
+import notify from '../utils/notifications';
 
 const initialForm = {
     name: '',
@@ -38,12 +38,12 @@ export default function ContactForm() {
                     { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
                 );
             }
-            toast.success('Message sent successfully.');
+            notify.success('Message sent successfully.');
             setForm(initialForm);
             event.currentTarget.reset();
         } catch (error) {
             console.error(error);
-            toast.error('Message could not be sent. Please try again.');
+            notify.error('Message could not be sent. Please try again.');
         } finally {
             setSending(false);
         }

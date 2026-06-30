@@ -1,40 +1,27 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FolderTree, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { categoryService } from '../../services/categoryService';
-import { parseApiError } from '../../utils/apiErrorHandler';
+import { categorySchema } from '../../validation/admin';
+import { parseZodError } from '../../utils/validation';
+import notify from '../../utils/notifications';
+import { pageVariants, itemVariants } from '../../constants/animations';
+import useAdminCrud from '../../hooks/useAdminCrud';
 import PageHeader from '../../components/admin/PageHeader';
 import SearchInput from '../../components/admin/SearchInput';
 import DataTable from '../../components/admin/DataTable';
 import Modal from '../../components/admin/Modal';
-import ConfirmDialog from '../../components/admin/ConfirmDialog';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import FormField from '../../components/admin/FormField';
+import ModalFooter from '../../components/admin/ModalFooter';
 
 const emptyForm = { name: '', description: '' };
 
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
-
 export default function Categories() {
-    const [categories, setCategories] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [search, setSearch] = useState('');
+    const fetchFn = useCallback(() => categoryService.getAll(), []);
+    const { data: categories, setData: setCategories, filtered, isLoading, error, search, setSearch, refetch } = useAdminCrud(fetchFn, {
+        errorMessage: 'Failed to load categories',
+    });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -43,34 +30,6 @@ export default function Categories() {
     const [form, setForm] = useState(emptyForm);
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const fetchCategories = useCallback(async () => {
-        setIsLoading(true);
-        setError('');
-        try {
-            const data = await categoryService.getAll();
-            setCategories(data);
-        } catch (err) {
-            const msgs = parseApiError(err);
-            setError(msgs.join(' '));
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        const controller = new AbortController();
-        fetchCategories();
-        return () => controller.abort();
-    }, [fetchCategories]);
-
-    const filtered = useMemo(() => {
-        const q = search.toLowerCase();
-        if (!q) return categories;
-        return categories.filter(
-            (c) => c.name?.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q)
-        );
-    }, [categories, search]);
 
     function openCreate() {
         setEditingCategory(null);
@@ -91,16 +50,19 @@ export default function Categories() {
         setIsDeleteOpen(true);
     }
 
-    function validate() {
-        const errs = {};
-        if (!form.name.trim()) errs.name = 'Name is required';
-        if (!form.description.trim()) errs.description = 'Description is required';
-        setFormErrors(errs);
-        return Object.keys(errs).length === 0;
+    function validateForm() {
+        const result = categorySchema.safeParse(form);
+        if (!result.success) {
+            setFormErrors(parseZodError(result.error));
+            return false;
+        }
+        setFormErrors({});
+        return true;
     }
 
-    async function handleSubmit() {
-        if (!validate()) return;
+    async function handleSubmit(e) {
+        e.preventDefault();
+        if (!validateForm()) return;
         setIsSubmitting(true);
         try {
             if (editingCategory) {
@@ -108,19 +70,18 @@ export default function Categories() {
                     name: form.name.trim(),
                     description: form.description.trim(),
                 });
-                toast.success('Category updated successfully');
+                notify.success('Category updated successfully');
             } else {
                 await categoryService.create({
                     name: form.name.trim(),
                     description: form.description.trim(),
                 });
-                toast.success('Category created successfully');
+                notify.success('Category created successfully');
             }
             setIsModalOpen(false);
-            await fetchCategories();
+            await refetch();
         } catch (err) {
-            const msgs = parseApiError(err);
-            toast.error(msgs.join(' '));
+            notify.errorFromApi(err, 'Failed to save category');
         } finally {
             setIsSubmitting(false);
         }
@@ -131,13 +92,12 @@ export default function Categories() {
         setIsSubmitting(true);
         try {
             await categoryService.remove(deletingCategory.id);
-            toast.success('Category deleted successfully');
+            notify.success('Category deleted successfully');
             setIsDeleteOpen(false);
             setDeletingCategory(null);
-            await fetchCategories();
+            await refetch();
         } catch (err) {
-            const msgs = parseApiError(err);
-            toast.error(msgs.join(' '));
+            notify.errorFromApi(err, 'Failed to delete category');
         } finally {
             setIsSubmitting(false);
         }
@@ -209,7 +169,7 @@ export default function Categories() {
                     description="Manage your product categories"
                     action={
                         <div className="flex items-center gap-2">
-                            <button onClick={fetchCategories} className="glass-button-secondary !p-2.5 !rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center" title="Refresh">
+                            <button onClick={refetch} className="glass-button-secondary !p-2.5 !rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center" title="Refresh">
                                 <RefreshCw size={16} />
                             </button>
                             <button onClick={openCreate} className="glass-button-primary !px-3 sm:!px-4 min-h-[44px] text-sm flex items-center gap-2">
@@ -235,7 +195,7 @@ export default function Categories() {
                     data={filtered}
                     isLoading={isLoading}
                     error={error}
-                    onRetry={fetchCategories}
+                    onRetry={refetch}
                     emptyTitle="No categories found"
                     emptyDescription={
                         search
@@ -251,7 +211,7 @@ export default function Categories() {
                 title={editingCategory ? 'Edit Category' : 'Create Category'}
                 maxWidth="max-w-full sm:max-w-lg"
             >
-                <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <FormField
                         label="Name"
                         name="name"
@@ -271,26 +231,13 @@ export default function Categories() {
                         required
                         placeholder="Brief description of this category"
                     />
-                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
-                        <button
-                            onClick={() => setIsModalOpen(false)}
-                            disabled={isSubmitting}
-                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={isSubmitting}
-                            className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center gap-2"
-                        >
-                            {isSubmitting && (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                            )}
-                            {editingCategory ? 'Update' : 'Create'}
-                        </button>
-                    </div>
-                </div>
+                    <ModalFooter
+                        onCancel={() => setIsModalOpen(false)}
+                        onSubmit={handleSubmit}
+                        isSubmitting={isSubmitting}
+                        submitText={editingCategory ? 'Update' : 'Create'}
+                    />
+                </form>
             </Modal>
 
             <ConfirmDialog

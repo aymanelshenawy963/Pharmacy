@@ -51,6 +51,7 @@ export default function FormField({
         if (type === 'select') {
             return (
                 <select
+                    id={name}
                     name={name}
                     value={value}
                     onChange={onChange}
@@ -73,6 +74,7 @@ export default function FormField({
         if (type === 'textarea') {
             return (
                 <textarea
+                    id={name}
                     name={name}
                     value={value}
                     onChange={onChange}
@@ -168,6 +170,7 @@ export default function FormField({
 
         return (
             <input
+                id={name}
                 type={type}
                 name={name}
                 value={value}

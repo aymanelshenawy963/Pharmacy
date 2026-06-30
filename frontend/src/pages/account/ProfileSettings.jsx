@@ -1,32 +1,16 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-hot-toast';
 import { User, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/profileService';
 import { parseApiError } from '../../utils/apiErrorHandler';
+import notify from '../../utils/notifications';
+import { pageVariants, itemVariants } from '../../constants/animations';
 import PageHeader from '../../components/admin/PageHeader';
 import FormField from '../../components/admin/FormField';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import { validators } from '../../utils/validators';
-
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
 
 export default function ProfileSettings() {
     const { user, updateProfile } = useAuth();
@@ -38,9 +22,7 @@ export default function ProfileSettings() {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        const controller = new AbortController();
         fetchProfile();
-        return () => controller.abort();
     }, []);
 
     async function fetchProfile() {
@@ -89,7 +71,7 @@ export default function ProfileSettings() {
             await profileService.updateProfile(formData);
             updateProfile(formData.firstName, formData.lastName);
             setInitialData({ ...formData });
-            toast.success('Profile updated successfully');
+            notify.success('Profile updated successfully');
         } catch (err) {
             if (err.status === 400 && err.validationErrors) {
                 const apiErrors = {};

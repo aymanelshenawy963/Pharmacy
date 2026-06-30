@@ -1,15 +1,20 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
+import SummaryRow from '../components/SummaryRow';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/currency';
-import toast from 'react-hot-toast';
-
-const PLACEHOLDER_IMG = 'https://placehold.co/100x100/f7fbfa/0d9488?text=N/A';
+import notify from '../utils/notifications';
+import { PLACEHOLDER_IMG_SM } from '../constants/ui';
 
 export default function Cart() {
-    const { items, setItemQuantity, removeFromCart, clearCart, subtotal } = useCart();
+    const { items, setItemQuantity, removeFromCart, clearCart, subtotal, refreshCartProducts } = useCart();
+
+    useEffect(() => {
+        refreshCartProducts();
+    }, [refreshCartProducts]);
 
     if (!items.length) {
         return (
@@ -73,26 +78,26 @@ export default function Cart() {
                                         key={item.id ?? `cart-item-${index}`}
                                         className="bg-surface flex flex-col gap-6 p-5 sm:flex-row relative group rounded-2xl border border-border shadow-sm"
                                     >
-                                        <div className="relative h-40 w-full sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-bg">
+                                        <Link to={`/products/${item.id}`} className="relative h-40 w-full sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-bg">
                                             <img
-                                                src={item.image || PLACEHOLDER_IMG}
+                                                src={item.image || PLACEHOLDER_IMG_SM}
                                                 alt={item.name}
                                                 loading="lazy"
                                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                             />
-                                        </div>
+                                        </Link>
 
                                         <div className="flex-1 flex flex-col justify-between">
                                             <div className="flex items-start justify-between gap-4">
-                                                <div>
+                                                <Link to={`/products/${item.id}`}>
                                                     <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">{item.category}</p>
-                                                    <h2 className="font-sans text-xl font-medium text-text line-clamp-1">{item.name}</h2>
-                                                </div>
+                                                    <h2 className="font-sans text-xl font-medium text-text line-clamp-1 hover:text-primary transition-colors duration-200">{item.name}</h2>
+                                                </Link>
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         removeFromCart(item.id);
-                                                        toast.success(`${item.name} removed`);
+                                                        notify.success(`${item.name} removed`);
                                                     }}
                                                     className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all duration-200 hover:scale-110 active:scale-90"
                                                     aria-label="Remove item"
@@ -188,11 +193,3 @@ export default function Cart() {
     );
 }
 
-function SummaryRow({ label, value, valueClass = "text-text" }) {
-    return (
-        <div className="flex items-center justify-between">
-            <span className="text-text-muted">{label}</span>
-            <span className={`font-medium ${valueClass}`}>{value}</span>
-        </div>
-    );
-}

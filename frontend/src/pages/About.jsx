@@ -3,23 +3,7 @@ import Seo from '../components/Seo';
 import Reveal from '../components/Reveal';
 import Icon from '../components/Icons';
 import { milestones, valueCards, ownerProfile } from '../data/store';
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.1 }
-    }
-};
-
-const staggerItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    }
-};
+import { staggerContainer, staggerItem } from '../constants/animations';
 
 export default function About() {
     return (
@@ -77,7 +61,7 @@ export default function About() {
                                             With over {new Date().getFullYear() - 2010} years of retail pharmacy experience, Madan Mohan Mishra has shaped the store around careful counseling, accurate product handling, and consistent follow-up.
                                         </p>
                                         <blockquote className="mt-8 border-l-2 border-primary pl-6 font-sans text-xl italic leading-relaxed text-text transition-colors duration-300 hover:border-primary/60">
-                                            "{ownerProfile.quote}"
+                                            &quot;{ownerProfile.quote}&quot;
                                         </blockquote>
 
                                         <div className="mt-10 flex flex-wrap gap-3">
@@ -102,7 +86,7 @@ export default function About() {
                             <div className="mb-10 md:mb-14">
                                 <span className="kicker">Our Core Values</span>
                                 <h2 className="display-heading text-3xl sm:text-4xl">
-                                    What we're built to protect
+                                    What we&apos;re built to protect
                                 </h2>
                             </div>
                             <motion.div
@@ -152,7 +136,7 @@ export default function About() {
                                     viewport={{ once: true }}
                                     className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 relative z-10"
                                 >
-                                    {milestones.map((milestone, index) => (
+                                    {milestones.map((milestone) => (
                                         <motion.div
                                             key={milestone.year}
                                             variants={staggerItem}

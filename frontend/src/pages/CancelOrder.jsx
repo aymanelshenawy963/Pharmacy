@@ -2,23 +2,7 @@ import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
 import { storeInfo } from '../data/store';
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.15 }
-    }
-};
-
-const staggerItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    }
-};
+import { staggerContainer, staggerItem } from '../constants/animations';
 
 export default function CancelOrder() {
     return (
@@ -118,7 +102,7 @@ export default function CancelOrder() {
                             {/* Refunds & Exceptions */}
                             <motion.div variants={staggerItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
                                 <h3 className="font-sans text-2xl font-semibold text-text mb-6">
-                                    Refunds & Exceptions
+                                    Refunds &amp; Exceptions
                                 </h3>
                                 <ul className="space-y-5 text-base leading-relaxed text-text-muted">
                                     <li className="flex items-start gap-4">

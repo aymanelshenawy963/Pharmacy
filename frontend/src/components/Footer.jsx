@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import notify from '../utils/notifications';
 import { footerLinks, ownerProfile, socialLinks, storeInfo } from '../data/store';
 import Icon from './Icons';
 
@@ -8,7 +8,7 @@ export default function Footer() {
 
     const handleSubscribe = (event) => {
         event.preventDefault();
-        toast.success('Thanks for subscribing.');
+        notify.success('Thanks for subscribing.');
         event.currentTarget.reset();
     };
 

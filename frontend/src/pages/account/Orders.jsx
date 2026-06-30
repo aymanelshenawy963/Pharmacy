@@ -1,52 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, Eye, RefreshCw } from 'lucide-react';
+import { Package, Eye } from 'lucide-react';
 import { orderService } from '../../services/orderService';
 import { formatPrice } from '../../utils/currency';
-import { parseApiError } from '../../utils/apiErrorHandler';
+import notify from '../../utils/notifications';
+import { ORDER_STATUS_STYLES, formatDate } from '../../constants/ui';
+import { pageVariants, itemVariants } from '../../constants/animations';
 import PageHeader from '../../components/admin/PageHeader';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import EmptyState from '../../components/admin/EmptyState';
-import toast from 'react-hot-toast';
-
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
-
-const STATUS_STYLES = {
-    Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-    Paid: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-    Shipped: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-    Delivered: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-    Cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-};
-
-function formatDate(dateStr) {
-    try {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    } catch {
-        return dateStr;
-    }
-}
 
 export default function Orders() {
     const [orders, setOrders] = useState([]);
@@ -60,18 +24,15 @@ export default function Orders() {
             const data = await orderService.getMyOrders();
             setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
-            const msgs = parseApiError(err);
-            setError(msgs.join(' '));
-            toast.error(msgs.join(' '));
+            setError('Failed to load orders.');
+            notify.errorFromApi(err, 'Failed to load orders.');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        const controller = new AbortController();
         fetchOrders();
-        return () => controller.abort();
     }, []);
 
     return (
@@ -112,7 +73,7 @@ export default function Orders() {
                                         <h3 className="text-sm font-bold text-[rgb(var(--color-text))]">
                                             Order #{order.id}
                                         </h3>
-                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_STYLES[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${ORDER_STATUS_STYLES[order.status] || 'bg-gray-100 text-gray-800'}`}>
                                             {order.status}
                                         </span>
                                     </div>

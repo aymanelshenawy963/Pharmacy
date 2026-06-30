@@ -22,6 +22,7 @@ export default function SearchInput({ value, onChange, placeholder = 'Search...'
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     placeholder={placeholder}
+                    aria-label={placeholder}
                     className="w-full rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] py-2.5 pl-10 pr-9 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] outline-none transition-all duration-200 focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20 min-h-[44px]"
                 />
                 <AnimatePresence>

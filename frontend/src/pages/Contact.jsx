@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import emailjs from '@emailjs/browser';
-import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
 import { ownerProfile, storeInfo } from '../data/store';
+import { staggerContainer, staggerItem } from '../constants/animations';
+import notify from '../utils/notifications';
 
 const initialForm = {
     name: '',
@@ -18,23 +19,6 @@ const emailConfigured =
     import.meta.env.VITE_EMAILJS_SERVICE_ID &&
     import.meta.env.VITE_EMAILJS_CONTACT_TEMPLATE &&
     import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.08, delayChildren: 0.1 }
-    }
-};
-
-const staggerItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    }
-};
 
 export default function Contact() {
     const [form, setForm] = useState(initialForm);
@@ -57,11 +41,11 @@ export default function Contact() {
                     { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
                 );
             }
-            toast.success('Message sent successfully.');
+            notify.success('Message sent successfully.');
             setForm(initialForm);
         } catch (error) {
             console.error(error);
-            toast.error('Message could not be sent. Please try again.');
+            notify.error('Message could not be sent. Please try again.');
         } finally {
             setSending(false);
         }

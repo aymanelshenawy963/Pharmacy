@@ -134,3 +134,62 @@ export const contactSubjects = [
     'Delivery support',
     'Other',
 ];
+
+// No backend API exists for delivery methods — these are static/fallback values.
+export const deliveryMethods = [
+    {
+        id: 1,
+        name: 'Fast Delivery',
+        description: 'Get your order in 1-2 days',
+        price: 9.99,
+        deliveryTime: '1-2 days',
+    },
+    {
+        id: 2,
+        name: 'Standard Delivery',
+        description: 'Get your order in 3-5 days',
+        price: 4.99,
+        deliveryTime: '3-5 days',
+    },
+    {
+        id: 3,
+        name: 'Economy Delivery',
+        description: 'Get your order in 5-7 days',
+        price: 2.99,
+        deliveryTime: '5-7 days',
+    },
+];
+
+export const collectionCards = [
+    {
+        title: 'Medicines',
+        description: 'Comprehensive pharmaceutical care, sourced strictly from certified global manufacturers.',
+        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD49expR2znvOL7qB6D50TlQBdUgtizsNudzj-6pxZGO_xZrwBSXCI1tLClB139tPjeUY_6-RSdQsD2yhhpf6tFZUFPtMIZcmQ3iUjYJeTAecFa620xx8QxFyaHHsMNNf3AonnjuGpd0y77rbEOkY7l7F50mTmls8pk6ZxEDa7fE9AnmeJB696HS79j8t4SKKfVK3E9iARcmCICR6Wg7twzL2tpHP2awMzcL4kiuvmSHTqft11KiDbtkgPbSfVIqFLIWaG7FLo1xN4',
+        large: true,
+    },
+    {
+        title: 'Vitamins',
+        description: 'Daily nutritional support.',
+        image: import.meta.env.BASE_URL + 'images/vitamins.webp',
+    },
+    {
+        title: 'Personal Care',
+        description: 'Premium hygiene essentials.',
+        image: import.meta.env.BASE_URL + 'images/personalcare.webp',
+    },
+    {
+        title: 'Baby Care',
+        description: 'Gentle pediatric solutions.',
+        image: import.meta.env.BASE_URL + 'images/babycare.webp',
+    },
+    {
+        title: 'Diabetic Care',
+        description: 'Monitoring and management.',
+        image: import.meta.env.BASE_URL + 'images/diabeticcare.webp',
+    },
+    {
+        title: 'Cough & Cold',
+        description: 'Relief for coughs, colds, and respiratory discomfort.',
+        image: import.meta.env.BASE_URL + 'images/coughandcold.webp',
+    },
+];

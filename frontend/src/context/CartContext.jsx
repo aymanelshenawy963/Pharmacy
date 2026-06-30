@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { basketService } from '../services/basketService';
+import { productService } from '../services/productService';
 import { useAuth } from './AuthContext';
-import toast from 'react-hot-toast';
+import notify from '../utils/notifications';
 
 const CartContext = createContext(null);
 
@@ -46,6 +47,8 @@ export function CartProvider({ children }) {
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const syncInProgress = useRef(false);
+    const itemsRef = useRef(items);
+    itemsRef.current = items;
 
     // Sync basket from backend on mount / auth change
     useEffect(() => {
@@ -96,9 +99,61 @@ export function CartProvider({ children }) {
         }
     }, []);
 
+    // Refresh cart items with current product data from the API
+    const refreshCartProducts = useCallback(async () => {
+        const currentItems = itemsRef.current;
+        if (!currentItems.length) return;
+
+        const productIds = [...new Set(currentItems.map((item) => item.productId || item.id))];
+
+        const products = await Promise.all(
+            productIds.map((id) => productService.getById(id).catch(() => null))
+        );
+
+        const productMap = {};
+        products.forEach((p) => {
+            if (p) productMap[p.id] = p;
+        });
+
+        if (Object.keys(productMap).length === 0) return;
+
+        setItems((latestItems) => {
+            const updated = latestItems.map((item) => {
+                const fresh = productMap[item.productId || item.id];
+                if (!fresh) return item;
+                return {
+                    ...item,
+                    name: fresh.name ?? item.name,
+                    productName: fresh.name ?? item.productName,
+                    description: fresh.description ?? item.description,
+                    image: fresh.photos?.[0] || fresh.image || item.image,
+                    price: fresh.newPrice ?? fresh.price ?? item.price,
+                    category: fresh.categoryName || fresh.category || item.category,
+                };
+            });
+
+            persistBasket(updated).catch(() => {});
+            return updated;
+        });
+    }, [persistBasket]);
+
+    // Re-fetch product data when tab gains focus
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') {
+                refreshCartProducts();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibility);
+        return () => document.removeEventListener('visibilitychange', handleVisibility);
+    }, [isAuthenticated, refreshCartProducts]);
+
     const addToCart = useCallback(async (product, quantity = 1) => {
         if (!isAuthenticated) {
-            toast.error('Please sign in to add items to your cart.');
+            notify.error('Please sign in to add items to your cart.');
             return false;
         }
 
@@ -173,8 +228,9 @@ export function CartProvider({ children }) {
             setItemQuantity,
             removeFromCart,
             clearCart,
+            refreshCartProducts,
         }),
-        [items, cartCount, subtotal, isLoading, addToCart, setItemQuantity, removeFromCart, clearCart],
+        [items, cartCount, subtotal, isLoading, addToCart, setItemQuantity, removeFromCart, clearCart, refreshCartProducts],
     );
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

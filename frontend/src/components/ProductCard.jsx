@@ -2,23 +2,22 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/currency';
-import toast from 'react-hot-toast';
+import notify from '../utils/notifications';
+import { PLACEHOLDER_IMG, calculateDiscount } from '../constants/ui';
 import Icon from './Icons';
-
-const PLACEHOLDER_IMG = 'https://placehold.co/800x800/f7fbfa/0d9488?text=No+Image';
 
 function ProductCard({ product }) {
     const { addToCart } = useCart();
     const price = product.price ?? 0;
     const mrp = product.mrp ?? 0;
-    const discount = mrp > price ? Math.max(0, Math.round(((mrp - price) / mrp) * 100)) : 0;
+    const discount = calculateDiscount(price, mrp);
     const image = product.image || PLACEHOLDER_IMG;
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
         const added = await addToCart(product);
         if (added) {
-            toast.success(
+            notify.success(
                 <div className="flex items-center gap-2">
                     <div className="bg-[rgb(var(--color-primary))]/15 p-1 rounded-lg">
                         <img src={image} alt="" className="w-6 h-6 object-cover rounded-md" />

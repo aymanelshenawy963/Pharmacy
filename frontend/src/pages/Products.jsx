@@ -1,14 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import ProductCard from '../components/ProductCard';
 import Icon from '../components/Icons';
-import { useDebounce } from '../hooks/useDebounce';
-import { productService } from '../services/productService';
-import { categoryService } from '../services/categoryService';
-import { parseApiError } from '../utils/apiErrorHandler';
-import toast from 'react-hot-toast';
+import useProducts from '../hooks/useProducts';
+import { staggerGrid, gridItem } from '../constants/animations';
 
 const sortOptions = [
     { value: '', label: 'Default' },
@@ -18,125 +13,28 @@ const sortOptions = [
     { value: 'namedesc', label: 'Name: Z → A' },
 ];
 
-const staggerGrid = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.06 }
-    }
-};
-
-const gridItem = {
-    hidden: { opacity: 0, y: 20, scale: 0.97 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
-    }
-};
-
-function normalizeProduct(p) {
-    return {
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        price: p.newPrice,
-        mrp: p.oldPrice,
-        category: p.categoryName,
-        image: p.photos?.[0] || null,
-        requiresPrescription: p.requiresPrescription,
-    };
-}
+const SELECT_ARROW = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`;
+const selectStyle = { backgroundImage: SELECT_ARROW, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' };
 
 export default function Products() {
-    const [searchParams] = useSearchParams();
-    const [search, setSearch] = useState('');
-    const [category, setCategory] = useState(searchParams.get('category') || 'All');
-    const [sortBy, setSortBy] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const [products, setProducts] = useState([]);
-    const [totalCount, setTotalCount] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
-    const [categories, setCategories] = useState([]);
-
-    const debouncedSearch = useDebounce(search, 400);
-    const perPage = 6;
-    const categoriesRef = useRef(categories);
-    categoriesRef.current = categories;
-
-    // Fetch categories on mount
-    useEffect(() => {
-        const controller = new AbortController();
-        (async () => {
-            try {
-                const data = await categoryService.getAll();
-                if (!controller.signal.aborted) setCategories(Array.isArray(data) ? data : []);
-            } catch {
-                // Categories will be empty; filter dropdown shows only "All"
-            }
-        })();
-        return () => controller.abort();
-    }, []);
-
-    // Fetch products when filters change
-    const fetchProducts = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const params = { PageSize: perPage, PageNumber: currentPage };
-            if (debouncedSearch.trim()) params.Search = debouncedSearch.trim();
-            if (category !== 'All') {
-                const match = categoriesRef.current.find(
-                    (c) => c.name.toLowerCase() === category.toLowerCase(),
-                );
-                if (match) params.CategoryId = match.id;
-            }
-            if (sortBy) params.Sort = sortBy;
-
-            const data = await productService.getAll(params);
-
-            const items = (data.data || []).map(normalizeProduct);
-            setProducts(items);
-            setTotalCount(data.totalCount ?? items.length);
-            setTotalPages(data.totalPages ?? 1);
-        } catch (err) {
-            const msgs = parseApiError(err);
-            setError(msgs.join(' '));
-            setProducts([]);
-            setTotalCount(0);
-            setTotalPages(1);
-            toast.error(msgs.join(' '));
-        } finally {
-            setLoading(false);
-        }
-    }, [debouncedSearch, category, sortBy, currentPage]);
-
-    useEffect(() => {
-        const controller = new AbortController();
-        fetchProducts();
-        return () => controller.abort();
-    }, [fetchProducts]);
-
-    // Reset to page 1 when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [debouncedSearch, category, sortBy]);
-
-    // Sync category from URL params
-    useEffect(() => {
-        setCategory(searchParams.get('category') || 'All');
-    }, [searchParams]);
-
-    const resetFilters = () => {
-        setSearch('');
-        setCategory('All');
-        setSortBy('');
-        setCurrentPage(1);
-    };
+    const {
+        search,
+        setSearch,
+        category,
+        setCategory,
+        sortBy,
+        setSortBy,
+        currentPage,
+        setCurrentPage,
+        loading,
+        error,
+        products,
+        totalCount,
+        totalPages,
+        categories,
+        resetFilters,
+        fetchProducts,
+    } = useProducts();
 
     return (
         <>
@@ -210,7 +108,6 @@ export default function Products() {
                         </div>
 
                         <div className="space-y-4">
-                            {/* Search */}
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Search</span>
                                 <div className="flex items-center gap-2 rounded-lg border border-border bg-bg px-3 py-2 transition-all duration-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 focus-within:shadow-sm">
@@ -224,14 +121,13 @@ export default function Products() {
                                 </div>
                             </label>
 
-                            {/* Category */}
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Category</span>
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
-                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
+                                    style={selectStyle}
                                 >
                                     <option value="All">All Categories</option>
                                     {categories.map((cat) => (
@@ -240,14 +136,13 @@ export default function Products() {
                                 </select>
                             </label>
 
-                            {/* Sort By */}
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Sort By</span>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                     className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
-                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' }}
+                                    style={selectStyle}
                                 >
                                     {sortOptions.map((option) => (
                                         <option key={option.value} value={option.value}>{option.label}</option>
@@ -308,7 +203,7 @@ export default function Products() {
                                         Something went wrong
                                     </h2>
                                     <p className="max-w-md text-base text-text-muted mb-8">
-                                        {error}
+                                        Failed to load products. Please try again.
                                     </p>
                                     <button onClick={fetchProducts} className="glass-button-primary">
                                         <Icon name="RefreshCw" className="h-4 w-4" />
@@ -348,7 +243,7 @@ export default function Products() {
                                         No products found
                                     </h2>
                                     <p className="max-w-md text-base text-text-muted mb-8">
-                                        We couldn't find anything matching your filters. Try adjusting your search criteria or resetting the filters.
+                                        We couldn&apos;t find anything matching your filters. Try adjusting your search criteria or resetting the filters.
                                     </p>
                                     <button onClick={resetFilters} className="glass-button-primary">
                                         <Icon name="RefreshCw" className="h-4 w-4" />

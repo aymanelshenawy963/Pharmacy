@@ -1,25 +1,10 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
 import { faqItems } from '../data/store';
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.06, delayChildren: 0.15 }
-    }
-};
-
-const staggerItem = {
-    hidden: { opacity: 0, y: 16 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
-    }
-};
+import { staggerContainer, staggerItem } from '../constants/animations';
 
 export default function FAQ() {
     const [openIndex, setOpenIndex] = useState(0);
@@ -108,10 +93,10 @@ export default function FAQ() {
                         className="mt-16 text-center bg-surface p-8 rounded-2xl border border-primary/20 shadow-sm"
                     >
                         <h3 className="font-sans text-2xl mb-3 text-text">Still have questions?</h3>
-                        <p className="text-text-muted mb-6">Can't find the answer you're looking for? Please contact our friendly team.</p>
-                        <a href="/contact" className="glass-button-primary inline-flex">
+                        <p className="text-text-muted mb-6">Can&apos;t find the answer you&apos;re looking for? Please contact our friendly team.</p>
+                        <Link to="/contact" className="glass-button-primary inline-flex">
                             Get in Touch
-                        </a>
+                        </Link>
                     </motion.div>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import emailjs from '@emailjs/browser';
-import toast from 'react-hot-toast';
+import notify from '../utils/notifications';
 import Icon from './Icons';
 
 const initialForm = {
@@ -53,7 +53,7 @@ export default function PrescriptionUpload() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (!file) {
-            toast.error('Please add a prescription file.');
+            notify.error('Please add a prescription file.');
             return;
         }
 
@@ -71,13 +71,13 @@ export default function PrescriptionUpload() {
                 );
             }
 
-            toast.success('Prescription submitted successfully.');
+            notify.success('Prescription submitted successfully.');
             setForm(initialForm);
             setFile(null);
             event.currentTarget.reset();
         } catch (error) {
             console.error(error);
-            toast.error('Prescription submission failed. Please try again.');
+            notify.error('Prescription submission failed. Please try again.');
         } finally {
             setSending(false);
         }

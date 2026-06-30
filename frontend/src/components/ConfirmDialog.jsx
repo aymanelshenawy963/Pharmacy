@@ -80,7 +80,7 @@ export default function ConfirmDialog({
                         animate="visible"
                         exit="exit"
                         className="fixed inset-0 bg-black/60 backdrop-blur-md"
-                        onClick={onClose}
+                        onClick={isLoading ? undefined : onClose}
                     />
                     <motion.div
                         variants={dialogVariants}

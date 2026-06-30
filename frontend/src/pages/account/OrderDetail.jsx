@@ -4,51 +4,12 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, MapPin, Truck, Package, XCircle } from 'lucide-react';
 import { orderService } from '../../services/orderService';
 import { formatPrice } from '../../utils/currency';
-import { parseApiError } from '../../utils/apiErrorHandler';
+import notify from '../../utils/notifications';
+import { ORDER_STATUS_STYLES, formatDateLong, PLACEHOLDER_IMG_XS } from '../../constants/ui';
+import { pageVariants, itemVariants } from '../../constants/animations';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
-import toast from 'react-hot-toast';
-
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
-
-const STATUS_STYLES = {
-    Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-    Paid: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-    Shipped: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-    Delivered: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-    Cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-};
-
-const PLACEHOLDER_IMG = 'https://placehold.co/80x80/f7fbfa/0d9488?text=N/A';
-
-function formatDate(dateStr) {
-    try {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    } catch {
-        return dateStr;
-    }
-}
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 export default function OrderDetail() {
     const { id } = useParams();
@@ -57,6 +18,7 @@ export default function OrderDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [cancelling, setCancelling] = useState(false);
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
     const fetchOrder = async () => {
         setLoading(true);
@@ -68,9 +30,8 @@ export default function OrderDetail() {
             if (err.status === 404) {
                 setError('not_found');
             } else {
-                const msgs = parseApiError(err);
-                setError(msgs.join(' '));
-                toast.error(msgs.join(' '));
+                setError('Failed to load order details.');
+                notify.errorFromApi(err, 'Failed to load order details.');
             }
         } finally {
             setLoading(false);
@@ -78,21 +39,18 @@ export default function OrderDetail() {
     };
 
     useEffect(() => {
-        const controller = new AbortController();
         fetchOrder();
-        return () => controller.abort();
     }, [id]);
 
     const handleCancel = async () => {
-        if (!window.confirm('Are you sure you want to cancel this order?')) return;
+        setShowCancelConfirm(false);
         setCancelling(true);
         try {
             await orderService.cancelOrder(id);
-            toast.success('Order cancelled successfully.');
+            notify.success('Order cancelled successfully.');
             fetchOrder();
         } catch (err) {
-            const msgs = parseApiError(err);
-            toast.error(msgs.join(' '));
+            notify.errorFromApi(err, 'Failed to cancel order.');
         } finally {
             setCancelling(false);
         }
@@ -158,16 +116,16 @@ export default function OrderDetail() {
                         Order #{order.id}
                     </h1>
                     <p className="text-sm text-[rgb(var(--color-text-muted))] mt-1">
-                        Placed on {formatDate(order.orderDate)}
+                        Placed on {formatDateLong(order.orderDate)}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${STATUS_STYLES[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                    <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${ORDER_STATUS_STYLES[order.status] || 'bg-gray-100 text-gray-800'}`}>
                         {order.status}
                     </span>
                     {canCancel && (
                         <button
-                            onClick={handleCancel}
+                            onClick={() => setShowCancelConfirm(true)}
                             disabled={cancelling}
                             className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors duration-200 disabled:opacity-50 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400"
                         >
@@ -190,7 +148,7 @@ export default function OrderDetail() {
                             <div key={idx} className="flex items-center gap-4 p-3 rounded-xl bg-[rgb(var(--color-bg-subtle))]">
                                 <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))]">
                                     <img
-                                        src={item.mainImage || PLACEHOLDER_IMG}
+                                        src={item.mainImage || PLACEHOLDER_IMG_XS}
                                         alt={item.productName}
                                         className="h-full w-full object-cover"
                                     />
@@ -253,6 +211,18 @@ export default function OrderDetail() {
                     </motion.div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={showCancelConfirm}
+                onClose={() => setShowCancelConfirm(false)}
+                onConfirm={handleCancel}
+                title="Cancel Order"
+                message="Are you sure you want to cancel this order? This action cannot be undone."
+                confirmText="Cancel Order"
+                cancelText="Keep Order"
+                variant="danger"
+                isLoading={cancelling}
+            />
         </motion.div>
     );
 }

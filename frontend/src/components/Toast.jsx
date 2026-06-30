@@ -1,5 +1,4 @@
 import { Toaster } from 'react-hot-toast';
-import { CheckCircle2, XCircle, AlertTriangle, Info } from 'lucide-react';
 
 export default function AppToaster() {
     return (

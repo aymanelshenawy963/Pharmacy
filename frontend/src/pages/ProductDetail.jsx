@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
@@ -8,43 +8,11 @@ import ProductCard from '../components/ProductCard';
 import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/currency';
-import { parseApiError } from '../utils/apiErrorHandler';
-import toast from 'react-hot-toast';
-
-const PLACEHOLDER_IMG = 'https://placehold.co/800x800/f7fbfa/0d9488?text=No+Image';
-
-const staggerInfo = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.15 }
-    }
-};
-
-const infoItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    }
-};
-
-function normalizeProduct(p) {
-    return {
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        price: p.newPrice,
-        mrp: p.oldPrice,
-        stock: p.stock,
-        category: p.categoryName,
-        categoryId: p.categoryId,
-        image: p.photos?.[0] || null,
-        requiresPrescription: p.requiresPrescription,
-        topSelling: p.topSelling,
-    };
-}
+import notify from '../utils/notifications';
+import { normalizeProduct } from '../utils/normalizeProduct';
+import { PLACEHOLDER_IMG, calculateDiscount } from '../constants/ui';
+import { staggerInfo, infoItem } from '../constants/animations';
+import { ROUTES } from '../constants/routes';
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -56,66 +24,66 @@ export default function ProductDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        let cancelled = false;
+    const loadProduct = async (signal) => {
         setLoading(true);
         setError(null);
         setProduct(null);
         setRelatedProducts([]);
 
-        (async () => {
-            try {
-                const data = await productService.getById(id);
-                if (cancelled) return;
-                const normalized = normalizeProduct(data);
-                setProduct(normalized);
+        try {
+            const data = await productService.getById(id);
+            if (signal?.aborted) return;
+            const normalized = normalizeProduct(data);
+            setProduct(normalized);
 
-                // Fetch related products by category
-                if (normalized.categoryId) {
-                    try {
-                        const related = await productService.getAll({
-                            CategoryId: normalized.categoryId,
-                            PageSize: 6,
-                            PageNumber: 1,
-                        });
-                        if (!cancelled) {
-                            const items = (related.data || [])
-                                .map(normalizeProduct)
-                                .filter((p) => p.id !== normalized.id)
-                                .slice(0, 4);
-                            setRelatedProducts(items);
-                        }
-                    } catch {
-                        // Related products are non-critical
+            if (normalized.categoryId) {
+                try {
+                    const related = await productService.getAll({
+                        CategoryId: normalized.categoryId,
+                        PageSize: 6,
+                        PageNumber: 1,
+                    });
+                    if (!signal?.aborted) {
+                        const items = (related.data || [])
+                            .map(normalizeProduct)
+                            .filter((p) => p.id !== normalized.id)
+                            .slice(0, 4);
+                        setRelatedProducts(items);
                     }
+                } catch {
+                    // Related products are non-critical
                 }
-            } catch (err) {
-                if (!cancelled) {
-                    if (err.status === 404) {
-                        setError('not_found');
-                    } else {
-                        const msgs = parseApiError(err);
-                        setError(msgs.join(' '));
-                        toast.error(msgs.join(' '));
-                    }
-                }
-            } finally {
-                if (!cancelled) setLoading(false);
             }
-        })();
+        } catch (err) {
+            if (!signal?.aborted) {
+                if (err.status === 404) {
+                    setError('not_found');
+                } else {
+                    notify.errorFromApi(err);
+                    setError('error');
+                }
+            }
+        } finally {
+            if (!signal?.aborted) setLoading(false);
+        }
+    };
 
-        return () => { cancelled = true; };
+    useEffect(() => {
+        const controller = new AbortController();
+        loadProduct(controller.signal);
+        return () => controller.abort();
     }, [id]);
+
+    const handleRetry = () => loadProduct();
 
     const handleAddToCart = async () => {
         if (!product) return;
         const added = await addToCart(product, quantity);
         if (added) {
-            toast.success(`${quantity} × ${product.name} added to cart.`);
+            notify.success(`${quantity} × ${product.name} added to cart.`);
         }
     };
 
-    // Loading state
     if (loading) {
         return (
             <>
@@ -144,7 +112,6 @@ export default function ProductDetail() {
         );
     }
 
-    // Not found state
     if (error === 'not_found' || (!loading && !product)) {
         return (
             <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 min-h-[60vh] flex flex-col justify-center">
@@ -166,7 +133,7 @@ export default function ProductDetail() {
                     <p className="mt-3 text-base text-text-muted">This product is not in our catalog.</p>
                     <button
                         type="button"
-                        onClick={() => navigate('/products')}
+                        onClick={() => navigate(ROUTES.PRODUCTS)}
                         className="glass-button-primary mt-8 inline-flex items-center"
                     >
                         <Icon name="ArrowRight" className="mr-2 h-4 w-4 rotate-180" />
@@ -177,7 +144,6 @@ export default function ProductDetail() {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 min-h-[60vh] flex flex-col justify-center">
@@ -191,10 +157,10 @@ export default function ProductDetail() {
                         <Icon name="AlertTriangle" className="h-10 w-10" />
                     </div>
                     <h1 className="mt-6 font-sans text-3xl font-semibold text-text">Something went wrong</h1>
-                    <p className="mt-3 text-base text-text-muted">{error}</p>
+                    <p className="mt-3 text-base text-text-muted">Failed to load product details.</p>
                     <button
                         type="button"
-                        onClick={() => window.location.reload()}
+                        onClick={handleRetry}
                         className="glass-button-primary mt-8 inline-flex items-center"
                     >
                         <Icon name="RefreshCw" className="mr-2 h-4 w-4" />
@@ -208,7 +174,7 @@ export default function ProductDetail() {
     const image = product.image || PLACEHOLDER_IMG;
     const price = product.price ?? 0;
     const mrp = product.mrp ?? 0;
-    const discount = mrp > price ? Math.max(0, Math.round(((mrp - price) / mrp) * 100)) : 0;
+    const discount = calculateDiscount(price, mrp);
 
     return (
         <>
@@ -220,7 +186,7 @@ export default function ProductDetail() {
             {/* Breadcrumb */}
             <div className="border-b border-border bg-bg/50 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 text-sm text-text-muted sm:px-6 lg:px-8">
-                    <Link to="/products" className="transition-colors hover:text-primary">Products</Link>
+                    <Link to={ROUTES.PRODUCTS} className="transition-colors hover:text-primary">Products</Link>
                     <Icon name="ChevronRight" className="h-3.5 w-3.5" />
                     {product.category && (
                         <>
@@ -260,7 +226,6 @@ export default function ProductDetail() {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                {/* Badges */}
                                 <div className="absolute left-5 top-5 flex flex-col gap-2">
                                     {discount > 0 && (
                                         <motion.span
@@ -294,7 +259,6 @@ export default function ProductDetail() {
                             animate="visible"
                             className="space-y-8"
                         >
-                            {/* Header */}
                             <motion.div variants={infoItem}>
                                 {product.category && (
                                     <span className="kicker !mb-3">
@@ -306,7 +270,6 @@ export default function ProductDetail() {
                                 </h1>
                             </motion.div>
 
-                            {/* Price card */}
                             <motion.div variants={infoItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
                                 <div className="flex flex-wrap items-end justify-between gap-6">
                                     <div>
@@ -333,7 +296,6 @@ export default function ProductDetail() {
                                         )}
                                     </div>
 
-                                    {/* Quantity */}
                                     <div className="flex items-center rounded-xl border border-border bg-bg p-1 shadow-sm">
                                         <motion.button
                                             whileTap={{ scale: 0.9 }}
@@ -365,7 +327,6 @@ export default function ProductDetail() {
                                     </div>
                                 </div>
 
-                                {/* Action buttons */}
                                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                                     <motion.button
                                         whileHover={{ scale: 1.01 }}
@@ -379,7 +340,7 @@ export default function ProductDetail() {
                                     </motion.button>
                                     {product.requiresPrescription && (
                                         <Link
-                                            to="/prescription"
+                                            to={ROUTES.PRESCRIPTION}
                                             className="glass-button flex-1 justify-center py-4 text-base"
                                         >
                                             <Icon name="Upload" className="h-5 w-5 mr-2" />
@@ -389,7 +350,6 @@ export default function ProductDetail() {
                                 </div>
                             </motion.div>
 
-                            {/* Prescription notice */}
                             {product.requiresPrescription && (
                                 <motion.div
                                     variants={infoItem}
@@ -402,7 +362,6 @@ export default function ProductDetail() {
                                 </motion.div>
                             )}
 
-                            {/* Description */}
                             {product.description && (
                                 <motion.div variants={infoItem} className="bg-surface p-7 rounded-2xl border border-border shadow-sm">
                                     <h3 className="font-sans text-lg font-semibold text-text mb-3 flex items-center gap-2">

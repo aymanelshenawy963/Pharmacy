@@ -1,88 +1,29 @@
 import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Icon from '../components/Icons';
 import Seo from '../components/Seo';
-
-const trustBadges = [
-    { title: 'Licensed Pharmacy', icon: 'ShieldCheck' },
-    { title: '100% Genuine Medicines', icon: 'BadgeCheck' },
-    { title: 'Same-Day Delivery', icon: 'Truck' },
-    { title: 'Expert Consultation', icon: 'Stethoscope' },
-];
-
-const collectionCards = [
-    {
-        title: 'Medicines',
-        description: 'Comprehensive pharmaceutical care, sourced strictly from certified global manufacturers.',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD49expR2znvOL7qB6D50TlQBdUgtizsNudzj-6pxZGO_xZrwBSXCI1tLClB139tPjeUY_6-RSdQsD2yhhpf6tFZUFPtMIZcmQ3iUjYJeTAecFa620xx8QxFyaHHsMNNf3AonnjuGpd0y77rbEOkY7l7F50mTmls8pk6ZxEDa7fE9AnmeJB696HS79j8t4SKKfVK3E9iARcmCICR6Wg7twzL2tpHP2awMzcL4kiuvmSHTqft11KiDbtkgPbSfVIqFLIWaG7FLo1xN4',
-        large: true,
-    },
-    {
-        title: 'Vitamins',
-        description: 'Daily nutritional support.',
-        image: import.meta.env.BASE_URL + 'images/vitamins.webp',
-    },
-    {
-        title: 'Personal Care',
-        description: 'Premium hygiene essentials.',
-        image: import.meta.env.BASE_URL + 'images/personalcare.webp',
-    },
-    {
-        title: 'Baby Care',
-        description: 'Gentle pediatric solutions.',
-        image: import.meta.env.BASE_URL + 'images/babycare.webp',
-    },
-    {
-        title: 'Diabetic Care',
-        description: 'Monitoring and management.',
-        image: import.meta.env.BASE_URL + 'images/diabeticcare.webp',
-    },
-    {
-        title: 'Cough & Cold',
-        description: 'Relief for coughs, colds, and respiratory discomfort.',
-        image: import.meta.env.BASE_URL + 'images/coughandcold.webp',
-    },
-];
-
-const processSteps = [
-    {
-        title: 'Search & Select',
-        description: 'Browse our curated inventory to find your prescribed or wellness items.',
-        icon: 'Search',
-    },
-    {
-        title: 'Upload Prescription',
-        description: 'Securely submit your medical documents for rapid pharmacist verification.',
-        icon: 'Upload',
-    },
-    {
-        title: 'Direct Delivery',
-        description: 'Receive your meticulously packaged order swiftly at your doorstep.',
-        icon: 'Truck',
-    },
-];
-
-const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
-};
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1 }
-    }
-};
+import notify from '../utils/notifications';
+import { trustBadges, howItWorksSteps, collectionCards } from '../data/store';
+import { staggerContainer, fadeInUp } from '../constants/animations';
+import { buildProductSearchUrl } from '../constants/routes';
 
 export default function Home() {
+    const navigate = useNavigate();
+    const [heroSearch, setHeroSearch] = useState('');
     const [newsletterEmail, setNewsletterEmail] = useState('');
+
+    const handleHeroSearch = (e) => {
+        e.preventDefault();
+        const query = heroSearch.trim();
+        if (query) {
+            navigate(buildProductSearchUrl(query));
+        }
+    };
 
     const handleSubscribe = (event) => {
         event.preventDefault();
-        toast.success('Newsletter signup submitted.');
+        notify.success('Newsletter signup submitted.');
         setNewsletterEmail('');
     };
 
@@ -177,12 +118,14 @@ export default function Home() {
                             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                             className="mt-6 w-full md:max-w-none md:mr-[-14%] lg:mr-[-18%]"
                             style={{ minWidth: '100%' }}
-                            onSubmit={(e) => e.preventDefault()}
+                            onSubmit={handleHeroSearch}
                         >
                             <label htmlFor="hero-search" className="sr-only">Search</label>
                             <div className="flex items-center gap-3 w-full">
                                 <input
                                     id="hero-search"
+                                    value={heroSearch}
+                                    onChange={(e) => setHeroSearch(e.target.value)}
                                     placeholder="Search for medicines, vitamins, baby care and personal care..."
                                     className="flex-1 min-w-0 bg-[rgb(var(--color-surface))]/80 backdrop-blur-md border border-[rgb(var(--color-border))]/40 shadow-sm rounded-full px-6 py-3.5 text-[15px] outline-none transition-all duration-300 focus:bg-[rgb(var(--color-surface))]/95 focus:shadow-md focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20 placeholder:text-[rgb(var(--color-text-muted))]"
                                 />
@@ -215,7 +158,7 @@ export default function Home() {
                                 className="group flex flex-col items-center gap-4 text-center"
                             >
                                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] shadow-sm text-[rgb(var(--color-primary))] transition-all duration-300 group-hover:scale-110 group-hover:bg-[rgb(var(--color-primary))]/10 group-hover:shadow-md group-hover:shadow-[rgb(var(--color-primary))]/10">
-                                    <Icon name={badge.icon} className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                                    <Icon name={badge.iconKey} className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
                                 </div>
                                 <h3 className="text-base font-medium text-[rgb(var(--color-text))] transition-colors duration-200 group-hover:text-[rgb(var(--color-primary))]">{badge.title}</h3>
                             </motion.div>
@@ -328,17 +271,17 @@ export default function Home() {
                     >
                         <div className="absolute left-1/2 md:left-0 top-0 md:top-10 h-full md:h-px w-px md:w-full -translate-x-1/2 md:translate-x-0 bg-[rgb(var(--color-border))] md:block" />
 
-                        {processSteps.map((step, index) => (
+                        {howItWorksSteps.map((step, index) => (
                             <motion.div
                                 variants={fadeInUp}
                                 key={step.title}
                                 className="z-10 flex w-full flex-col items-center bg-[rgb(var(--color-surface))] md:bg-transparent px-4 text-center md:w-1/3 pt-4 md:pt-0 group/step"
                             >
                                 <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] shadow-lg text-[rgb(var(--color-primary))] transition-all duration-300 group-hover/step:scale-110 group-hover/step:shadow-xl group-hover/step:shadow-[rgb(var(--color-primary))]/15">
-                                    <Icon name={step.icon} className="h-8 w-8 transition-transform duration-300 group-hover/step:scale-110" />
+                                    <Icon name={step.iconKey} className="h-8 w-8 transition-transform duration-300 group-hover/step:scale-110" />
                                 </div>
                                 <h4 className="mb-3 font-sans text-xl font-semibold text-[rgb(var(--color-text))]">{step.title}</h4>
-                                <p className="text-base text-[rgb(var(--color-text-muted))] max-w-xs">{step.description}</p>
+                                <p className="text-base text-[rgb(var(--color-text-muted))] max-w-xs">{step.text}</p>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -369,7 +312,7 @@ export default function Home() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-0 left-0 p-8 text-white transition-transform duration-500 group-hover/owner:translate-y-[-4px]">
                             <p className="font-sans text-2xl font-semibold">Madan Mohan Mishra</p>
-                            <p className="text-white/80">Founder & Owner</p>
+                            <p className="text-white/80">Founder &amp; Owner</p>
                         </div>
                     </motion.div>
 

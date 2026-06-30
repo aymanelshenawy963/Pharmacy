@@ -1,4 +1,4 @@
-export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$/;
+export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#_\-])[A-Za-z\d@$!%*?&^#_\-]{8,}$/;
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const validators = {
@@ -14,7 +14,7 @@ export const validators = {
         if (!/[A-Z]/.test(value)) return 'Password must contain at least one uppercase letter';
         if (!/[a-z]/.test(value)) return 'Password must contain at least one lowercase letter';
         if (!/\d/.test(value)) return 'Password must contain at least one number';
-        if (!/[^a-zA-Z\d]/.test(value)) return 'Password must contain at least one special character';
+        if (!/[@$!%*?&^#_\-]/.test(value)) return 'Password must contain at least one special character (@$!%*?&^#_-)';
         return null;
     },
 
@@ -59,7 +59,7 @@ export function getPasswordStrength(password) {
     if (/[A-Z]/.test(password)) score++;
     if (/[a-z]/.test(password)) score++;
     if (/\d/.test(password)) score++;
-    if (/[^a-zA-Z\d]/.test(password)) score++;
+    if (/[@$!%*?&^#_\-]/.test(password)) score++;
 
     if (score <= 2) return { score, label: 'Weak', color: '#ef4444' };
     if (score <= 3) return { score, label: 'Fair', color: '#f59e0b' };

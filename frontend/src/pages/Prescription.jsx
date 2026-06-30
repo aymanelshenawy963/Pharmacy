@@ -2,24 +2,13 @@ import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import PrescriptionUpload from '../components/PrescriptionUpload';
 import Icon from '../components/Icons';
+import { howItWorksSteps } from '../data/store';
 
-const steps = [
-    {
-        icon: 'Upload',
-        title: 'Upload Prescription',
-        description: 'Share a clear photo or PDF of your valid medical prescription through our secure portal.',
-    },
-    {
-        icon: 'ShieldCheck',
-        title: 'Pharmacist Verification',
-        description: 'Our licensed pharmacist carefully reviews every detail for accuracy and compliance.',
-    },
-    {
-        icon: 'Truck',
-        title: 'Doorstep Delivery',
-        description: 'Your verified medicines are meticulously packed and delivered right to your doorstep.',
-    },
-];
+const prescriptionSteps = howItWorksSteps.map((step) => ({
+    icon: step.iconKey,
+    title: step.title.charAt(0).toUpperCase() + step.title.slice(1),
+    description: step.text,
+}));
 
 const containerVariants = {
     hidden: {},
@@ -128,7 +117,7 @@ export default function Prescription() {
                                 <div>
                                     <p className="font-sans text-xl font-medium text-text">Pharmacist Reviewed</p>
                                     <p className="mt-2 text-sm text-text-muted leading-relaxed">
-                                        Every prescription is personally verified by our licensed pharmacist before dispatch. If anything needs clarification, we'll contact you directly.
+                                        Every prescription is personally verified by our licensed pharmacist before dispatch. If anything needs clarification, we&apos;ll contact you directly.
                                     </p>
                                 </div>
                             </div>
@@ -216,7 +205,7 @@ export default function Prescription() {
                         viewport={{ once: true, amount: 0.3 }}
                         className="relative flex flex-col items-center gap-12 md:flex-row md:items-start md:justify-between md:gap-4"
                     >
-                        {steps.map((step, index) => (
+                        {prescriptionSteps.map((step, index) => (
                             <div key={step.title} className="flex flex-col items-center md:flex-1 w-full relative group/step">
                                 <motion.div
                                     variants={stepVariants}
@@ -241,7 +230,7 @@ export default function Prescription() {
                                 </motion.div>
 
                                 {/* Connecting line */}
-                                {index < steps.length - 1 && (
+                                {index < prescriptionSteps.length - 1 && (
                                     <>
                                         {/* Desktop */}
                                         <motion.div

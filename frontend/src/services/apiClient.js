@@ -1,5 +1,6 @@
 import { authStorage } from './authStorage';
-import { BASE_URL, sleep } from '../config/api';
+import { BASE_URL } from '../config/api';
+import { sleep } from '../utils/sleep';
 
 const MAX_429_RETRIES = 3;
 const RETRY_BASE_DELAY = 2000;
@@ -77,7 +78,7 @@ async function refreshTokenRequest() {
 
 async function handleResponse(response) {
     const contentType = response.headers.get('content-type');
-    const isJson = contentType && contentType.includes('application/json');
+    const isJson = contentType && (contentType.includes('application/json') || contentType.includes('application/problem+json'));
 
     let body;
     try {
@@ -144,7 +145,7 @@ async function doRefreshAndRetry(url, config, headers, retryFn) {
         isRefreshing = false;
         refreshSubscribers = [];
         authStorage.clear();
-        window.location.href = '/login';
+        window.location.replace('/login');
         throw refreshError;
     }
 }
