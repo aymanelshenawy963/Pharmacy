@@ -15,7 +15,7 @@ public class Basket
 
     public string? PaymentIntentId { get; set; }
     public string? ClientSecret { get; set; }
-
+    public int? DeliveryMethodId { get; set; }
 
     public List<BasketItem> Items { get;  set; } = new();
 }
