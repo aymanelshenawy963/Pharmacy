@@ -10,7 +10,6 @@ public sealed class User : IdentityUser
 
     public bool IsDisabled { get; set; }
 
-    public Address? Address { get; set; }
 
     public List<RefreshToken> RefreshTokens { get; set; } = [];
 
