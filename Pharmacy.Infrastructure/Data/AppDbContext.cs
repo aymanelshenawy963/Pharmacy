@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public virtual DbSet<OrderItem> OrderItems { get; set; }
     public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<Review> Reviews { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

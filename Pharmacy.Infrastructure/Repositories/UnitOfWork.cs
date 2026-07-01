@@ -21,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
     public IBasketRepository BasketRepository { get; }
     public IOrderRepository OrderRepository { get; }
     public INotificationRepository NotificationRepository { get; }
+    public IReviewRepository ReviewRepository { get; }
 
     public UnitOfWork(AppDbContext context, IMapper mapper,
         IImageMangementService imageMangementService, IConnectionMultiplexer redis)
@@ -36,6 +37,7 @@ public class UnitOfWork : IUnitOfWork
         BasketRepository = new BasketRepository(_redis);
         OrderRepository = new OrderRepository(_context);
         NotificationRepository = new NotificationRepository(_context);
+        ReviewRepository = new ReviewRepository(_context);
     }
 
     public Task<int> SaveAsync() => _context.SaveChangesAsync();

@@ -77,10 +77,11 @@ public class ProductRepository : GenericRepositry<Product>, IProductRepository
     {
         var product = _mapper.Map<Product>(productDTO);
 
+   
+
         await _context.Products.AddAsync(product);
         await _context.SaveChangesAsync();
 
-        // 🟢 رفع الصور
         if (productDTO.Photos != null && productDTO.Photos.Count > 0)
         {
             var imagePaths = await _imageMangementService
