@@ -1,4 +1,6 @@
+using Hangfire;
 using Pharmacy.Api.Middelware;
+using Pharmacy.API.BackgroundJobs;
 using Pharmacy.Core.Mapping;
 using Pharmacy.Infrastructure;
 
@@ -31,6 +33,18 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(MappingAssemblyMarker).Assembl
 
 builder.Services.InfrastructureConfiguration(builder.Configuration);
 
+// Hangfire — uses the same SQL Server connection as the app
+builder.Services.AddHangfire(cfg => cfg
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHangfireServer(options =>
+{
+    options.WorkerCount = 2; // keep low — monitoring jobs are lightweight
+});
+
 
 var app = builder.Build();
 
@@ -54,5 +68,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Hangfire Dashboard (admin only — restrict in production)
+app.UseHangfireDashboard("/hangfire");
+
+// Register the recurring stock-monitoring job — every minute
+RecurringJob.AddOrUpdate<StockMonitoringJob>(
+    StockMonitoringJob.JobId,
+    job => job.ExecuteAsync(),
+    Cron.Minutely());
+
+app.UseExceptionHandler();
 
 app.Run();
