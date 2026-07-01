@@ -1,15 +1,19 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.Entities.Enums;
 using Pharmacy.Core.interfaces;
 using Pharmacy.Core.Interfaces.Services;
+using Pharmacy.Core.Settings;
 
 namespace Pharmacy.Infrastructure.Repositories.Services;
 
 public class NotificationService(
     IUnitOfWork unitOfWork,
     IEmailSender emailSender,
+    UserManager<User> userManager,
     ILogger<NotificationService> logger) : INotificationService
 {
     private const int LowStockThreshold = 3;
@@ -75,13 +79,22 @@ public class NotificationService(
     {
         try
         {
-            // TODO: replace with the actual admin email from configuration
-            const string adminEmail = "admin@pharmacy.com";
+            var admins = await userManager.GetUsersInRoleAsync("Admin");
+
+            if (!admins.Any())
+            {
+                logger.LogWarning("No admin users found to notify for product '{Name}'", notification.ProductName);
+                return;
+            }
 
             var subject = $"[Low Stock Alert] {notification.ProductName}";
             var body = BuildEmailBody(notification);
 
-            await emailSender.SendEmailAsync(adminEmail, subject, body);
+            foreach (var admin in admins)
+            {
+                if (!string.IsNullOrEmpty(admin.Email))
+                    await emailSender.SendEmailAsync(admin.Email, subject, body);
+            }
         }
         catch (Exception ex)
         {

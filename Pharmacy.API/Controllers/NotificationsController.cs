@@ -1,6 +1,8 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pharmacy.Core.Consts;
+using Pharmacy.Core.DTO;
 using Pharmacy.Core.Entities.Enums;
 using Pharmacy.Core.Interfaces.Services;
 
@@ -9,17 +11,13 @@ namespace Pharmacy.API.Controllers;
 [Authorize(Roles = DefaultRoles.Admin)]
 [ApiController]
 [Route("api/[controller]")]
-public class NotificationsController(INotificationService notificationService) : ControllerBase
+public class NotificationsController(INotificationService notificationService, IMapper mapper) : ControllerBase
 {
-    /// <summary>
-    /// Returns all notifications. Pass ?status=Active|Read|Resolved to filter.
-    /// Called by the Admin Dashboard to populate the notification list.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] NotificationStatus? status)
     {
         var notifications = await notificationService.GetNotificationsAsync(status);
-        return Ok(notifications);
+        return Ok(mapper.Map<IReadOnlyList<NotificationDTO>>(notifications));
     }
 
     /// <summary>
