@@ -1,40 +1,48 @@
 import { useEffect } from 'react';
 
-export default function Seo({ title, description }) {
+const setMeta = (selector, content, attr = 'property') => {
+    if (!content) return;
+    let meta = document.querySelector(selector);
+    if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute(attr, selector.replace('meta[', '').replace(']', ''));
+        document.head.appendChild(meta);
+    }
+    meta.content = content;
+};
+
+export default function Seo({ title, description, image, url, type = 'website' }) {
     useEffect(() => {
         if (title) {
             document.title = `${title} | Jaya Medical Store`;
         }
 
         if (description) {
-            let meta = document.querySelector('meta[name="description"]');
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.name = 'description';
-                document.head.appendChild(meta);
-            }
-            meta.content = description;
+            setMeta('meta[name="description"]', description, 'name');
         }
 
-        const setMeta = (property, content) => {
-            if (!content) {
-                return;
-            }
+        const fullTitle = title ? `${title} | Jaya Medical Store` : 'Jaya Medical Store';
 
-            let meta = document.querySelector(`meta[property="${property}"]`);
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.setAttribute('property', property);
-                document.head.appendChild(meta);
-            }
-            meta.content = content;
-        };
+        setMeta('meta[property="og:title"]', fullTitle);
+        setMeta('meta[property="og:description"]', description);
+        setMeta('meta[property="og:type"]', type);
 
-        setMeta('og:title', title ? `${title} | Jaya Medical Store` : 'Jaya Medical Store');
-        setMeta('og:description', description);
-        setMeta('twitter:title', title ? `${title} | Jaya Medical Store` : 'Jaya Medical Store');
-        setMeta('twitter:description', description);
-    }, [title, description]);
+        if (image) {
+            setMeta('meta[property="og:image"]', image);
+        }
+
+        if (url) {
+            setMeta('meta[property="og:url"]', url);
+        }
+
+        setMeta('meta[name="twitter:card"]', image ? 'summary_large_image' : 'summary', 'name');
+        setMeta('meta[name="twitter:title"]', fullTitle, 'name');
+        setMeta('meta[name="twitter:description"]', description, 'name');
+
+        if (image) {
+            setMeta('meta[name="twitter:image"]', image, 'name');
+        }
+    }, [title, description, image, url, type]);
 
     return null;
 }

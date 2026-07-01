@@ -7,11 +7,14 @@ import BackToTop from './components/BackToTop';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import PageLoader from './components/PageLoader';
 import AuthHeader from './components/AuthHeader';
+import ErrorBoundary from './components/ErrorBoundary';
+import RouteErrorBoundary from './components/RouteErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
 const Prescription = lazy(() => import('./pages/Prescription'));
 const Contact = lazy(() => import('./pages/Contact'));
 const About = lazy(() => import('./pages/About'));
@@ -38,10 +41,13 @@ const AdminCategories = lazy(() => import('./pages/admin/Categories'));
 const AdminProducts = lazy(() => import('./pages/admin/Products'));
 const ProfileSettings = lazy(() => import('./pages/account/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/account/SecuritySettings'));
+const Orders = lazy(() => import('./pages/account/Orders'));
+const OrderDetail = lazy(() => import('./pages/account/OrderDetail'));
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import AdminProtectedRoute from './routes/AdminProtectedRoute';
 import AccountProtectedRoute from './routes/AccountProtectedRoute';
+import GuestRoute from './routes/GuestRoute';
 
 const pageTransition = {
     initial: { opacity: 0, y: 12 },
@@ -63,21 +69,31 @@ function Layout() {
     const location = useLocation();
     return (
         <div className="min-h-screen bg-hero-gradient text-slate-900">
+            <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg"
+            >
+                Skip to content
+            </a>
             <ScrollToTop />
             <Navbar />
             <FloatingWhatsApp />
             <BackToTop />
-            <main>
-                <Suspense fallback={<PageLoader />}>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={location.pathname}
-                            {...pageTransition}
-                        >
-                            <Outlet />
-                        </motion.div>
-                    </AnimatePresence>
-                </Suspense>
+            <main id="main-content">
+                <ErrorBoundary>
+                    <Suspense fallback={<PageLoader />}>
+                        <RouteErrorBoundary>
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={location.pathname}
+                                    {...pageTransition}
+                                >
+                                    <Outlet />
+                                </motion.div>
+                            </AnimatePresence>
+                        </RouteErrorBoundary>
+                    </Suspense>
+                </ErrorBoundary>
             </main>
             <Footer />
         </div>
@@ -91,19 +107,21 @@ function AuthLayout() {
         <div className="min-h-screen bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
             <ScrollToTop />
             <AuthHeader />
-            <Suspense fallback={<PageLoader />}>
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={location.pathname}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                    >
-                        <Outlet />
-                    </motion.div>
-                </AnimatePresence>
-            </Suspense>
+            <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={location.pathname}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        >
+                            <Outlet />
+                        </motion.div>
+                    </AnimatePresence>
+                </Suspense>
+            </ErrorBoundary>
         </div>
     );
 }
@@ -135,6 +153,7 @@ export default function App() {
                 {/* Protected routes */}
                 <Route element={<ProtectedRoute />}>
                     <Route path="cart" element={<Cart />} />
+                    <Route path="checkout" element={<Checkout />} />
                     <Route path="prescription" element={<Prescription />} />
                 </Route>
 
@@ -142,14 +161,16 @@ export default function App() {
             </Route>
 
             {/* ── Auth routes (no Navbar, no Footer) ── */}
-            <Route element={<AuthLayout />}>
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
-                <Route path="forgot-password" element={<ForgotPassword />} />
-                <Route path="reset-password" element={<ResetPassword />} />
-                <Route path="confirm-email" element={<ConfirmEmail />} />
-                <Route path="resend-confirmation" element={<ResendConfirmationEmail />} />
-                <Route path="check-email" element={<CheckEmail />} />
+            <Route element={<GuestRoute />}>
+                <Route element={<AuthLayout />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
+                    <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
+                    <Route path="confirm-email" element={<ConfirmEmail />} />
+                    <Route path="resend-confirmation" element={<ResendConfirmationEmail />} />
+                    <Route path="check-email" element={<CheckEmail />} />
+                </Route>
             </Route>
 
             {/* ── Admin routes (AdminLayout with sidebar) ── */}
@@ -168,6 +189,8 @@ export default function App() {
                 <Route path="account" element={<AdminLayoutWrapper />}>
                     <Route path="profile" element={<ProfileSettings />} />
                     <Route path="security" element={<SecuritySettings />} />
+                    <Route path="orders" element={<Orders />} />
+                    <Route path="orders/:id" element={<OrderDetail />} />
                 </Route>
             </Route>
         </Routes>

@@ -1,52 +1,118 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Reveal from '../components/Reveal';
 import Icon from '../components/Icons';
 import ProductCard from '../components/ProductCard';
-import { products } from '../data/products';
+import { productService } from '../services/productService';
 import { useCart } from '../context/CartContext';
-import toast from 'react-hot-toast';
-
-const tabs = [
-    { key: 'details', label: 'Details', icon: 'FileText' },
-    { key: 'uses', label: 'Uses', icon: 'CheckCircle2' },
-    { key: 'sideEffects', label: 'Side Effects', icon: 'ShieldCheck' },
-    { key: 'directions', label: 'Directions', icon: 'ClipboardList' },
-];
-
-const staggerInfo = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.15 }
-    }
-};
-
-const infoItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    }
-};
+import { formatPrice } from '../utils/currency';
+import notify from '../utils/notifications';
+import { normalizeProduct } from '../utils/normalizeProduct';
+import { PLACEHOLDER_IMG, calculateDiscount } from '../constants/ui';
+import { staggerInfo, infoItem } from '../constants/animations';
+import { ROUTES } from '../constants/routes';
 
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState('details');
+    const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const product = products.find((item) => item.id === Number(id));
-    const relatedProducts = useMemo(
-        () => products.filter((item) => item.category === product?.category && item.id !== product?.id).slice(0, 4),
-        [product],
-    );
+    const loadProduct = async (signal) => {
+        setLoading(true);
+        setError(null);
+        setProduct(null);
+        setRelatedProducts([]);
 
-    if (!product) {
+        try {
+            const data = await productService.getById(id);
+            if (signal?.aborted) return;
+            const normalized = normalizeProduct(data);
+            setProduct(normalized);
+
+            if (normalized.categoryId) {
+                try {
+                    const related = await productService.getAll({
+                        CategoryId: normalized.categoryId,
+                        PageSize: 6,
+                        PageNumber: 1,
+                    });
+                    if (!signal?.aborted) {
+                        const items = (related.data || [])
+                            .map(normalizeProduct)
+                            .filter((p) => p.id !== normalized.id)
+                            .slice(0, 4);
+                        setRelatedProducts(items);
+                    }
+                } catch {
+                    // Related products are non-critical
+                }
+            }
+        } catch (err) {
+            if (!signal?.aborted) {
+                if (err.status === 404) {
+                    setError('not_found');
+                } else {
+                    notify.errorFromApi(err);
+                    setError('error');
+                }
+            }
+        } finally {
+            if (!signal?.aborted) setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const controller = new AbortController();
+        loadProduct(controller.signal);
+        return () => controller.abort();
+    }, [id]);
+
+    const handleRetry = () => loadProduct();
+
+    const handleAddToCart = async () => {
+        if (!product) return;
+        const added = await addToCart(product, quantity);
+        if (added) {
+            notify.success(`${quantity} × ${product.name} added to cart.`);
+        }
+    };
+
+    if (loading) {
+        return (
+            <>
+                <Seo title="Loading..." description="Loading product details." />
+                <div className="border-b border-border bg-bg/50 backdrop-blur-md">
+                    <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 text-sm text-text-muted sm:px-6 lg:px-8">
+                        <div className="h-4 w-16 bg-border rounded-full animate-pulse" />
+                        <div className="h-4 w-4 bg-border rounded-full animate-pulse" />
+                        <div className="h-4 w-32 bg-border rounded-full animate-pulse" />
+                    </div>
+                </div>
+                <section className="bg-surface min-h-[calc(100vh-72px)]">
+                    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+                        <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr]">
+                            <div className="bg-bg-subtle aspect-[4/3] rounded-2xl animate-pulse" />
+                            <div className="space-y-6">
+                                <div className="h-4 w-24 bg-border rounded-full animate-pulse" />
+                                <div className="h-10 w-3/4 bg-border rounded-full animate-pulse" />
+                                <div className="h-6 w-1/2 bg-border/60 rounded-full animate-pulse" />
+                                <div className="h-40 bg-border/30 rounded-2xl animate-pulse" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </>
+        );
+    }
+
+    if (error === 'not_found' || (!loading && !product)) {
         return (
             <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 min-h-[60vh] flex flex-col justify-center">
                 <Seo title="Product not found" description="The requested product could not be found." />
@@ -54,7 +120,7 @@ export default function ProductDetail() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="mx-auto w-full max-w-2xl glass-card p-12 text-center"
+                    className="mx-auto w-full max-w-2xl bg-surface p-12 text-center rounded-2xl border border-border shadow-sm"
                 >
                     <motion.div
                         animate={{ y: [0, -6, 0] }}
@@ -63,11 +129,11 @@ export default function ProductDetail() {
                     >
                         <Icon name="PackageSearch" className="h-10 w-10" />
                     </motion.div>
-                    <h1 className="mt-6 font-serif text-3xl font-semibold text-text">Product not found</h1>
+                    <h1 className="mt-6 font-sans text-3xl font-semibold text-text">Product not found</h1>
                     <p className="mt-3 text-base text-text-muted">This product is not in our catalog.</p>
                     <button
                         type="button"
-                        onClick={() => navigate('/products')}
+                        onClick={() => navigate(ROUTES.PRODUCTS)}
                         className="glass-button-primary mt-8 inline-flex items-center"
                     >
                         <Icon name="ArrowRight" className="mr-2 h-4 w-4 rotate-180" />
@@ -78,25 +144,61 @@ export default function ProductDetail() {
         );
     }
 
-    const discount = Math.max(0, Math.round(((product.mrp - product.price) / product.mrp) * 100));
+    if (error) {
+        return (
+            <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 min-h-[60vh] flex flex-col justify-center">
+                <Seo title="Error" description="Failed to load product." />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mx-auto w-full max-w-2xl bg-surface p-12 text-center rounded-2xl border border-border shadow-sm"
+                >
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-red-50 text-red-500 border border-red-200">
+                        <Icon name="AlertTriangle" className="h-10 w-10" />
+                    </div>
+                    <h1 className="mt-6 font-sans text-3xl font-semibold text-text">Something went wrong</h1>
+                    <p className="mt-3 text-base text-text-muted">Failed to load product details.</p>
+                    <button
+                        type="button"
+                        onClick={handleRetry}
+                        className="glass-button-primary mt-8 inline-flex items-center"
+                    >
+                        <Icon name="RefreshCw" className="mr-2 h-4 w-4" />
+                        Try Again
+                    </button>
+                </motion.div>
+            </section>
+        );
+    }
 
-    const handleAddToCart = () => {
-        addToCart(product, quantity);
-        toast.success(`${quantity} × ${product.name} added to cart.`);
-    };
+    const image = product.image || PLACEHOLDER_IMG;
+    const price = product.price ?? 0;
+    const mrp = product.mrp ?? 0;
+    const discount = calculateDiscount(price, mrp);
 
     return (
         <>
             <Seo
                 title={product.name}
-                description={`${product.name} by ${product.brand} — composition, pricing, uses, and directions.`}
+                description={`${product.name} — pricing and details.`}
             />
 
             {/* Breadcrumb */}
             <div className="border-b border-border bg-bg/50 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 text-sm text-text-muted sm:px-6 lg:px-8">
-                    <Link to="/products" className="transition-colors hover:text-primary">Products</Link>
+                    <Link to={ROUTES.PRODUCTS} className="transition-colors hover:text-primary">Products</Link>
                     <Icon name="ChevronRight" className="h-3.5 w-3.5" />
+                    {product.category && (
+                        <>
+                            <Link
+                                to={`/products?category=${encodeURIComponent(product.category)}`}
+                                className="transition-colors hover:text-primary"
+                            >
+                                {product.category}
+                            </Link>
+                            <Icon name="ChevronRight" className="h-3.5 w-3.5" />
+                        </>
+                    )}
                     <span className="text-text font-semibold">{product.name}</span>
                 </div>
             </div>
@@ -113,18 +215,17 @@ export default function ProductDetail() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                             whileHover={{ scale: 1.01 }}
-                            className="glass-card overflow-hidden group cursor-zoom-in"
+                            className="bg-surface overflow-hidden group cursor-zoom-in rounded-2xl border border-border shadow-sm"
                         >
                             <div className="relative bg-bg-subtle aspect-[4/3] w-full overflow-hidden">
                                 <img
-                                    src={product.image}
+                                    src={image}
                                     alt={product.name}
                                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     loading="lazy"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                                {/* Badges */}
                                 <div className="absolute left-5 top-5 flex flex-col gap-2">
                                     {discount > 0 && (
                                         <motion.span
@@ -158,56 +259,43 @@ export default function ProductDetail() {
                             animate="visible"
                             className="space-y-8"
                         >
-                            {/* Header */}
                             <motion.div variants={infoItem}>
-                                <span className="kicker !mb-3">
-                                    {product.category}
-                                </span>
+                                {product.category && (
+                                    <span className="kicker !mb-3">
+                                        {product.category}
+                                    </span>
+                                )}
                                 <h1 className="display-heading text-4xl sm:text-5xl !mb-2 text-balance">
                                     {product.name}
                                 </h1>
-                                <p className="text-base text-text-muted mt-3">
-                                    by <span className="font-semibold text-text">{product.manufacturer}</span>
-                                </p>
                             </motion.div>
 
-                            {/* Meta badges */}
-                            <motion.div variants={infoItem} className="flex flex-wrap gap-2.5">
-                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-subtle px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-text-muted transition-all duration-200 hover:border-primary/30 hover:bg-primary/5">
-                                    <Icon name="Pill" className="h-3.5 w-3.5 text-primary" />
-                                    {product.composition}
-                                </span>
-                                <span className="inline-flex items-center rounded-lg border border-border bg-bg-subtle px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-text-muted transition-all duration-200 hover:border-primary/30 hover:bg-primary/5">
-                                    {product.brand}
-                                </span>
-                                <span className="inline-flex items-center rounded-lg border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
-                                    {product.badge}
-                                </span>
-                            </motion.div>
-
-                            {/* Price card */}
-                            <motion.div variants={infoItem} className="glass-card p-8">
+                            <motion.div variants={infoItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
                                 <div className="flex flex-wrap items-end justify-between gap-6">
                                     <div>
                                         <div className="flex items-baseline gap-3">
                                             <motion.p
-                                                key={product.price}
+                                                key={price}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
-                                                className="font-serif text-4xl font-bold text-text"
+                                                className="font-sans text-4xl font-bold text-text"
                                             >
-                                                ₹{product.price}
+                                                {formatPrice(price)}
                                             </motion.p>
                                             {discount > 0 && (
-                                                <p className="text-lg font-medium text-text-muted line-through">₹{product.mrp}</p>
+                                                <p className="text-lg font-medium text-text-muted line-through">{formatPrice(mrp)}</p>
                                             )}
                                         </div>
                                         <p className="mt-1 text-sm text-text-muted">
                                             Inclusive of all taxes
                                         </p>
+                                        {product.stock > 0 && (
+                                            <p className="mt-1 text-xs text-green-600 font-medium">
+                                                In stock ({product.stock} available)
+                                            </p>
+                                        )}
                                     </div>
 
-                                    {/* Quantity */}
                                     <div className="flex items-center rounded-xl border border-border bg-bg p-1 shadow-sm">
                                         <motion.button
                                             whileTap={{ scale: 0.9 }}
@@ -239,7 +327,6 @@ export default function ProductDetail() {
                                     </div>
                                 </div>
 
-                                {/* Action buttons */}
                                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                                     <motion.button
                                         whileHover={{ scale: 1.01 }}
@@ -253,7 +340,7 @@ export default function ProductDetail() {
                                     </motion.button>
                                     {product.requiresPrescription && (
                                         <Link
-                                            to="/prescription"
+                                            to={ROUTES.PRESCRIPTION}
                                             className="glass-button flex-1 justify-center py-4 text-base"
                                         >
                                             <Icon name="Upload" className="h-5 w-5 mr-2" />
@@ -263,7 +350,6 @@ export default function ProductDetail() {
                                 </div>
                             </motion.div>
 
-                            {/* Prescription notice */}
                             {product.requiresPrescription && (
                                 <motion.div
                                     variants={infoItem}
@@ -276,44 +362,17 @@ export default function ProductDetail() {
                                 </motion.div>
                             )}
 
-                            {/* Tabs */}
-                            <motion.div variants={infoItem} className="glass-card p-7">
-                                <div className="flex flex-wrap gap-2 border-b border-border pb-4 mb-5">
-                                    {tabs.map((tab) => (
-                                        <motion.button
-                                            key={tab.key}
-                                            whileTap={{ scale: 0.95 }}
-                                            type="button"
-                                            onClick={() => setActiveTab(tab.key)}
-                                            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 ${
-                                                activeTab === tab.key
-                                                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                                                    : 'text-text-muted hover:bg-bg hover:text-text'
-                                            }`}
-                                        >
-                                            <Icon name={tab.icon} className="h-4 w-4" />
-                                            {tab.label}
-                                        </motion.button>
-                                    ))}
-                                </div>
-                                <div className="relative min-h-[120px]">
-                                    <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={activeTab}
-                                            initial={{ opacity: 0, y: 8 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -8 }}
-                                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                                            className="text-base leading-relaxed text-text-muted absolute inset-0"
-                                        >
-                                            {activeTab === 'details' && <p>{product.details}</p>}
-                                            {activeTab === 'uses' && <ListBlock items={product.uses} />}
-                                            {activeTab === 'sideEffects' && <ListBlock items={product.sideEffects} />}
-                                            {activeTab === 'directions' && <ListBlock items={product.directions} />}
-                                        </motion.div>
-                                    </AnimatePresence>
-                                </div>
-                            </motion.div>
+                            {product.description && (
+                                <motion.div variants={infoItem} className="bg-surface p-7 rounded-2xl border border-border shadow-sm">
+                                    <h3 className="font-sans text-lg font-semibold text-text mb-3 flex items-center gap-2">
+                                        <Icon name="FileText" className="h-5 w-5 text-primary" />
+                                        Description
+                                    </h3>
+                                    <p className="text-base leading-relaxed text-text-muted">
+                                        {product.description}
+                                    </p>
+                                </motion.div>
+                            )}
                         </motion.div>
                     </Reveal>
                 </div>
@@ -349,26 +408,5 @@ export default function ProductDetail() {
                 </section>
             )}
         </>
-    );
-}
-
-function ListBlock({ items }) {
-    return (
-        <ul className="space-y-4">
-            {items.map((item) => (
-                <motion.li
-                    key={item}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex items-start gap-4"
-                >
-                    <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                        <Icon name="CheckCircle2" className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-text-muted">{item}</span>
-                </motion.li>
-            ))}
-        </ul>
     );
 }

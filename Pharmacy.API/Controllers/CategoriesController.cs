@@ -17,6 +17,7 @@ public class CategoriesController : BaseController
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
@@ -24,6 +25,7 @@ public class CategoriesController : BaseController
      var result = _mapper.Map<IReadOnlyList<CategoryToReturnDTO>>(categories);
        return Ok(result);
     }
+
 
     [HttpGet("{id}")]
     [AllowAnonymous]

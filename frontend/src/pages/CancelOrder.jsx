@@ -1,24 +1,8 @@
 import { motion } from 'framer-motion';
 import Seo from '../components/Seo';
 import Icon from '../components/Icons';
-import { storeInfo } from '../data/products';
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.15 }
-    }
-};
-
-const staggerItem = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    }
-};
+import { storeInfo } from '../data/store';
+import { staggerContainer, staggerItem } from '../constants/animations';
 
 export default function CancelOrder() {
     return (
@@ -51,7 +35,7 @@ export default function CancelOrder() {
                         className="mt-12 space-y-10"
                     >
                         {/* Highlighted Policy Box */}
-                        <motion.div variants={staggerItem} className="glass-card p-8 md:p-10 border-tertiary/20 bg-tertiary/5">
+                        <motion.div variants={staggerItem} className="bg-surface p-8 md:p-10 rounded-2xl border border-border shadow-sm border-tertiary/20 bg-tertiary/5">
                             <div className="flex items-start gap-5">
                                 <motion.div
                                     whileHover={{ rotate: -10, scale: 1.1 }}
@@ -60,7 +44,7 @@ export default function CancelOrder() {
                                     <Icon name="Clock" className="h-6 w-6" />
                                 </motion.div>
                                 <div>
-                                    <h2 className="font-serif text-2xl font-semibold text-text mb-3">
+                                    <h2 className="font-sans text-2xl font-semibold text-text mb-3">
                                         The 2-Hour Cancellation Window
                                     </h2>
                                     <p className="text-base leading-relaxed text-text-muted">
@@ -72,8 +56,8 @@ export default function CancelOrder() {
 
                         <div className="grid gap-6 md:grid-cols-2">
                             {/* How to Cancel */}
-                            <motion.div variants={staggerItem} className="glass-card p-8">
-                                <h3 className="font-serif text-2xl font-semibold text-text mb-4">
+                            <motion.div variants={staggerItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+                                <h3 className="font-sans text-2xl font-semibold text-text mb-4">
                                     How to Cancel
                                 </h3>
                                 <p className="text-base leading-relaxed text-text-muted mb-6">
@@ -116,9 +100,9 @@ export default function CancelOrder() {
                             </motion.div>
 
                             {/* Refunds & Exceptions */}
-                            <motion.div variants={staggerItem} className="glass-card p-8">
-                                <h3 className="font-serif text-2xl font-semibold text-text mb-6">
-                                    Refunds & Exceptions
+                            <motion.div variants={staggerItem} className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+                                <h3 className="font-sans text-2xl font-semibold text-text mb-6">
+                                    Refunds &amp; Exceptions
                                 </h3>
                                 <ul className="space-y-5 text-base leading-relaxed text-text-muted">
                                     <li className="flex items-start gap-4">

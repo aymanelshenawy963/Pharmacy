@@ -80,7 +80,7 @@ export default function ConfirmDialog({
                         animate="visible"
                         exit="exit"
                         className="fixed inset-0 bg-black/60 backdrop-blur-md"
-                        onClick={onClose}
+                        onClick={isLoading ? undefined : onClose}
                     />
                     <motion.div
                         variants={dialogVariants}
@@ -110,7 +110,7 @@ export default function ConfirmDialog({
                             <div className="flex-1 min-w-0">
                                 <h3
                                     id="confirm-title"
-                                    className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))]"
+                                    className="font-sans text-base sm:text-lg font-bold text-[rgb(var(--color-text))]"
                                 >
                                     {title}
                                 </h3>

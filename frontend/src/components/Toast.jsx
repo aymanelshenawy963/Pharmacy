@@ -1,5 +1,4 @@
 import { Toaster } from 'react-hot-toast';
-import { CheckCircle2, XCircle, AlertTriangle, Info } from 'lucide-react';
 
 export default function AppToaster() {
     return (
@@ -15,7 +14,7 @@ export default function AppToaster() {
                     background: 'rgb(var(--color-surface))',
                     color: 'rgb(var(--color-text))',
                     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.12)',
-                    fontFamily: 'DM Sans, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     fontSize: '14px',
                     padding: '12px 16px',
                     maxWidth: '400px',

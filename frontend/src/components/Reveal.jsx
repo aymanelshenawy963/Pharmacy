@@ -1,28 +1,45 @@
-import { motion } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 
 export default function Reveal({ children, className = '', delay = 0, direction = 'up' }) {
-    const directionMap = {
-        up: { y: 24, x: 0 },
-        down: { y: -24, x: 0 },
-        left: { x: 24, y: 0 },
-        right: { x: -24, y: 0 },
+    const ref = useRef(null);
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setVisible(true);
+                    observer.unobserve(el);
+                }
+            },
+            { threshold: 0.15 }
+        );
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    const directionStyles = {
+        up: { transform: visible ? 'translateY(0)' : 'translateY(16px)' },
+        down: { transform: visible ? 'translateY(0)' : 'translateY(-16px)' },
+        left: { transform: visible ? 'translateX(0)' : 'translateX(16px)' },
+        right: { transform: visible ? 'translateX(0)' : 'translateX(-16px)' },
     };
 
-    const offset = directionMap[direction] || directionMap.up;
-
     return (
-        <motion.div
-            initial={{ opacity: 0, ...offset }}
-            whileInView={{ opacity: 1, x: 0, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{
-                duration: 0.6,
-                delay,
-                ease: [0.16, 1, 0.3, 1],
-            }}
+        <div
+            ref={ref}
             className={className}
+            style={{
+                opacity: visible ? 1 : 0,
+                transform: (directionStyles[direction] || directionStyles.up).transform,
+                transition: `opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+            }}
         >
             {children}
-        </motion.div>
+        </div>
     );
 }

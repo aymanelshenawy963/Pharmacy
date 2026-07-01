@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
     Activity,
     ArrowDownUp,
@@ -18,7 +19,6 @@ import {
     Grid2x2,
     HeartPulse,
     Home,
-    IndianRupee,
     Instagram,
     Mail,
     MapPin,
@@ -47,9 +47,10 @@ import {
     RefreshCw,
     Play,
     ClipboardList,
+    Eye,
 } from 'lucide-react';
 
-export const iconMap = {
+const iconMap = {
     Activity,
     ArrowDownUp,
     ArrowRight,
@@ -69,7 +70,6 @@ export const iconMap = {
     Grid2x2,
     HeartPulse,
     Home,
-    IndianRupee,
     Instagram,
     Mail,
     MapPin,
@@ -98,9 +98,10 @@ export const iconMap = {
     RefreshCw,
     Play,
     ClipboardList,
+    Eye,
 };
 
-export default function Icon({ name, className = 'h-5 w-5', strokeWidth = 1.75, ...props }) {
+function Icon({ name, className = 'h-5 w-5', strokeWidth = 1.75, ...props }) {
     const Component = iconMap[name];
 
     if (!Component) {
@@ -109,3 +110,5 @@ export default function Icon({ name, className = 'h-5 w-5', strokeWidth = 1.75, 
 
     return <Component className={className} strokeWidth={strokeWidth} {...props} />;
 }
+
+export default memo(Icon);

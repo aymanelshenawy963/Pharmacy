@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -12,31 +11,24 @@ const ThemeToggle = () => {
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       <div className="relative w-5 h-5">
-        <motion.div
-          initial={false}
-          animate={{
-            scale: theme === 'dark' ? 1 : 0,
-            opacity: theme === 'dark' ? 1 : 0,
-            rotate: theme === 'dark' ? 0 : 90
-          }}
-          transition={{ type: 'spring', stiffness: 200, damping: 10 }}
-          className="absolute inset-0 text-[rgb(var(--color-primary))]"
+        <span
+          className={`absolute inset-0 text-[rgb(var(--color-primary))] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            theme === 'dark'
+              ? 'opacity-100 scale-100 rotate-0'
+              : 'opacity-0 scale-0 rotate-90'
+          }`}
         >
           <Moon size={20} />
-        </motion.div>
-        
-        <motion.div
-          initial={false}
-          animate={{
-            scale: theme === 'light' ? 1 : 0,
-            opacity: theme === 'light' ? 1 : 0,
-            rotate: theme === 'light' ? 0 : -90
-          }}
-          transition={{ type: 'spring', stiffness: 200, damping: 10 }}
-          className="absolute inset-0 text-[rgb(var(--color-primary))]"
+        </span>
+        <span
+          className={`absolute inset-0 text-[rgb(var(--color-primary))] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            theme === 'light'
+              ? 'opacity-100 scale-100 rotate-0'
+              : 'opacity-0 scale-0 -rotate-90'
+          }`}
         >
           <Sun size={20} />
-        </motion.div>
+        </span>
       </div>
     </button>
   );

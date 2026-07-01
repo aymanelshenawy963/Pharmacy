@@ -1,31 +1,16 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-hot-toast';
 import { User, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/profileService';
+import { parseApiError } from '../../utils/apiErrorHandler';
+import notify from '../../utils/notifications';
+import { pageVariants, itemVariants } from '../../constants/animations';
 import PageHeader from '../../components/admin/PageHeader';
 import FormField from '../../components/admin/FormField';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import { validators } from '../../utils/validators';
-
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
 
 export default function ProfileSettings() {
     const { user, updateProfile } = useAuth();
@@ -48,7 +33,8 @@ export default function ProfileSettings() {
             setFormData({ firstName: data.firstName, lastName: data.lastName });
             setInitialData({ firstName: data.firstName, lastName: data.lastName });
         } catch (err) {
-            setServerError(err.message || 'Failed to load profile');
+            const msgs = parseApiError(err);
+            setServerError(msgs.join(' '));
         } finally {
             setIsLoading(false);
         }
@@ -85,7 +71,7 @@ export default function ProfileSettings() {
             await profileService.updateProfile(formData);
             updateProfile(formData.firstName, formData.lastName);
             setInitialData({ ...formData });
-            toast.success('Profile updated successfully');
+            notify.success('Profile updated successfully');
         } catch (err) {
             if (err.status === 400 && err.validationErrors) {
                 const apiErrors = {};
@@ -95,7 +81,8 @@ export default function ProfileSettings() {
                 });
                 setErrors((prev) => ({ ...prev, ...apiErrors }));
             }
-            setServerError(err.message || 'Failed to update profile');
+            const msgs = parseApiError(err);
+            setServerError(msgs.join(' '));
         } finally {
             setIsSaving(false);
         }
@@ -137,7 +124,7 @@ export default function ProfileSettings() {
                         <User className="h-7 w-7 sm:h-8 sm:w-8 text-[rgb(var(--color-primary))]" />
                     </div>
                     <div className="min-w-0">
-                        <p className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
+                        <p className="font-sans text-base sm:text-lg font-bold text-[rgb(var(--color-text))] truncate">
                             {user?.firstName} {user?.lastName}
                         </p>
                         <p className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))] truncate">{user?.email}</p>

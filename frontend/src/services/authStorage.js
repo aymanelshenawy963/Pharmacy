@@ -1,38 +1,33 @@
-const KEYS = {
-    TOKEN: 'jaya-auth-token',
-    REFRESH_TOKEN: 'jaya-refresh-token',
-    USER: 'jaya-auth-user',
-    EXPIRES_IN: 'jaya-auth-expires',
-};
+import { STORAGE_KEYS } from '../constants/auth';
 
 export const authStorage = {
     setAuth(authData) {
         try {
-            localStorage.setItem(KEYS.TOKEN, authData.token);
-            localStorage.setItem(KEYS.REFRESH_TOKEN, authData.refreshToken);
-            localStorage.setItem(KEYS.USER, JSON.stringify({
+            localStorage.setItem(STORAGE_KEYS.TOKEN, authData.token);
+            localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, authData.refreshToken);
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({
                 id: authData.id,
                 email: authData.email,
                 firstName: authData.firstName,
                 lastName: authData.lastName,
             }));
-            localStorage.setItem(KEYS.EXPIRES_IN, String(authData.expiresIn));
-        } catch (e) {
-            console.error('authStorage.setAuth failed', e);
+            localStorage.setItem(STORAGE_KEYS.EXPIRES_IN, String(authData.expiresIn));
+        } catch {
+            // Silently fail — localStorage may be full or disabled
         }
     },
 
     getToken() {
-        return localStorage.getItem(KEYS.TOKEN);
+        return localStorage.getItem(STORAGE_KEYS.TOKEN);
     },
 
     getRefreshToken() {
-        return localStorage.getItem(KEYS.REFRESH_TOKEN);
+        return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
     },
 
     getUser() {
         try {
-            const raw = localStorage.getItem(KEYS.USER);
+            const raw = localStorage.getItem(STORAGE_KEYS.USER);
             return raw ? JSON.parse(raw) : null;
         } catch {
             return null;
@@ -41,30 +36,30 @@ export const authStorage = {
 
     setUser(userData) {
         try {
-            localStorage.setItem(KEYS.USER, JSON.stringify({
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({
                 id: userData.id,
                 email: userData.email,
                 firstName: userData.firstName,
                 lastName: userData.lastName,
             }));
-        } catch (e) {
-            console.error('authStorage.setUser failed', e);
+        } catch {
+            // Silently fail
         }
     },
 
     getExpiresIn() {
-        const val = localStorage.getItem(KEYS.EXPIRES_IN);
+        const val = localStorage.getItem(STORAGE_KEYS.EXPIRES_IN);
         return val ? Number(val) : null;
     },
 
     clear() {
-        localStorage.removeItem(KEYS.TOKEN);
-        localStorage.removeItem(KEYS.REFRESH_TOKEN);
-        localStorage.removeItem(KEYS.USER);
-        localStorage.removeItem(KEYS.EXPIRES_IN);
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        localStorage.removeItem(STORAGE_KEYS.EXPIRES_IN);
     },
 
     isAuthenticated() {
-        return Boolean(localStorage.getItem(KEYS.TOKEN));
+        return Boolean(localStorage.getItem(STORAGE_KEYS.TOKEN));
     },
 };

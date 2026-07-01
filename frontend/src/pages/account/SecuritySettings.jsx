@@ -1,30 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-hot-toast';
 import { Lock, Save, Loader2, Shield, Check, X } from 'lucide-react';
 import { profileService } from '../../services/profileService';
+import notify from '../../utils/notifications';
+import { parseApiError } from '../../utils/apiErrorHandler';
+import { pageVariants, itemVariants } from '../../constants/animations';
 import PageHeader from '../../components/admin/PageHeader';
 import FormField from '../../components/admin/FormField';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import { validators } from '../../utils/validators';
-import { parseApiError } from '../../utils/apiErrorHandler';
-
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
 
 function PasswordRequirement({ label, met }) {
     return (
@@ -83,10 +67,14 @@ export default function SecuritySettings() {
                 newPassword: formData.newPassword,
             });
             setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-            toast.success('Password changed successfully');
+            notify.success('Password changed successfully');
         } catch (err) {
+            const PASSWORD_ERROR_MAP = {
+                'New password must be different from current password': 'Your new password is the same as your current one. Please choose a different password.',
+            };
             const errors = parseApiError(err);
-            setServerError(errors.join('. '));
+            const friendlyMessage = errors.map(msg => PASSWORD_ERROR_MAP[msg] || msg).join('. ');
+            setServerError(friendlyMessage);
         } finally {
             setIsSaving(false);
         }
@@ -129,7 +117,7 @@ export default function SecuritySettings() {
                         <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-[rgb(var(--color-secondary))]" />
                     </div>
                     <div className="min-w-0">
-                        <p className="font-serif text-base sm:text-lg font-bold text-[rgb(var(--color-text))]">
+                        <p className="font-sans text-base sm:text-lg font-bold text-[rgb(var(--color-text))]">
                             Change Password
                         </p>
                         <p className="text-xs sm:text-sm text-[rgb(var(--color-text-muted))]">

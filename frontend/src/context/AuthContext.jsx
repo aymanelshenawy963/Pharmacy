@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
         return null;
     });
     const [isAuthenticated, setIsAuthenticated] = useState(() => authStorage.isAuthenticated());
-    const [isLoadingAuth, setIsLoadingAuth] = useState(false);
+    const [isLoadingAuth, setIsLoadingAuth] = useState(() => authStorage.isAuthenticated());
     const refreshTimerRef = useRef(null);
 
     const clearAuthState = useCallback(() => {
@@ -61,6 +61,7 @@ export function AuthProvider({ children }) {
     }, [clearAuthState]);
 
     useEffect(() => {
+        setIsLoadingAuth(false);
         const expiresIn = authStorage.getExpiresIn();
         if (isAuthenticated && expiresIn) {
             scheduleTokenRefresh(expiresIn);
@@ -68,7 +69,7 @@ export function AuthProvider({ children }) {
         return () => {
             if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []); // Run once on mount — scheduleTokenRefresh is stable
 
     const login = useCallback(async (email, password) => {
         setIsLoadingAuth(true);

@@ -1,11 +1,6 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { forwardRef, useState } from 'react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs) {
-    return twMerge(clsx(inputs));
-}
+import { cn } from '../utils/cn';
 
 const Input = forwardRef(({ label, error, type = 'text', className, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -24,12 +19,12 @@ const Input = forwardRef(({ label, error, type = 'text', className, ...props }, 
                     type={isPassword ? (showPassword ? 'text' : 'password') : type}
                     className={cn(
                         'glass-input',
-                        error
-                            ? 'input-error'
-                            : '',
+                        error ? 'input-error' : '',
                         isPassword && 'pr-10',
                         className
                     )}
+                    aria-invalid={error ? 'true' : undefined}
+                    aria-describedby={error ? `${props.name}-error` : undefined}
                     {...props}
                 />
                 {isPassword && (
@@ -44,7 +39,7 @@ const Input = forwardRef(({ label, error, type = 'text', className, ...props }, 
                 )}
             </div>
             {error && (
-                <span className="text-xs font-medium text-red-500 animate-slide-down" style={{ animationDuration: '0.2s' }}>
+                <span id={`${props.name}-error`} className="text-xs font-medium text-red-500 animate-slide-down" style={{ animationDuration: '0.2s' }} aria-live="polite">
                     {error}
                 </span>
             )}

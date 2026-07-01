@@ -15,13 +15,13 @@ export default function TestimonialSlider({ testimonials }) {
     const current = testimonials[index];
 
     return (
-        <div className="glass-card overflow-hidden p-6 sm:p-8">
+        <div className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm overflow-hidden p-6 sm:p-8">
             <div className="flex items-center justify-between gap-4">
                 <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">
                         Customer Notes
                     </p>
-                    <h3 className="mt-2 font-serif text-2xl font-bold text-[rgb(var(--color-text))]">What customers say</h3>
+                    <h3 className="mt-2 font-sans text-2xl font-bold text-[rgb(var(--color-text))]">What customers say</h3>
                 </div>
                 <div className="flex gap-1.5">
                     <button
@@ -63,7 +63,7 @@ export default function TestimonialSlider({ testimonials }) {
                     <div className="flex items-end justify-between rounded-2xl bg-[rgb(var(--color-text))] p-6 text-white">
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Reviewer</p>
-                            <p className="mt-2 font-serif text-xl font-bold">{current.name}</p>
+                            <p className="mt-2 font-sans text-xl font-bold">{current.name}</p>
                             <p className="mt-2 text-sm text-white/60">
                                 Trusted customer of Jaya Medical Store
                             </p>

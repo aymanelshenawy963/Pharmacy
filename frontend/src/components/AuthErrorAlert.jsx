@@ -1,5 +1,5 @@
 import { AlertCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function AuthErrorAlert({ errors, children }) {
     if (!errors || errors.length === 0) return null;
@@ -10,6 +10,8 @@ export default function AuthErrorAlert({ errors, children }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            role="alert"
+            aria-live="assertive"
             className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/15 p-4 border border-red-200/60 dark:border-red-800/30 flex items-start gap-3"
         >
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
@@ -42,12 +44,12 @@ function ErrorMessage({ text }) {
                     <li>One uppercase letter</li>
                     <li>One lowercase letter</li>
                     <li>One number</li>
-                    <li>One special character</li>
+                    <li>One special character (@$!%*?&amp;^#_-)</li>
                 </ul>
             </div>
         );
     }
-    
+
     return (
         <p className="text-sm text-red-600 dark:text-red-400 font-medium leading-snug">
             {text}

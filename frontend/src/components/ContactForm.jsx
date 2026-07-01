@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
-import toast from 'react-hot-toast';
-import { contactSubjects } from '../data/products';
+import { contactSubjects } from '../data/store';
 import Icon from './Icons';
+import notify from '../utils/notifications';
 
 const initialForm = {
     name: '',
@@ -39,22 +38,22 @@ export default function ContactForm() {
                     { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
                 );
             }
-            toast.success('Message sent successfully.');
+            notify.success('Message sent successfully.');
             setForm(initialForm);
             event.currentTarget.reset();
         } catch (error) {
             console.error(error);
-            toast.error('Message could not be sent. Please try again.');
+            notify.error('Message could not be sent. Please try again.');
         } finally {
             setSending(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="glass-card space-y-5 p-6">
+        <form onSubmit={handleSubmit} className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm space-y-5 p-6">
             <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgb(var(--color-primary))]">Contact form</p>
-                <h2 className="mt-2 font-serif text-2xl font-bold text-[rgb(var(--color-text))]">Send a message to the store</h2>
+                <h2 className="mt-2 font-sans text-2xl font-bold text-[rgb(var(--color-text))]">Send a message to the store</h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -122,12 +121,10 @@ export default function ContactForm() {
                 />
             </label>
 
-            <motion.button
+            <button
                 type="submit"
                 disabled={sending}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                className="glass-button-primary w-full !py-3"
+                className="glass-button-primary w-full !py-3 hover:scale-[1.01] active:scale-[0.98] transition-transform duration-200"
             >
                 {sending ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -137,7 +134,7 @@ export default function ContactForm() {
                         <Icon name="Send" className="h-4 w-4" />
                     </>
                 )}
-            </motion.button>
+            </button>
         </form>
     );
 }

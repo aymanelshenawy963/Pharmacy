@@ -1,42 +1,31 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { roleService } from '../../services/roleService';
-import { parseApiError } from '../../utils/apiErrorHandler';
+import { roleSchema } from '../../validation/admin';
+import { parseZodError } from '../../utils/validation';
+import notify from '../../utils/notifications';
+import { pageVariants, itemVariants } from '../../constants/animations';
+import useAdminCrud from '../../hooks/useAdminCrud';
 import PageHeader from '../../components/admin/PageHeader';
 import SearchInput from '../../components/admin/SearchInput';
 import DataTable from '../../components/admin/DataTable';
 import Modal from '../../components/admin/Modal';
-import ConfirmDialog from '../../components/admin/ConfirmDialog';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import StatusBadge from '../../components/admin/StatusBadge';
 import FormField from '../../components/admin/FormField';
+import ModalFooter from '../../components/admin/ModalFooter';
 
 const INITIAL_FORM = { name: '' };
 
-const pageVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
-    },
-};
-
 export default function Roles() {
-    const [roles, setRoles] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [search, setSearch] = useState('');
     const [showDeleted, setShowDeleted] = useState(false);
+
+    const fetchFn = useCallback(() => roleService.getAll(showDeleted), [showDeleted]);
+    const { data: roles, filtered: filteredRoles, isLoading, error, search, setSearch, refetch } = useAdminCrud(fetchFn, {
+        errorMessage: 'Failed to load roles',
+        filterFn: (role, q) => role.name.toLowerCase().includes(q),
+    });
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -49,42 +38,11 @@ export default function Roles() {
     const [editingRole, setEditingRole] = useState(null);
     const [togglingRole, setTogglingRole] = useState(null);
 
-    const fetchRoles = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const data = await roleService.getAll(showDeleted);
-            setRoles(data);
-        } catch (err) {
-            const msgs = parseApiError(err);
-            setError(msgs.join(' '));
-        } finally {
-            setIsLoading(false);
-        }
-    }, [showDeleted]);
-
-    useEffect(() => {
-        fetchRoles();
-    }, [fetchRoles]);
-
-    const filteredRoles = useMemo(() => {
-        if (!search.trim()) return roles;
-        const q = search.toLowerCase();
-        return roles.filter((r) => r.name.toLowerCase().includes(q));
-    }, [roles, search]);
-
-    function validateName(value) {
-        if (!value.trim()) return 'Name is required';
-        if (value.trim().length < 3) return 'Name must be at least 3 characters';
-        if (value.trim().length > 50) return 'Name must be at most 50 characters';
-        return '';
-    }
-
     function handleFormChange(e) {
         const { value } = e.target;
         setForm({ name: value });
         if (formErrors.name) {
-            setFormErrors({ name: validateName(value) });
+            setFormErrors({ name: '' });
         }
     }
 
@@ -106,42 +64,44 @@ export default function Roles() {
         setIsToggleOpen(true);
     }
 
-    async function handleCreate() {
-        const error = validateName(form.name);
-        if (error) {
-            setFormErrors({ name: error });
-            return;
+    function validateForm() {
+        const result = roleSchema.safeParse(form);
+        if (!result.success) {
+            setFormErrors(parseZodError(result.error));
+            return false;
         }
+        setFormErrors({});
+        return true;
+    }
+
+    async function handleCreate(e) {
+        e.preventDefault();
+        if (!validateForm()) return;
         setIsSubmitting(true);
         try {
             await roleService.create({ name: form.name.trim() });
-            toast.success('Role created successfully');
+            notify.success('Role created successfully');
             setIsCreateOpen(false);
-            fetchRoles();
+            refetch();
         } catch (err) {
-            const msgs = parseApiError(err);
-            toast.error(msgs.join(' '));
+            notify.errorFromApi(err, 'Failed to create role');
         } finally {
             setIsSubmitting(false);
         }
     }
 
-    async function handleEdit() {
-        const error = validateName(form.name);
-        if (error) {
-            setFormErrors({ name: error });
-            return;
-        }
+    async function handleEdit(e) {
+        e.preventDefault();
+        if (!validateForm()) return;
         setIsSubmitting(true);
         try {
             await roleService.update(editingRole.id, { name: form.name.trim() });
-            toast.success('Role updated successfully');
+            notify.success('Role updated successfully');
             setIsEditOpen(false);
             setEditingRole(null);
-            fetchRoles();
+            refetch();
         } catch (err) {
-            const msgs = parseApiError(err);
-            toast.error(msgs.join(' '));
+            notify.errorFromApi(err, 'Failed to update role');
         } finally {
             setIsSubmitting(false);
         }
@@ -152,24 +112,15 @@ export default function Roles() {
         setIsSubmitting(true);
         try {
             await roleService.toggleStatus(togglingRole.id);
-            toast.success(togglingRole.isDeleted ? 'Role restored successfully' : 'Role deactivated successfully');
+            notify.success(togglingRole.isDeleted ? 'Role restored successfully' : 'Role deactivated successfully');
             setIsToggleOpen(false);
             setTogglingRole(null);
-            fetchRoles();
+            refetch();
         } catch (err) {
-            const msgs = parseApiError(err);
-            toast.error(msgs.join(' '));
+            notify.errorFromApi(err, 'Failed to toggle role status');
         } finally {
             setIsSubmitting(false);
         }
-    }
-
-    function handleCreateKeyDown(e) {
-        if (e.key === 'Enter' && !isSubmitting) handleCreate();
-    }
-
-    function handleEditKeyDown(e) {
-        if (e.key === 'Enter' && !isSubmitting) handleEdit();
     }
 
     const columns = [
@@ -228,7 +179,7 @@ export default function Roles() {
     const headerAction = (
         <div className="flex items-center gap-2">
             <button
-                onClick={fetchRoles}
+                onClick={refetch}
                 className="glass-button-secondary flex items-center gap-2 !px-3 min-h-[44px] text-sm"
             >
                 <RefreshCw size={16} />
@@ -286,7 +237,7 @@ export default function Roles() {
                     data={filteredRoles}
                     isLoading={isLoading}
                     error={error}
-                    onRetry={fetchRoles}
+                    onRetry={refetch}
                     emptyTitle="No roles found"
                     emptyDescription={
                         search
@@ -298,7 +249,7 @@ export default function Roles() {
 
             {/* Create Modal */}
             <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create Role" maxWidth="max-w-full sm:max-w-lg">
-                <div className="space-y-4" onKeyDown={handleCreateKeyDown}>
+                <form onSubmit={handleCreate} className="space-y-4">
                     <FormField
                         label="Role Name"
                         name="name"
@@ -309,32 +260,18 @@ export default function Roles() {
                         placeholder="e.g. Administrator"
                         disabled={isSubmitting}
                     />
-                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
-                        <button
-                            onClick={() => setIsCreateOpen(false)}
-                            disabled={isSubmitting}
-                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleCreate}
-                            disabled={isSubmitting}
-                            className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center"
-                        >
-                            {isSubmitting ? (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                            ) : (
-                                'Create'
-                            )}
-                        </button>
-                    </div>
-                </div>
+                    <ModalFooter
+                        onCancel={() => setIsCreateOpen(false)}
+                        onSubmit={handleCreate}
+                        isSubmitting={isSubmitting}
+                        submitText="Create"
+                    />
+                </form>
             </Modal>
 
             {/* Edit Modal */}
             <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Role" maxWidth="max-w-full sm:max-w-lg">
-                <div className="space-y-4" onKeyDown={handleEditKeyDown}>
+                <form onSubmit={handleEdit} className="space-y-4">
                     <FormField
                         label="Role Name"
                         name="name"
@@ -345,27 +282,13 @@ export default function Roles() {
                         placeholder="e.g. Administrator"
                         disabled={isSubmitting}
                     />
-                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
-                        <button
-                            onClick={() => setIsEditOpen(false)}
-                            disabled={isSubmitting}
-                            className="glass-button-secondary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleEdit}
-                            disabled={isSubmitting}
-                            className="glass-button-primary !px-4 !py-2.5 text-sm min-h-[44px] w-full sm:w-auto flex items-center justify-center"
-                        >
-                            {isSubmitting ? (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                            ) : (
-                                'Save Changes'
-                            )}
-                        </button>
-                    </div>
-                </div>
+                    <ModalFooter
+                        onCancel={() => setIsEditOpen(false)}
+                        onSubmit={handleEdit}
+                        isSubmitting={isSubmitting}
+                        submitText="Save Changes"
+                    />
+                </form>
             </Modal>
 
             {/* Toggle Status Confirmation */}
