@@ -26,7 +26,8 @@ public class CategoriesController : BaseController
        return Ok(result);
     }
 
-    [HttpGet("{id}")] 
+
+    [HttpGet("{id}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {

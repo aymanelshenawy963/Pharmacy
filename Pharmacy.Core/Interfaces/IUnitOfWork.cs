@@ -9,6 +9,7 @@ public interface IUnitOfWork
     IPhotoRepository PhotoRepository { get; }
     IBasketRepository BasketRepository { get; }
     IOrderRepository OrderRepository { get; }
+    INotificationRepository NotificationRepository { get; }
 
     /// <summary>
     /// Persists all staged changes in a single database transaction.

@@ -10,10 +10,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Photo> Photos { get; set; }
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<Category> Categories { get; set; }
-    public virtual DbSet<Address> Addresses { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
     public virtual DbSet<OrderItem> OrderItems { get; set; }
     public virtual DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+    public virtual DbSet<Notification> Notifications { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

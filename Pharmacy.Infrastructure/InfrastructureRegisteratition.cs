@@ -1,5 +1,4 @@
-﻿
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using Pharmacy.Core.DTO.Validators;
 using Pharmacy.Core.Entities;
+using Pharmacy.Core.Errors;
 using Pharmacy.Core.interfaces;
 using Pharmacy.Core.Interfaces;
 using Pharmacy.Core.Interfaces.Authentication;
@@ -24,6 +24,7 @@ using Pharmacy.Infrastructure.Repositories.Authentication;
 using Pharmacy.Infrastructure.Repositories.Services;
 using Pharmacy.Infrastructure.Repositriers;
 using Pharmacy.Infrastructure.Repositriers.Service;
+using Pharmacy.Infrastructure.Repositories.Services;
 using StackExchange.Redis;
 using Stripe.Climate;
 using System.Text;
@@ -38,6 +39,7 @@ public static class InfrastructureRegisteratition
 
         services.AddScoped(typeof(IGenericRepositry<>), typeof(GenericRepositry<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<IUserService, UserService>();
@@ -48,6 +50,10 @@ public static class InfrastructureRegisteratition
 
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining<RegisterDTOValidator>(); // بس السطر ده كفاية
+
+
+        services.AddExceptionHandler<GlobalExceptionHandelar>();
+        services.AddProblemDetails();
 
         services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
