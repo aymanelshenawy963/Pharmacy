@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l \"IOrderRepository\\\\|IProductRepository\\\\|IBasketRepository\")",
+      "Bash(git rebase *)",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  }
+}
