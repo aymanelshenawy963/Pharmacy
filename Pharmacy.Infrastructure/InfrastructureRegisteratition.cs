@@ -25,7 +25,6 @@ using Pharmacy.Infrastructure.Repositories.Services;
 using Pharmacy.Infrastructure.Repositriers;
 using Pharmacy.Infrastructure.Repositriers.Service;
 using StackExchange.Redis;
-using Stripe.Climate;
 using System.Text;
 using Hangfire;
 
@@ -45,6 +44,14 @@ public static class InfrastructureRegisteratition
         services.AddScoped<IEmailSender, EmailService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IPaymentService, PaymentService>();
+
+        services.AddOptions<StripeSettings>()
+            .Bind(configuration.GetSection(StripeSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddSingleton<IImageMangementService, ImageMangementService>();
         services.AddSingleton<IJwtProvider, JwtProvider>();
         services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
