@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.Entities.Enums;
 using Pharmacy.Core.interfaces;
 using Pharmacy.Core.Interfaces.Services;
-using Pharmacy.Core.Settings;
 
 namespace Pharmacy.Infrastructure.Repositories.Services;
 

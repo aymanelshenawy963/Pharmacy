@@ -24,10 +24,11 @@ using Pharmacy.Infrastructure.Repositories.Authentication;
 using Pharmacy.Infrastructure.Repositories.Services;
 using Pharmacy.Infrastructure.Repositriers;
 using Pharmacy.Infrastructure.Repositriers.Service;
-using Pharmacy.Infrastructure.Repositories.Services;
 using StackExchange.Redis;
 using Stripe.Climate;
 using System.Text;
+using Hangfire;
+
 
 namespace Pharmacy.Infrastructure;
 
@@ -117,6 +118,24 @@ public static class InfrastructureRegisteratition
             options.SignIn.RequireConfirmedEmail = true;
             options.User.RequireUniqueEmail = true;
         });
+
+
+
+
+        // Hangfire — uses the same SQL Server connection as the app
+        services.AddHangfire(cfg => cfg
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddHangfireServer(options =>
+        {
+            options.WorkerCount = 2; // keep low — monitoring jobs are lightweight
+        });
+
+
+
 
 
 
