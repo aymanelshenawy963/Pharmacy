@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Pharmacy.Core.Entities;
+using Pharmacy.Core.Entities.Enums;
 using Pharmacy.Core.interfaces;
 using Pharmacy.Core.Interfaces.Services;
 using Pharmacy.Core.Settings;
@@ -72,5 +74,29 @@ public class PaymentService : IPaymentService
 
         var updatedBasket = await _unitOfWork.BasketRepository.UpdateBasketAsync(basket);
         return (updatedBasket, null);
+    }
+
+    public async Task<Order> UpdateOrderPaymentSucceeded(string paymentIntentId)
+    {
+        var order = await _context.Orders
+            .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId)
+            ?? throw new KeyNotFoundException(
+                $"No order found for PaymentIntent '{paymentIntentId}'.");
+
+        order.Status = OrderStatus.PaymentReceived;
+        await _unitOfWork.SaveAsync();
+        return order;
+    }
+
+    public async Task<Order> UpdateOrderPaymentFailed(string paymentIntentId)
+    {
+        var order = await _context.Orders
+            .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId)
+            ?? throw new KeyNotFoundException(
+                $"No order found for PaymentIntent '{paymentIntentId}'.");
+
+        order.Status = OrderStatus.PaymentFailed;
+        await _unitOfWork.SaveAsync();
+        return order;
     }
 }

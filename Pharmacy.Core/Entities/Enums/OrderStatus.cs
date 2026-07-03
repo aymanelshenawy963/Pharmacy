@@ -7,6 +7,8 @@ namespace Pharmacy.Core.Entities.Enums;
 public enum OrderStatus
 {
     Pending,
+    PaymentReceived,
+    PaymentFailed,
     Paid,
     Shipped,
     Delivered,
