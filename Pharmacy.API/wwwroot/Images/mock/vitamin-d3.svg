@@ -1,0 +1,30 @@
+<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F5F8FB"/></linearGradient>
+    
+    <linearGradient id="vd-btl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FCD9A0"/><stop offset="0.5" stop-color="#E59A2B"/><stop offset="1" stop-color="#A2611A"/></linearGradient>
+    <linearGradient id="vd-cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1F5F9"/><stop offset="1" stop-color="#94A3B8"/></linearGradient>
+    <radialGradient id="vd-gel" cx="0.35" cy="0.3" r="0.85"><stop offset="0" stop-color="#FFE9A8"/><stop offset="0.55" stop-color="#F59E0B"/><stop offset="1" stop-color="#B45309"/></radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect x="40" y="40" width="124" height="40" rx="20" fill="#F59E0B" fill-opacity="0.12"/>
+  <text x="102" y="66" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#F59E0B">VITAMINS</text>
+  
+    <g>
+      <ellipse cx="268" cy="352" rx="28" ry="17" fill="url(#vd-gel)" transform="rotate(-18 268 352)"/><ellipse cx="260" cy="346" rx="7" ry="4" fill="#FFF7E0" opacity="0.8" transform="rotate(-18 260 346)"/>
+      <ellipse cx="330" cy="356" rx="28" ry="17" fill="url(#vd-gel)" transform="rotate(14 330 356)"/><ellipse cx="322" cy="350" rx="7" ry="4" fill="#FFF7E0" opacity="0.8" transform="rotate(14 322 350)"/>
+      <ellipse cx="300" cy="368" rx="28" ry="17" fill="url(#vd-gel)"/><ellipse cx="292" cy="362" rx="7" ry="4" fill="#FFF7E0" opacity="0.8"/>
+    </g>
+    <rect x="258" y="166" width="84" height="30" rx="7" fill="url(#vd-cap)"/>
+    <rect x="248" y="196" width="104" height="150" rx="16" fill="url(#vd-btl)"/>
+    <rect x="257" y="206" width="12" height="130" rx="6" fill="#FFFFFF" opacity="0.35"/>
+    <rect x="248" y="232" width="104" height="92" fill="#FFFFFF" opacity="0.96"/>
+    <circle cx="300" cy="258" r="15" fill="#F59E0B"/>
+    <g stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"><line x1="300" y1="234" x2="300" y2="240"/><line x1="300" y1="276" x2="300" y2="282"/><line x1="276" y1="258" x2="282" y2="258"/><line x1="318" y1="258" x2="324" y2="258"/><line x1="284" y1="242" x2="288" y2="246"/><line x1="312" y1="270" x2="316" y2="274"/><line x1="316" y1="242" x2="312" y2="246"/><line x1="288" y1="270" x2="284" y2="274"/></g>
+    <text x="300" y="300" text-anchor="middle" font-family="Arial" font-size="15" font-weight="800" fill="#B45309">VITAMIN D3</text>
+    <text x="300" y="317" text-anchor="middle" font-family="Arial" font-size="12" font-weight="600" fill="#92400E">2000 IU</text>
+  <ellipse cx="300" cy="394" rx="112" ry="15" fill="#0F172A" opacity="0.07"/>
+  <text x="300" y="434" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#0F172A">Vitamin D3 2000 IU</text>
+  <text x="300" y="470" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#0F172A">Softgels</text>
+  <rect x="1" y="1" width="598" height="598" fill="none" stroke="#E5E7EB" stroke-width="2"/>
+</svg>

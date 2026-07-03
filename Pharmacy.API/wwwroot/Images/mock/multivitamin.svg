@@ -1,0 +1,31 @@
+<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F5F8FB"/></linearGradient>
+    
+    <linearGradient id="mv-btl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FCD9A0"/><stop offset="0.5" stop-color="#E59A2B"/><stop offset="1" stop-color="#A2611A"/></linearGradient>
+    <linearGradient id="mv-cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD34D"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect x="40" y="40" width="124" height="40" rx="20" fill="#F59E0B" fill-opacity="0.12"/>
+  <text x="102" y="66" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#F59E0B">VITAMINS</text>
+  
+    <g>
+      <circle cx="256" cy="352" r="18" fill="#EF4444"/><circle cx="250" cy="346" r="5" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="298" cy="362" r="18" fill="#3B82F6"/><circle cx="292" cy="356" r="5" fill="#FFFFFF" opacity="0.5"/>
+      <circle cx="340" cy="352" r="18" fill="#22C55E"/><circle cx="334" cy="346" r="5" fill="#FFFFFF" opacity="0.5"/>
+      <ellipse cx="322" cy="378" rx="20" ry="12" fill="#A855F7"/><ellipse cx="315" cy="374" rx="5" ry="3" fill="#FFFFFF" opacity="0.5"/>
+    </g>
+    <rect x="258" y="166" width="84" height="32" rx="8" fill="url(#mv-cap)"/>
+    <rect x="264" y="170" width="72" height="7" rx="3" fill="#FFFFFF" opacity="0.3"/>
+    <rect x="248" y="198" width="104" height="152" rx="16" fill="url(#mv-btl)"/>
+    <rect x="257" y="208" width="12" height="132" rx="6" fill="#FFFFFF" opacity="0.35"/>
+    <rect x="248" y="238" width="104" height="88" fill="#FFFFFF" opacity="0.96"/>
+    <rect x="248" y="238" width="104" height="6" fill="#F59E0B"/>
+    <text x="300" y="278" text-anchor="middle" font-family="Arial" font-size="15" font-weight="800" fill="#B45309">MULTI</text>
+    <text x="300" y="296" text-anchor="middle" font-family="Arial" font-size="15" font-weight="800" fill="#B45309">VITAMIN</text>
+    <text x="300" y="314" text-anchor="middle" font-family="Arial" font-size="11" font-weight="600" fill="#92400E">23 nutrients</text>
+  <ellipse cx="300" cy="394" rx="112" ry="15" fill="#0F172A" opacity="0.07"/>
+  <text x="300" y="434" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#0F172A">Daily Multivitamin</text>
+  <text x="300" y="470" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#0F172A">Tablets</text>
+  <rect x="1" y="1" width="598" height="598" fill="none" stroke="#E5E7EB" stroke-width="2"/>
+</svg>

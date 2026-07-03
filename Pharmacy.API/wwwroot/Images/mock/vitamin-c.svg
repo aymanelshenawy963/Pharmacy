@@ -1,0 +1,29 @@
+<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F5F8FB"/></linearGradient>
+    
+    <linearGradient id="vc-tube" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FDE68A"/><stop offset="0.5" stop-color="#F59E0B"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+    <linearGradient id="vc-cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCD34D"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+    <radialGradient id="vc-tab" cx="0.4" cy="0.35" r="0.8"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FEF3C7"/></radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect x="40" y="40" width="124" height="40" rx="20" fill="#F59E0B" fill-opacity="0.12"/>
+  <text x="102" y="66" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#F59E0B">VITAMINS</text>
+  
+    <ellipse cx="360" cy="320" rx="46" ry="46" fill="url(#vc-tab)" stroke="#F59E0B" stroke-width="2"/>
+    <ellipse cx="360" cy="320" rx="46" ry="14" fill="#F59E0B" opacity="0.12"/>
+    <circle cx="352" cy="270" r="5" fill="#FCD34D" opacity="0.8"/><circle cx="372" cy="250" r="4" fill="#FCD34D" opacity="0.7"/><circle cx="344" cy="240" r="3" fill="#FCD34D" opacity="0.6"/><circle cx="378" cy="286" r="3" fill="#FCD34D" opacity="0.7"/>
+    <rect x="262" y="146" width="76" height="34" rx="11" fill="url(#vc-cap)"/>
+    <rect x="270" y="151" width="60" height="7" rx="3" fill="#FFFFFF" opacity="0.35"/>
+    <rect x="256" y="180" width="88" height="188" rx="20" fill="url(#vc-tube)"/>
+    <rect x="266" y="192" width="12" height="164" rx="6" fill="#FFFFFF" opacity="0.4"/>
+    <rect x="256" y="234" width="88" height="96" fill="#FFFFFF" opacity="0.96"/>
+    <rect x="256" y="234" width="88" height="5" fill="#F59E0B"/><rect x="256" y="325" width="88" height="5" fill="#F59E0B"/>
+    <circle cx="300" cy="262" r="17" fill="#F59E0B"/><text x="300" y="269" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="#FFFFFF">C</text>
+    <text x="300" y="298" text-anchor="middle" font-family="Arial" font-size="15" font-weight="800" fill="#B45309">VITAMIN C</text>
+    <text x="300" y="317" text-anchor="middle" font-family="Arial" font-size="12" font-weight="600" fill="#92400E">1000 mg</text>
+  <ellipse cx="300" cy="394" rx="112" ry="15" fill="#0F172A" opacity="0.07"/>
+  <text x="300" y="434" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#0F172A">Vitamin C 1000mg</text>
+  <text x="300" y="470" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#0F172A">Effervescent</text>
+  <rect x="1" y="1" width="598" height="598" fill="none" stroke="#E5E7EB" stroke-width="2"/>
+</svg>
