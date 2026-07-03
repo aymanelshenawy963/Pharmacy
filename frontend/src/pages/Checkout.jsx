@@ -6,6 +6,7 @@ import useCheckout from '../hooks/useCheckout';
 import AddressForm from '../components/checkout/AddressForm';
 import DeliveryMethodSelector from '../components/checkout/DeliveryMethodSelector';
 import OrderSummary from '../components/checkout/OrderSummary';
+import PaymentMethodSelector from '../components/checkout/PaymentMethodSelector';
 
 export default function Checkout() {
     const {
@@ -15,7 +16,8 @@ export default function Checkout() {
         errors,
         deliveryMethodId,
         setDeliveryMethodId,
-        deliveryPrice,
+        paymentMethod,
+        setPaymentMethod,
         total,
         submitting,
         handleChange,
@@ -49,13 +51,13 @@ export default function Checkout() {
         );
     }
 
+    const isCod = paymentMethod === 'cod';
+
     return (
         <>
             <Seo title="Checkout" description="Complete your order with shipping and delivery details." />
 
             <div className="min-h-[calc(100vh-72px)] bg-surface relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/2 h-96 bg-primary/10 blur-[100px] pointer-events-none" />
-
                 <div className="mx-auto max-w-7xl px-4 py-12 md:py-20 lg:px-8 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -91,23 +93,33 @@ export default function Checkout() {
                                         onSelect={setDeliveryMethodId}
                                     />
                                 </motion.div>
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.15 }}
+                                >
+                                    <PaymentMethodSelector
+                                        paymentMethod={paymentMethod}
+                                        onSelect={setPaymentMethod}
+                                    />
+                                </motion.div>
                             </div>
 
                             {/* Right column — order summary */}
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.15 }}
+                                transition={{ delay: 0.2 }}
                                 className="space-y-6 lg:sticky lg:top-28 h-fit"
                             >
                                 <OrderSummary
                                     items={items}
                                     subtotal={subtotal}
-                                    deliveryPrice={deliveryPrice}
                                     total={total}
                                 />
 
-                                {/* Place Order */}
+                                {/* Submit button — label changes by payment method */}
                                 <motion.button
                                     whileHover={{ scale: 1.01 }}
                                     whileTap={{ scale: 0.98 }}
@@ -118,19 +130,22 @@ export default function Checkout() {
                                     {submitting ? (
                                         <>
                                             <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                                            Placing Order...
+                                            {isCod ? 'Placing Order...' : 'Initializing Payment...'}
                                         </>
                                     ) : (
                                         <>
-                                            <Icon name="CheckCircle" className="h-5 w-5 mr-2" />
-                                            Place Order
+                                            <Icon
+                                                name={isCod ? 'PackageCheck' : 'CreditCard'}
+                                                className="h-5 w-5 mr-2"
+                                            />
+                                            {isCod ? 'Place Order' : 'Continue to Payment'}
                                         </>
                                     )}
                                 </motion.button>
 
                                 <Link
                                     to="/cart"
-                                    className="glass-button w-full py-3 justify-center text-sm"
+                                    className="glass-button w-full py-3 justify-center text-sm text-[rgb(var(--color-text))]"
                                 >
                                     <Icon name="ArrowLeft" className="h-4 w-4 mr-1" />
                                     Back to Cart

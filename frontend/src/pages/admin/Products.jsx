@@ -110,19 +110,6 @@ export default function Products() {
             render: (row) => <StockIndicator stock={row.stock} />,
         },
         {
-            key: 'requiresPrescription',
-            header: 'Rx',
-            render: (row) => (
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    row.requiresPrescription
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800/30 dark:text-gray-400'
-                }`}>
-                    {row.requiresPrescription ? 'Rx' : 'OTC'}
-                </span>
-            ),
-        },
-        {
             key: 'topSelling',
             header: 'Top',
             render: (row) => (

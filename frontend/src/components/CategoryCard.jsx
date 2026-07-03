@@ -8,7 +8,7 @@ export default function CategoryCard({ category }) {
                 to={`/products?category=${encodeURIComponent(category.slug)}`}
                 className="group bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm block p-5 transition-all duration-300 hover:shadow-md hover:border-[rgb(var(--color-primary))]/20"
             >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] transition-all duration-300 group-hover:bg-[rgb(var(--color-primary))] group-hover:text-white group-hover:shadow-[var(--shadow-glow)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] transition-all duration-300 group-hover:bg-[rgb(var(--color-primary))] group-hover:text-white ">
                     <Icon name={category.iconKey} className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 font-sans text-xl font-bold text-[rgb(var(--color-text))]">{category.name}</h3>

@@ -19,6 +19,7 @@ export default function RoleCheckboxes({
                     availableRoles.map((role) => {
                         const roleName = getRoleName(role);
                         const isChecked = selectedRoles.includes(roleName);
+                        const isSystem = role?.isSystem;
                         return (
                             <label
                                 key={roleName}
@@ -35,6 +36,11 @@ export default function RoleCheckboxes({
                                     className="h-4 w-4 rounded border-[rgb(var(--color-border))] text-[rgb(var(--color-primary))] focus:ring-[rgb(var(--color-primary))]"
                                 />
                                 {roleName}
+                                {isSystem && (
+                                    <span className="ml-auto text-[10px] font-medium text-[rgb(var(--color-text-muted))] bg-[rgb(var(--color-bg-subtle))] px-1.5 py-0.5 rounded-full border border-[rgb(var(--color-border))]">
+                                        System
+                                    </span>
+                                )}
                             </label>
                         );
                     })

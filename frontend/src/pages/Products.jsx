@@ -13,9 +13,6 @@ const sortOptions = [
     { value: 'namedesc', label: 'Name: Z → A' },
 ];
 
-const SELECT_ARROW = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`;
-const selectStyle = { backgroundImage: SELECT_ARROW, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1em' };
-
 export default function Products() {
     const {
         search,
@@ -40,7 +37,7 @@ export default function Products() {
         <>
             <Seo
                 title="Products"
-                description="Browse medicines, vitamins, and wellness essentials at Jaya Medical Store."
+                description="Browse medicines, vitamins, and wellness essentials at Medical Store."
             />
 
             {/* Hero header */}
@@ -123,31 +120,35 @@ export default function Products() {
 
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Category</span>
-                                <select
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
-                                    style={selectStyle}
-                                >
-                                    <option value="All">All Categories</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <select
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                        className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
+                                    >
+                                        <option value="All">All Categories</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                        ))}
+                                    </select>
+                                    <Icon name="ChevronDown" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                                </div>
                             </label>
 
                             <label className="block space-y-1.5">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Sort By</span>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
-                                    style={selectStyle}
-                                >
-                                    {sortOptions.map((option) => (
-                                        <option key={option.value} value={option.value}>{option.label}</option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-[13px] text-text outline-none transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-sm appearance-none cursor-pointer hover:border-primary/40"
+                                    >
+                                        {sortOptions.map((option) => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                    <Icon name="ChevronDown" className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                                </div>
                             </label>
                         </div>
                     </motion.aside>

@@ -21,6 +21,13 @@ import ModalFooter from '../../components/admin/ModalFooter';
 import UserForm from '../../components/admin/UserForm';
 import UserViewModal from '../../components/admin/UserViewModal';
 
+function hasAdminRole(user) {
+    return (user.roles || []).some((r) => {
+        const name = typeof r === 'string' ? r : r?.name || r?.roleName || '';
+        return name === 'Admin';
+    });
+}
+
 export default function Users() {
     const {
         filteredUsers,
@@ -29,8 +36,6 @@ export default function Users() {
         search,
         setSearch,
         refetch,
-        availableRoles,
-        getRoleName,
         showCreateModal,
         setShowCreateModal,
         openCreateModal,
@@ -38,7 +43,7 @@ export default function Users() {
         createErrors,
         isCreating,
         handleCreateChange,
-        handleCreateRoleToggle,
+        handleCreateAdminToggle,
         handleCreateSubmit,
         showEditModal,
         setShowEditModal,
@@ -47,7 +52,7 @@ export default function Users() {
         editErrors,
         isEditing,
         handleEditChange,
-        handleEditRoleToggle,
+        handleEditAdminToggle,
         handleEditSubmit,
         showViewModal,
         setShowViewModal,
@@ -97,24 +102,20 @@ export default function Users() {
         },
         {
             key: 'roles',
-            header: 'Roles',
+            header: 'Role',
             render: (row) => {
-                const roles = row.roles || [];
-                if (roles.length === 0) {
-                    return <span className="text-[rgb(var(--color-text-muted))] text-xs">No roles</span>;
-                }
+                const isAdmin = hasAdminRole(row);
                 return (
-                    <div className="flex flex-wrap gap-1">
-                        {roles.map((role, i) => (
-                            <span
-                                key={i}
-                                className="inline-flex items-center gap-0.5 rounded-full bg-[rgb(var(--color-primary))]/10 px-1.5 py-0.5 text-[11px] font-medium text-[rgb(var(--color-primary))]"
-                            >
-                                <Shield size={9} />
-                                {getRoleName(role)}
-                            </span>
-                        ))}
-                    </div>
+                    <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                            isAdmin
+                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300'
+                                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                        }`}
+                    >
+                        <Shield size={10} />
+                        {isAdmin ? 'Admin' : 'Customer'}
+                    </span>
                 );
             },
         },
@@ -151,7 +152,11 @@ export default function Users() {
                     </button>
                     <button
                         onClick={() => openToggleDialog(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-amber-500/10 hover:text-amber-500 transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                        className={`rounded-lg p-2 text-[rgb(var(--color-text-muted))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center ${
+                            row.isDisabled
+                                ? 'hover:bg-emerald-500/10 hover:text-emerald-500'
+                                : 'hover:bg-amber-500/10 hover:text-amber-500'
+                        }`}
                         title={row.isDisabled ? 'Enable user' : 'Disable user'}
                     >
                         {row.isDisabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
@@ -239,9 +244,7 @@ export default function Users() {
                         form={createForm}
                         formErrors={createErrors}
                         onFormChange={handleCreateChange}
-                        onRoleToggle={handleCreateRoleToggle}
-                        availableRoles={availableRoles}
-                        getRoleName={getRoleName}
+                        onAdminToggle={handleCreateAdminToggle}
                     />
                     <ModalFooter
                         onCancel={() => setShowCreateModal(false)}
@@ -269,9 +272,7 @@ export default function Users() {
                         form={editForm}
                         formErrors={editErrors}
                         onFormChange={handleEditChange}
-                        onRoleToggle={handleEditRoleToggle}
-                        availableRoles={availableRoles}
-                        getRoleName={getRoleName}
+                        onAdminToggle={handleEditAdminToggle}
                     />
                     <ModalFooter
                         onCancel={() => setShowEditModal(false)}

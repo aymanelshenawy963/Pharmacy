@@ -99,4 +99,21 @@ public class PaymentService : IPaymentService
         await _unitOfWork.SaveAsync();
         return order;
     }
+
+    public async Task<string?> GetPaymentIntentStatusAsync(string paymentIntentId)
+    {
+        if (string.IsNullOrEmpty(paymentIntentId))
+            return null;
+
+        var intentService = new PaymentIntentService();
+        try
+        {
+            var intent = await intentService.GetAsync(paymentIntentId);
+            return intent.Status;
+        }
+        catch (StripeException)
+        {
+            return null;
+        }
+    }
 }

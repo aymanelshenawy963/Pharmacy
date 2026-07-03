@@ -7,12 +7,9 @@ import { staggerContainer, staggerItem } from '../constants/animations';
 export default function CancelOrder() {
     return (
         <>
-            <Seo title="Cancellation & Refund Policy" description="Order cancellation and refund policy for Jaya Medical Store." />
+            <Seo title="Cancellation & Refund Policy" description="Order cancellation and refund policy for Medical Store." />
 
             <main className="bg-surface min-h-[calc(100vh-72px)] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/3 h-[400px] bg-primary/5 blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-1/3 h-[400px] bg-secondary/5 blur-[120px] pointer-events-none" />
-
                 <div className="mx-auto max-w-[1000px] px-5 py-16 sm:px-6 md:px-16 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}

@@ -8,12 +8,13 @@ export default function AuthHeader() {
             <Link
                 to="/"
                 className="flex items-center gap-2.5 group pointer-events-auto"
+                aria-label="Medical Store — Home"
             >
-                <div className="bg-[rgb(var(--color-primary))]/10 p-2 rounded-xl group-hover:bg-[rgb(var(--color-primary))]/20 transition-all duration-300">
-                    <Activity className="h-5 w-5 text-[rgb(var(--color-primary))]" />
+                <div className="bg-[rgb(var(--color-primary))]/10 p-2 rounded-xl group-hover:bg-[rgb(var(--color-primary))]/15 group-hover:scale-[1.03] transition-all duration-300">
+                    <Activity className="h-5 w-5 text-[rgb(var(--color-primary))]" strokeWidth={2} />
                 </div>
                 <p className="font-sans text-lg font-bold tracking-tight text-[#00685f] dark:text-[#38b2ac]">
-                    Jaya Medical Store
+                    Medical Store
                 </p>
             </Link>
             <div className="pointer-events-auto">

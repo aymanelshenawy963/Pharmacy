@@ -5,11 +5,9 @@ import { staggerContainer, staggerItem } from '../constants/animations';
 export default function PrivacyPolicy() {
     return (
         <>
-            <Seo title="Privacy Policy" description="Privacy Policy for Jaya Medical Store." />
+            <Seo title="Privacy Policy" description="Privacy Policy for Medical Store." />
 
             <main className="bg-surface min-h-[calc(100vh-72px)] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/3 h-[400px] bg-primary/5 blur-[120px] pointer-events-none" />
-
                 <div className="mx-auto max-w-[1000px] px-5 py-16 sm:px-6 md:px-16 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -40,21 +38,21 @@ export default function PrivacyPolicy() {
                             <motion.section variants={staggerItem} className="space-y-4">
                                 <h2 className="font-sans text-2xl font-semibold text-text">1. Information We Collect</h2>
                                 <p className="text-base leading-relaxed text-text-muted">
-                                    At Jaya Medical Store, we collect information that you provide directly to us when you create an account, place an order, or contact us for support. This includes your name, email address, phone number, shipping address, and medical prescriptions (when required for ordering specific medicines).
+                                    At Medical Store, we collect information that you provide directly to us when you create an account, place an order, or contact us for support. This includes your name, email address, phone number, and shipping address.
                                 </p>
                             </motion.section>
 
                             <motion.section variants={staggerItem} className="space-y-4">
                                 <h2 className="font-sans text-2xl font-semibold text-text">2. How We Use Your Information</h2>
                                 <p className="text-base leading-relaxed text-text-muted">
-                                    We use the information we collect to fulfill your orders, provide customer support, communicate with you about your order status via SMS or WhatsApp, and ensure compliance with pharmacy laws regarding prescription medications. We do not sell or rent your personal information to third parties.
+                                    We use the information we collect to fulfill your orders, provide customer support, communicate with you about your order status via SMS or WhatsApp, and ensure compliance with pharmacy laws regarding medications. We do not sell or rent your personal information to third parties.
                                 </p>
                             </motion.section>
 
                             <motion.section variants={staggerItem} className="space-y-4">
                                 <h2 className="font-sans text-2xl font-semibold text-text">3. Data Security and Confidentiality</h2>
                                 <p className="text-base leading-relaxed text-text-muted">
-                                    We take the security of your medical and personal data seriously. Prescriptions uploaded to our platform are stored securely and are only accessed by our licensed pharmacists for the purpose of order verification and fulfillment. We implement standard security measures to protect against unauthorized access or data breaches.
+                                    We take the security of your medical and personal data seriously. Data is stored securely and is only accessed by our licensed pharmacists for the purpose of order verification and fulfillment. We implement standard security measures to protect against unauthorized access or data breaches.
                                 </p>
                             </motion.section>
 

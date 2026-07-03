@@ -14,14 +14,14 @@ const setMeta = (selector, content, attr = 'property') => {
 export default function Seo({ title, description, image, url, type = 'website' }) {
     useEffect(() => {
         if (title) {
-            document.title = `${title} | Jaya Medical Store`;
+            document.title = `${title} | Medical Store`;
         }
 
         if (description) {
             setMeta('meta[name="description"]', description, 'name');
         }
 
-        const fullTitle = title ? `${title} | Jaya Medical Store` : 'Jaya Medical Store';
+        const fullTitle = title ? `${title} | Medical Store` : 'Medical Store';
 
         setMeta('meta[property="og:title"]', fullTitle);
         setMeta('meta[property="og:description"]', description);

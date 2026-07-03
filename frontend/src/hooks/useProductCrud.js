@@ -14,7 +14,6 @@ const INITIAL_FORM = {
     oldPrice: '',
     stock: '',
     categoryId: '',
-    requiresPrescription: false,
     hasStrips: false,
     stripCount: '',
     topSelling: false,
@@ -131,7 +130,6 @@ export default function useProductCrud() {
             oldPrice: product.oldPrice ?? '',
             stock: product.stock ?? '',
             categoryId: categories.find(c => c.name === product.categoryName)?.id || '',
-            requiresPrescription: product.requiresPrescription || false,
             hasStrips: product.hasStrips || false,
             stripCount: product.stripCount ?? '',
             topSelling: product.topSelling || false,
@@ -186,7 +184,6 @@ export default function useProductCrud() {
         fd.append('NewPrice', Number(form.newPrice));
         fd.append('OldPrice', form.oldPrice ? Number(form.oldPrice) : 0);
         fd.append('Stock', Number(form.stock));
-        fd.append('RequiresPrescription', form.requiresPrescription);
         fd.append('HasStrips', form.hasStrips);
         if (form.hasStrips && form.stripCount) fd.append('StripCount', Number(form.stripCount));
         fd.append('TopSelling', form.topSelling);

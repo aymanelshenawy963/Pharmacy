@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react';
+import { Shield, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw, Info } from 'lucide-react';
 import { roleService } from '../../services/roleService';
 import { roleSchema } from '../../validation/admin';
 import { parseZodError } from '../../utils/validation';
@@ -18,6 +18,11 @@ import ModalFooter from '../../components/admin/ModalFooter';
 
 const INITIAL_FORM = { name: '' };
 
+const SYSTEM_ROLES = [
+    { name: 'Admin', isSystem: true, isDeleted: false },
+    { name: 'Customer', isSystem: true, isDeleted: false },
+];
+
 export default function Roles() {
     const [showDeleted, setShowDeleted] = useState(false);
 
@@ -26,6 +31,14 @@ export default function Roles() {
         errorMessage: 'Failed to load roles',
         filterFn: (role, q) => role.name.toLowerCase().includes(q),
     });
+
+    const allRoles = [
+        ...SYSTEM_ROLES.filter((sr) => {
+            if (!search) return true;
+            return sr.name.toLowerCase().includes(search.toLowerCase());
+        }),
+        ...(filteredRoles || []).filter((r) => !SYSTEM_ROLES.some((sr) => sr.name === r.name)),
+    ];
 
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -68,6 +81,11 @@ export default function Roles() {
         const result = roleSchema.safeParse(form);
         if (!result.success) {
             setFormErrors(parseZodError(result.error));
+            return false;
+        }
+        const nameLower = form.name.trim().toLowerCase();
+        if (SYSTEM_ROLES.some((sr) => sr.name.toLowerCase() === nameLower)) {
+            setFormErrors({ name: `"${form.name.trim()}" is a system role and cannot be created.` });
             return false;
         }
         setFormErrors({});
@@ -132,7 +150,15 @@ export default function Roles() {
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 ring-1 ring-[rgb(var(--color-primary))]/10">
                         <Shield className="h-4 w-4 text-[rgb(var(--color-primary))]" />
                     </div>
-                    <span className="font-medium">{row.name}</span>
+                    <div className="flex items-center gap-2">
+                        <span className="font-medium">{row.name}</span>
+                        {row.isSystem && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[rgb(var(--color-bg-subtle))] px-2 py-0.5 text-[10px] font-semibold text-[rgb(var(--color-text-muted))] border border-[rgb(var(--color-border))]">
+                                <Info size={10} />
+                                System
+                            </span>
+                        )}
+                    </div>
                 </div>
             ),
         },
@@ -143,7 +169,7 @@ export default function Roles() {
                 <StatusBadge
                     active={!row.isDeleted}
                     activeText="Active"
-                    inactiveText="Deleted"
+                    inactiveText={row.isSystem ? 'System' : 'Deleted'}
                 />
             ),
         },
@@ -151,28 +177,37 @@ export default function Roles() {
             key: 'actions',
             header: 'Actions',
             width: 'auto',
-            render: (row) => (
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={() => openEdit(row)}
-                        className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
-                        title="Edit"
-                    >
-                        <Pencil size={16} />
-                    </button>
-                    <button
-                        onClick={() => openToggle(row)}
-                        className={`rounded-lg p-2 text-[rgb(var(--color-text-muted))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center ${
-                            row.isDeleted
-                                ? 'hover:bg-emerald-500/10 hover:text-emerald-500'
-                                : 'hover:bg-amber-500/10 hover:text-amber-500'
-                        }`}
-                        title={row.isDeleted ? 'Restore' : 'Deactivate'}
-                    >
-                        {row.isDeleted ? <ToggleLeft size={16} /> : <ToggleRight size={16} />}
-                    </button>
-                </div>
-            ),
+            render: (row) => {
+                if (row.isSystem) {
+                    return (
+                        <span className="text-xs text-[rgb(var(--color-text-muted))] italic">
+                            Managed by system
+                        </span>
+                    );
+                }
+                return (
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => openEdit(row)}
+                            className="rounded-lg p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-primary))]/10 hover:text-[rgb(var(--color-primary))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                            title="Edit"
+                        >
+                            <Pencil size={16} />
+                        </button>
+                        <button
+                            onClick={() => openToggle(row)}
+                            className={`rounded-lg p-2 text-[rgb(var(--color-text-muted))] transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center ${
+                                row.isDeleted
+                                    ? 'hover:bg-emerald-500/10 hover:text-emerald-500'
+                                    : 'hover:bg-amber-500/10 hover:text-amber-500'
+                            }`}
+                            title={row.isDeleted ? 'Restore' : 'Deactivate'}
+                        >
+                            {row.isDeleted ? <ToggleLeft size={16} /> : <ToggleRight size={16} />}
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
 
@@ -207,6 +242,19 @@ export default function Roles() {
                 />
             </motion.div>
 
+            {/* Info about system roles */}
+            <motion.div
+                variants={itemVariants}
+                className="flex items-start gap-3 rounded-xl border border-[rgb(var(--color-primary))]/20 bg-[rgb(var(--color-primary))]/5 p-4"
+            >
+                <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-[rgb(var(--color-primary))]" />
+                <div className="text-sm text-[rgb(var(--color-text-muted))]">
+                    <p>
+                        <strong className="text-[rgb(var(--color-text))]">System roles</strong> (Admin, Customer) are managed automatically and cannot be edited or deleted. They are always active in the system.
+                    </p>
+                </div>
+            </motion.div>
+
             <motion.div
                 variants={itemVariants}
                 className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -234,7 +282,7 @@ export default function Roles() {
             <motion.div variants={itemVariants}>
                 <DataTable
                     columns={columns}
-                    data={filteredRoles}
+                    data={allRoles}
                     isLoading={isLoading}
                     error={error}
                     onRetry={refetch}

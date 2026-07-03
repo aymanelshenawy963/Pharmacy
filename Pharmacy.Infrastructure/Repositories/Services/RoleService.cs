@@ -16,9 +16,9 @@ public class RoleService(RoleManager<ApplicationRole> roleManager,IMapper mapper
     private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<IEnumerable<RoleToReturnDTO>> GetAllAsync(CancellationToken cancellationToken, bool? icludeDisabled = false) =>
+    public async Task<IEnumerable<RoleToReturnDTO>> GetAllAsync(CancellationToken cancellationToken, bool? icludeDisabled = false, bool? includeDefault = false) =>
         await _roleManager.Roles
-            .Where(x => !x.IsDefault && (!x.IsDeleted || icludeDisabled == true)) 
+            .Where(x => (!x.IsDefault || includeDefault == true) && (!x.IsDeleted || icludeDisabled == true)) 
             .ProjectTo<RoleToReturnDTO>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

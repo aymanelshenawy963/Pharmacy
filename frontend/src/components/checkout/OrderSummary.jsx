@@ -2,7 +2,7 @@ import { PLACEHOLDER_IMG_SM } from '../../constants/ui';
 import { formatPrice } from '../../utils/currency';
 import SummaryRow from '../SummaryRow';
 
-export default function OrderSummary({ items, subtotal, deliveryPrice, total }) {
+export default function OrderSummary({ items, subtotal, total }) {
     return (
         <div className="bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-sm">
             <h2 className="font-sans text-2xl font-semibold text-text mb-6 border-b border-border pb-6">
@@ -32,10 +32,6 @@ export default function OrderSummary({ items, subtotal, deliveryPrice, total }) 
             {/* Summary rows */}
             <div className="space-y-3 text-sm border-t border-border pt-4">
                 <SummaryRow label="Subtotal" value={formatPrice(subtotal)} />
-                <SummaryRow
-                    label="Delivery"
-                    value={deliveryPrice === 0 ? 'Free' : formatPrice(deliveryPrice)}
-                />
                 <div className="border-t border-border pt-3 mt-3">
                     <div className="flex items-center justify-between">
                         <span className="text-base font-semibold text-text">Total</span>

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { authStorage } from './authStorage';
 import { BASE_URL } from '../config/api';
 import { sleep } from '../utils/sleep';
@@ -5,7 +6,6 @@ import { sleep } from '../utils/sleep';
 const MAX_429_RETRIES = 3;
 const RETRY_BASE_DELAY = 2000;
 const REQUEST_TIMEOUT = 30000;
-const MAX_NETWORK_RETRIES = 1;
 
 const STATUS_MESSAGES = {
     400: 'Please check the information you entered.',
@@ -19,275 +19,152 @@ const STATUS_MESSAGES = {
     503: 'Service is currently unavailable. Please try again later.',
 };
 
+const axiosInstance = axios.create({
+    baseURL: BASE_URL,
+    timeout: REQUEST_TIMEOUT,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
 let isRefreshing = false;
-let refreshSubscribers = [];
+let failedQueue = [];
 
-function onRefreshed(token) {
-    refreshSubscribers.forEach((cb) => cb(token));
-    refreshSubscribers = [];
-}
-
-function addRefreshSubscriber(cb) {
-    refreshSubscribers.push(cb);
-}
-
-function mergeAbortSignals(userSignal, timeoutSignal) {
-    const controller = new AbortController();
-
-    if (userSignal.aborted) controller.abort();
-    else userSignal.addEventListener('abort', () => controller.abort(), { once: true });
-
-    if (timeoutSignal.aborted) controller.abort();
-    else timeoutSignal.addEventListener('abort', () => controller.abort(), { once: true });
-
-    return controller.signal;
-}
-
-function fetchWithTimeout(url, options, timeout = REQUEST_TIMEOUT) {
-    const controller = new AbortController();
-    const signal = options.signal
-        ? mergeAbortSignals(options.signal, controller.signal)
-        : controller.signal;
-
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    return fetch(url, { ...options, signal }).finally(() => clearTimeout(timeoutId));
-}
-
-async function refreshTokenRequest() {
-    const token = authStorage.getToken();
-    const refreshToken = authStorage.getRefreshToken();
-
-    if (!token || !refreshToken) throw new Error('No tokens available');
-
-    const response = await fetchWithTimeout(`${BASE_URL}/Auth/refresh-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, refreshToken }),
+const processQueue = (error, token = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
     });
+    failedQueue = [];
+};
 
-    if (!response.ok) {
-        authStorage.clear();
-        throw new Error('Refresh token failed');
-    }
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = authStorage.getToken();
+        if (token && !config.headers['Authorization']) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
-    const data = await response.json();
-    authStorage.setAuth(data);
-    return data.token;
-}
+axiosInstance.interceptors.response.use(
+    (response) => {
+        return response.data;
+    },
+    async (error) => {
+        const originalRequest = error.config;
+        
+        if (!error.response) {
+            const err = new Error('Unable to connect to the server. Please check your internet connection.');
+            err.status = 0;
+            return Promise.reject(err);
+        }
 
-async function handleResponse(response) {
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType && (contentType.includes('application/json') || contentType.includes('application/problem+json'));
+        const { status, data } = error.response;
 
-    let body;
-    try {
-        body = isJson ? await response.json() : await response.text();
-    } catch {
-        body = null;
-    }
+        if (status === 429 && (!originalRequest._retryCount || originalRequest._retryCount < MAX_429_RETRIES)) {
+            originalRequest._retryCount = (originalRequest._retryCount || 0) + 1;
+            await sleep(RETRY_BASE_DELAY * originalRequest._retryCount);
+            return axiosInstance(originalRequest);
+        }
 
-    if (!response.ok) {
-        let errorMessage = STATUS_MESSAGES[response.status] || `HTTP ${response.status}`;
-
-        if (body) {
-            if (typeof body === 'string') {
-                errorMessage = body;
-            } else if (body.message) {
-                errorMessage = body.message;
-            } else if (body.title && body.errors) {
-                const firstErrorKey = Object.keys(body.errors)[0];
-                if (firstErrorKey && body.errors[firstErrorKey].length > 0) {
-                    errorMessage = body.errors[firstErrorKey][0];
-                } else {
-                    errorMessage = body.title;
-                }
-            } else if (body.title) {
-                errorMessage = body.title;
+        if (status === 401 && !originalRequest._retry && authStorage.getRefreshToken() && originalRequest.url !== '/Auth/login') {
+            if (isRefreshing) {
+                return new Promise(function(resolve, reject) {
+                    failedQueue.push({ resolve, reject });
+                }).then(token => {
+                    originalRequest.headers['Authorization'] = 'Bearer ' + token;
+                    return axiosInstance(originalRequest);
+                }).catch(err => {
+                    return Promise.reject(err);
+                });
             }
-        }
 
-        const error = new Error(errorMessage);
-        error.status = response.status;
-        error.body = body;
-        error.validationErrors = body?.errors || null;
-        throw error;
-    }
+            originalRequest._retry = true;
+            isRefreshing = true;
 
-    return body;
-}
-
-async function doRefreshAndRetry(url, config, headers, retryFn) {
-    if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-            addRefreshSubscriber(async (newToken) => {
-                try {
-                    const retryHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
-                    const retryResponse = await retryFn(url, { ...config, headers: retryHeaders });
-                    resolve(handleResponse(retryResponse));
-                } catch (err) {
-                    reject(err);
-                }
-            });
-        });
-    }
-
-    isRefreshing = true;
-    try {
-        const newToken = await refreshTokenRequest();
-        isRefreshing = false;
-        onRefreshed(newToken);
-
-        const retryHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
-        const retryResponse = await retryFn(url, { ...config, headers: retryHeaders });
-        return handleResponse(retryResponse);
-    } catch (refreshError) {
-        isRefreshing = false;
-        refreshSubscribers = [];
-        authStorage.clear();
-        window.location.replace('/login');
-        throw refreshError;
-    }
-}
-
-export async function apiRequest(endpoint, options = {}, isRetry = false) {
-    const url = `${BASE_URL}${endpoint}`;
-
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-    };
-
-    const token = authStorage.getToken();
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config = { ...options, headers };
-
-    let response;
-    try {
-        response = await fetchWithTimeout(url, config);
-    } catch (err) {
-        if (err.name === 'AbortError') {
-            const error = new Error('Request timed out. Please try again.');
-            error.status = 0;
-            error.body = null;
-            error.validationErrors = null;
-            throw error;
-        }
-        const error = new Error('Unable to connect to the server. Please check your internet connection.');
-        error.status = 0;
-        error.body = null;
-        error.validationErrors = null;
-        throw error;
-    }
-
-    if (response.status === 429) {
-        for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
-            await sleep(RETRY_BASE_DELAY * attempt);
             try {
-                response = await fetchWithTimeout(url, config);
-            } catch {
-                break;
+                const token = authStorage.getToken();
+                const refreshToken = authStorage.getRefreshToken();
+
+                const response = await axios.post(`${BASE_URL}/Auth/refresh-token`, { token, refreshToken });
+                const { token: newToken } = response.data;
+                
+                authStorage.setAuth(response.data);
+                
+                axiosInstance.defaults.headers.common['Authorization'] = 'Bearer ' + newToken;
+                originalRequest.headers['Authorization'] = 'Bearer ' + newToken;
+                
+                processQueue(null, newToken);
+                return axiosInstance(originalRequest);
+            } catch (err) {
+                processQueue(err, null);
+                authStorage.clear();
+                window.location.replace('/login');
+                return Promise.reject(err);
+            } finally {
+                isRefreshing = false;
             }
-            if (response.status !== 429) break;
         }
-    }
 
-    if (response.status === 401 && !isRetry && authStorage.getRefreshToken()) {
-        return doRefreshAndRetry(url, config, headers, (u, c) => fetchWithTimeout(u, c));
-    }
-
-    return handleResponse(response);
-}
-
-async function apiRequestWithNetworkRetry(endpoint, options = {}, isRetry = false) {
-    for (let attempt = 0; attempt <= MAX_NETWORK_RETRIES; attempt++) {
-        try {
-            return await apiRequest(endpoint, options, isRetry);
-        } catch (err) {
-            if (err.status === 0 && attempt < MAX_NETWORK_RETRIES) {
-                await sleep(1000 * (attempt + 1));
-                continue;
+        let errorMessage = STATUS_MESSAGES[status] || `HTTP ${status}`;
+        
+        if (data) {
+            if (typeof data === 'string') {
+                errorMessage = data;
+            } else if (data.message) {
+                errorMessage = data.message;
+            } else if (data.title && data.errors) {
+                const firstErrorKey = Object.keys(data.errors)[0];
+                if (firstErrorKey && data.errors[firstErrorKey].length > 0) {
+                    errorMessage = data.errors[firstErrorKey][0];
+                } else {
+                    errorMessage = data.title;
+                }
+            } else if (data.title) {
+                errorMessage = data.title;
             }
-            throw err;
         }
+
+        const customError = new Error(errorMessage);
+        customError.status = status;
+        customError.body = data;
+        customError.validationErrors = data?.errors || null;
+        return Promise.reject(customError);
     }
-}
+);
 
 export async function apiGet(endpoint, params = {}) {
-    const filtered = Object.fromEntries(
+    const filteredParams = Object.fromEntries(
         Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
     );
-    const searchParams = new URLSearchParams(filtered).toString();
-    const url = searchParams ? `${endpoint}?${searchParams}` : endpoint;
-    return apiRequestWithNetworkRetry(url, { method: 'GET' });
+    return axiosInstance.get(endpoint, { params: filteredParams });
 }
 
 export async function apiPost(endpoint, body) {
-    return apiRequestWithNetworkRetry(endpoint, {
-        method: 'POST',
-        body: JSON.stringify(body),
-    });
+    return axiosInstance.post(endpoint, body);
 }
 
 export async function apiPut(endpoint, body) {
-    return apiRequestWithNetworkRetry(endpoint, {
-        method: 'PUT',
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    return axiosInstance.put(endpoint, body);
+}
+
+export async function apiDelete(endpoint) {
+    return axiosInstance.delete(endpoint);
 }
 
 export async function apiFormData(endpoint, method, formData) {
-    const url = `${BASE_URL}${endpoint}`;
-
-    const headers = {};
-    const token = authStorage.getToken();
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    let response;
-    try {
-        response = await fetchWithTimeout(url, { method, headers, body: formData });
-    } catch (err) {
-        if (err.name === 'AbortError') {
-            const error = new Error('Request timed out. Please try again.');
-            error.status = 0;
-            error.body = null;
-            error.validationErrors = null;
-            throw error;
-        }
-        const error = new Error('Unable to connect to the server. Please check your internet connection.');
-        error.status = 0;
-        error.body = null;
-        error.validationErrors = null;
-        throw error;
-    }
-
-    if (response.status === 429) {
-        for (let attempt = 1; attempt <= MAX_429_RETRIES; attempt++) {
-            await sleep(RETRY_BASE_DELAY * attempt);
-            try {
-                response = await fetchWithTimeout(url, { method, headers, body: formData });
-            } catch {
-                break;
-            }
-            if (response.status !== 429) break;
-        }
-    }
-
-    if (response.status === 401 && authStorage.getRefreshToken()) {
-        return doRefreshAndRetry(
-            url,
-            { method, body: formData },
-            headers,
-            (u, c) => fetchWithTimeout(u, c),
-        );
-    }
-
-    return handleResponse(response);
+    return axiosInstance({
+        method: method.toLowerCase(),
+        url: endpoint,
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
 }
 
 export { BASE_URL };

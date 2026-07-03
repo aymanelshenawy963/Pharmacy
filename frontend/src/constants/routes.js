@@ -2,9 +2,11 @@ export const ROUTES = {
     HOME: '/',
     PRODUCTS: '/products',
     PRODUCT_DETAIL: '/products/:id',
-    PRESCRIPTION: '/prescription',
     CART: '/cart',
     CHECKOUT: '/checkout',
+    PAYMENT: '/payment',
+    PAYMENT_SUCCESS: '/payment/success',
+    PAYMENT_FAILED: '/payment/failed',
     ABOUT: '/about',
     FAQ: '/faq',
     CONTACT: '/contact',
@@ -23,6 +25,9 @@ export const ROUTES = {
     ADMIN_USERS: '/admin/users',
     ADMIN_ROLES: '/admin/roles',
     ADMIN_CATEGORIES: '/admin/categories',
+    ADMIN_ORDERS: '/admin/orders',
+    ADMIN_ORDER_DETAIL: '/admin/orders/:id',
+    ADMIN_NOTIFICATIONS: '/admin/notifications',
     ACCOUNT: '/account',
     ACCOUNT_PROFILE: '/account/profile',
     ACCOUNT_SECURITY: '/account/security',
@@ -32,5 +37,6 @@ export const ROUTES = {
 
 export const buildProductUrl = (id) => `/products/${id}`;
 export const buildOrderUrl = (id) => `/account/orders/${id}`;
+export const buildAdminOrderUrl = (id) => `/admin/orders/${id}`;
 export const buildCategoryProductsUrl = (category) => `/products?category=${encodeURIComponent(category)}`;
 export const buildProductSearchUrl = (query) => `/products?q=${encodeURIComponent(query)}`;

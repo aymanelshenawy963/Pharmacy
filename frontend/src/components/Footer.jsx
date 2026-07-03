@@ -22,7 +22,7 @@ export default function Footer() {
                 <div className="space-y-6 animate-[fadeInUp_0.5s_cubic-bezier(0.16,1,0.3,1)_0.06s_both]">
                     <div>
                         <p className="font-sans text-2xl font-bold tracking-tight">
-                            Jaya Medical Store
+                            Medical Store
                         </p>
                         <p className="mt-4 max-w-md text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">
                             A neighborhood pharmacy experience shaped for clarity, care, and dependable service.
@@ -53,7 +53,7 @@ export default function Footer() {
                                 href={social.href}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="group inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-muted))] transition-all duration-300 hover:border-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))] hover:text-white hover:shadow-[var(--shadow-glow)]"
+                                className="group inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-muted))] transition-all duration-300 hover:border-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))] hover:text-white "
                                 aria-label={social.name}
                             >
                                 <Icon name={social.name === 'WhatsApp' ? 'MessageCircle' : social.name} className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
@@ -154,7 +154,7 @@ export default function Footer() {
             {/* Bottom bar */}
             <div className="border-t border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg))]">
                 <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-[rgb(var(--color-text-muted))] sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                    <p>&copy; {year} Jaya Medical Store. All rights reserved.</p>
+                    <p>&copy; {year} Medical Store. All rights reserved.</p>
                     <p className="flex items-center gap-1">
                         Built for reliable pharmacy care <Icon name="HeartPulse" className="w-3.5 h-3.5 text-red-500" />
                     </p>

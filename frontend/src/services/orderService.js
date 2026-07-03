@@ -1,12 +1,8 @@
-import { apiGet, apiPost, apiRequest } from './apiClient';
+import { apiGet, apiPost, apiPut } from './apiClient';
 
 export const orderService = {
-    async createOrder({ basketId, deliveryMethodId, shippingAddress }) {
-        return apiPost('/api/Orders', {
-            basketId,
-            deliveryMethodId,
-            shippingAddress,
-        });
+    async createOrder(orderData) {
+        return apiPost('/api/Orders', orderData);
     },
 
     async getMyOrders() {
@@ -18,6 +14,18 @@ export const orderService = {
     },
 
     async cancelOrder(id) {
-        return apiRequest(`/api/Orders/${id}/cancel`, { method: 'PUT' });
+        return apiPut(`/api/Orders/${id}/cancel`);
+    },
+
+    async getAllOrders() {
+        return apiGet('/api/Orders/all');
+    },
+
+    async getOrderByIdAdmin(id) {
+        return apiGet(`/api/Orders/${id}/admin`);
+    },
+
+    async updateOrderStatus(id, status) {
+        return apiPut(`/api/Orders/${id}/status`, { status });
     },
 };

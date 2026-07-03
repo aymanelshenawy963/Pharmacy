@@ -11,12 +11,9 @@ export default function FAQ() {
 
     return (
         <>
-            <Seo title="FAQ" description="Frequently asked questions about delivery, prescriptions, returns, payment methods, and WhatsApp ordering." />
+            <Seo title="FAQ" description="Frequently asked questions about delivery, returns, payment methods, and WhatsApp ordering." />
 
             <div className="min-h-[calc(100vh-72px)] bg-surface relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1/2 h-[500px] bg-primary/5 blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-0 right-0 w-1/2 h-[500px] bg-secondary/5 blur-[120px] pointer-events-none" />
-
                 <div className="mx-auto max-w-3xl px-4 py-16 md:py-24 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -27,7 +24,7 @@ export default function FAQ() {
                         <span className="kicker justify-center">FAQ</span>
                         <h1 className="display-heading text-4xl sm:text-5xl !mb-4">Common questions</h1>
                         <p className="text-lg text-text-muted">
-                            Find quick answers to questions about delivery, prescriptions, returns, and payment methods.
+                            Find quick answers to questions about delivery, returns, and payment methods.
                         </p>
                     </motion.div>
 

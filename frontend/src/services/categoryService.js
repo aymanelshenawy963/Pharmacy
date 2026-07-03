@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiRequest } from './apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from './apiClient';
 
 const CACHE_TTL = 5 * 60 * 1000;
 let categoriesCache = null;
@@ -38,7 +38,7 @@ export const categoryService = {
     },
 
     async remove(id) {
-        const result = await apiRequest(`/api/Categories/${id}`, { method: 'DELETE' });
+        const result = await apiDelete(`/api/Categories/${id}`);
         this.invalidateCache();
         return result;
     },

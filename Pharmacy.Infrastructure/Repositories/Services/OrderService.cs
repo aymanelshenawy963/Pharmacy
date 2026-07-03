@@ -9,11 +9,12 @@ using Pharmacy.Infrastructure.Data;
 
 namespace Pharmacy.Infrastructure.Repositories.Services;
 
-public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext context) : IOrderService
+public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext context, IPaymentService paymentService) : IOrderService
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
     private readonly AppDbContext _context = context;
+    private readonly IPaymentService _paymentService = paymentService;
 
     public async Task<(OrderToReturnDTO? Order, string? Error)> CreateOrderAsync(
         string buyerEmail, CreateOrderDTO dto)
@@ -83,10 +84,23 @@ public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext c
         if (rowsAffected <= 0)
             return (null, "Failed to save the order. Please try again");
 
-        // 10. Delete the basket from Redis — best-effort; the order is already persisted
+        // 10. Check PaymentIntent status to handle race condition with Stripe webhook.
+        // If the webhook fired before the order was created, the payment already succeeded
+        // and we need to update the order status here.
+        if (!string.IsNullOrEmpty(order.PaymentIntentId))
+        {
+            var piStatus = await _paymentService.GetPaymentIntentStatusAsync(order.PaymentIntentId);
+            if (piStatus == "succeeded" && order.Status == OrderStatus.Pending)
+            {
+                order.Status = OrderStatus.PaymentReceived;
+                await _unitOfWork.SaveAsync();
+            }
+        }
+
+        // 11. Delete the basket from Redis — best-effort; the order is already persisted
         await _unitOfWork.BasketRepository.DeleteBasketAsync(dto.BasketId);
 
-        // 11. Re-query to populate navigation properties needed by the mapper
+        // 12. Re-query to populate navigation properties needed by the mapper
         var createdOrder = await _unitOfWork.OrderRepository.GetOrderByIdAsync(order.Id, buyerEmail);
         return (_mapper.Map<OrderToReturnDTO>(createdOrder), null);
     }
@@ -100,6 +114,17 @@ public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext c
     public async Task<OrderToReturnDTO?> GetOrderByIdAsync(int id, string buyerEmail)
     {
         var order = await _unitOfWork.OrderRepository.GetOrderByIdAsync(id, buyerEmail);
+        return order is null ? null : _mapper.Map<OrderToReturnDTO>(order);
+    }
+
+    public async Task<OrderToReturnDTO?> GetOrderByIdAdminAsync(int id)
+    {
+        var order = await _context.Orders
+            .Include(o => o.DeliveryMethod)
+            .Include(o => o.OrderItems)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == id);
+
         return order is null ? null : _mapper.Map<OrderToReturnDTO>(order);
     }
 

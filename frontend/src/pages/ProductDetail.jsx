@@ -6,6 +6,8 @@ import Reveal from '../components/Reveal';
 import Icon from '../components/Icons';
 import ProductCard from '../components/ProductCard';
 import { productService } from '../services/productService';
+import { reviewService } from '../services/reviewService';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../utils/currency';
 import notify from '../utils/notifications';
@@ -13,16 +15,39 @@ import { normalizeProduct } from '../utils/normalizeProduct';
 import { PLACEHOLDER_IMG, calculateDiscount } from '../constants/ui';
 import { staggerInfo, infoItem } from '../constants/animations';
 import { ROUTES } from '../constants/routes';
+import { Star, MessageSquare, Send } from 'lucide-react';
 
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const { isAuthenticated, user } = useAuth();
     const [quantity, setQuantity] = useState(1);
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+    const [reviewsError, setReviewsError] = useState(null);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+    const [reviewFormError, setReviewFormError] = useState('');
+
+    const fetchReviews = async (productId) => {
+        setReviewsLoading(true);
+        setReviewsError(null);
+        try {
+            const data = await reviewService.getByProduct(productId);
+            setReviews(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setReviewsError('Failed to load reviews');
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
 
     const loadProduct = async (signal) => {
         setLoading(true);
@@ -35,24 +60,46 @@ export default function ProductDetail() {
             if (signal?.aborted) return;
             const normalized = normalizeProduct(data);
             setProduct(normalized);
+            fetchReviews(id);
 
-            if (normalized.categoryId) {
-                try {
+            // Fetch related products: same category first, then fill with top-selling
+            try {
+                let items = [];
+                if (normalized.categoryId) {
                     const related = await productService.getAll({
                         CategoryId: normalized.categoryId,
                         PageSize: 6,
                         PageNumber: 1,
                     });
                     if (!signal?.aborted) {
-                        const items = (related.data || [])
+                        items = (related.data || [])
                             .map(normalizeProduct)
-                            .filter((p) => p.id !== normalized.id)
-                            .slice(0, 4);
-                        setRelatedProducts(items);
+                            .filter((p) => p.id !== normalized.id);
                     }
-                } catch {
-                    // Related products are non-critical
                 }
+
+                // Fill remaining slots with top-selling products if needed
+                if (items.length < 8 && !signal?.aborted) {
+                    const topSelling = await productService.getAll({
+                        TopSelling: true,
+                        PageSize: 8,
+                        PageNumber: 1,
+                    });
+                    if (!signal?.aborted) {
+                        const existingIds = new Set(items.map((p) => p.id));
+                        existingIds.add(normalized.id);
+                        const extras = (topSelling.data || [])
+                            .map(normalizeProduct)
+                            .filter((p) => !existingIds.has(p.id));
+                        items = [...items, ...extras];
+                    }
+                }
+
+                if (!signal?.aborted) {
+                    setRelatedProducts(items.slice(0, 8));
+                }
+            } catch {
+                // Related products are non-critical
             }
         } catch (err) {
             if (!signal?.aborted) {
@@ -76,6 +123,35 @@ export default function ProductDetail() {
 
     const handleRetry = () => loadProduct();
 
+    async function handleReviewSubmit(e) {
+        e.preventDefault();
+        if (reviewForm.rating === 0) {
+            setReviewFormError('Please select a rating.');
+            return;
+        }
+        if (!reviewForm.comment.trim()) {
+            setReviewFormError('Please write a comment.');
+            return;
+        }
+        setReviewFormError('');
+        setIsSubmittingReview(true);
+        try {
+            await reviewService.create({
+                productId: Number(id),
+                rating: reviewForm.rating,
+                comment: reviewForm.comment.trim(),
+            });
+            notify.success('Review submitted successfully!');
+            setReviewForm({ rating: 0, comment: '' });
+            setHoverRating(0);
+            await fetchReviews(id);
+        } catch (err) {
+            notify.errorFromApi(err, 'Failed to submit review');
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    }
+
     const handleAddToCart = async () => {
         if (!product) return;
         const added = await addToCart(product, quantity);
@@ -95,7 +171,7 @@ export default function ProductDetail() {
                         <div className="h-4 w-32 bg-border rounded-full animate-pulse" />
                     </div>
                 </div>
-                <section className="bg-surface min-h-[calc(100vh-72px)]">
+                <section className="bg-bg min-h-[calc(100vh-72px)]">
                     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
                         <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr]">
                             <div className="bg-bg-subtle aspect-[4/3] rounded-2xl animate-pulse" />
@@ -153,7 +229,7 @@ export default function ProductDetail() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="mx-auto w-full max-w-2xl bg-surface p-12 text-center rounded-2xl border border-border shadow-sm"
                 >
-                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-red-50 text-red-500 border border-red-200">
+                                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-red-500/10 text-red-500 border border-red-500/20">
                         <Icon name="AlertTriangle" className="h-10 w-10" />
                     </div>
                     <h1 className="mt-6 font-sans text-3xl font-semibold text-text">Something went wrong</h1>
@@ -204,9 +280,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Main product section */}
-            <section className="bg-surface relative overflow-hidden min-h-[calc(100vh-72px)]">
-                <div className="absolute top-0 right-0 w-1/2 h-[600px] bg-primary/5 blur-[120px] pointer-events-none" />
-
+            <section className="bg-bg relative overflow-hidden min-h-[calc(100vh-72px)]">
                 <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 relative z-10">
                     <Reveal className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-start lg:gap-16">
                         {/* Image */}
@@ -235,17 +309,6 @@ export default function ProductDetail() {
                                             className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold tracking-widest text-white shadow-lg backdrop-blur-md"
                                         >
                                             {discount}% OFF
-                                        </motion.span>
-                                    )}
-                                    {product.requiresPrescription && (
-                                        <motion.span
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.4 }}
-                                            className="rounded-lg bg-tertiary px-3 py-1.5 text-xs font-bold tracking-widest text-white shadow-lg backdrop-blur-md flex items-center gap-1.5"
-                                        >
-                                            <Icon name="ShieldCheck" className="w-3.5 h-3.5" />
-                                            Rx Required
                                         </motion.span>
                                     )}
                                 </div>
@@ -290,7 +353,7 @@ export default function ProductDetail() {
                                             Inclusive of all taxes
                                         </p>
                                         {product.stock > 0 && (
-                                            <p className="mt-1 text-xs text-green-600 font-medium">
+                                            <p className="mt-1 text-xs text-green-600 dark:text-green-400 font-medium">
                                                 In stock ({product.stock} available)
                                             </p>
                                         )}
@@ -338,29 +401,8 @@ export default function ProductDetail() {
                                         <Icon name="ShoppingCart" className="h-5 w-5 mr-2" />
                                         Add to Cart
                                     </motion.button>
-                                    {product.requiresPrescription && (
-                                        <Link
-                                            to={ROUTES.PRESCRIPTION}
-                                            className="glass-button flex-1 justify-center py-4 text-base"
-                                        >
-                                            <Icon name="Upload" className="h-5 w-5 mr-2" />
-                                            Upload Rx
-                                        </Link>
-                                    )}
                                 </div>
                             </motion.div>
-
-                            {product.requiresPrescription && (
-                                <motion.div
-                                    variants={infoItem}
-                                    className="flex items-start gap-4 rounded-2xl border border-tertiary/20 bg-tertiary/5 p-5"
-                                >
-                                    <Icon name="ShieldCheck" className="mt-0.5 h-6 w-6 shrink-0 text-tertiary" />
-                                    <p className="text-sm leading-relaxed text-text-muted">
-                                        <strong className="text-text">Prescription Required.</strong> This medicine requires a valid prescription before dispatch. Upload your prescription and our pharmacy will review it carefully.
-                                    </p>
-                                </motion.div>
-                            )}
 
                             {product.description && (
                                 <motion.div variants={infoItem} className="bg-surface p-7 rounded-2xl border border-border shadow-sm">
@@ -387,16 +429,18 @@ export default function ProductDetail() {
                                 <div>
                                     <span className="kicker">Related</span>
                                     <h2 className="display-heading text-3xl sm:text-4xl !mb-0">
-                                        More from {product.category}
+                                        {product.category ? `More from ${product.category}` : 'You May Also Like'}
                                     </h2>
                                 </div>
-                                <Link
-                                    to={`/products?category=${encodeURIComponent(product.category)}`}
-                                    className="hidden items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary transition-opacity hover:opacity-70 md:inline-flex"
-                                >
-                                    View All
-                                    <Icon name="ArrowRight" className="h-4 w-4" />
-                                </Link>
+                                {product.category && (
+                                    <Link
+                                        to={`/products?category=${encodeURIComponent(product.category)}`}
+                                        className="hidden items-center gap-2 text-sm font-bold uppercase tracking-widest text-primary transition-opacity hover:opacity-70 md:inline-flex"
+                                    >
+                                        View All
+                                        <Icon name="ArrowRight" className="h-4 w-4" />
+                                    </Link>
+                                )}
                             </div>
                             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                                 {relatedProducts.map((item) => (
@@ -407,6 +451,190 @@ export default function ProductDetail() {
                     </div>
                 </section>
             )}
+
+            {/* Reviews Section */}
+            <section className="bg-bg py-16 sm:py-24 border-t border-border">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <Reveal className="space-y-10">
+                        <div>
+                            <span className="kicker">Feedback</span>
+                            <h2 className="display-heading text-3xl sm:text-4xl !mb-0">
+                                Customer Reviews
+                            </h2>
+                        </div>
+
+                        {reviewsLoading ? (
+                            <div className="space-y-4">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="bg-surface rounded-2xl border border-border p-6 shadow-sm">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <div className="h-10 w-10 rounded-full bg-border animate-pulse" />
+                                            <div className="space-y-2 flex-1">
+                                                <div className="h-3 w-24 bg-border rounded-full animate-pulse" />
+                                                <div className="h-3 w-16 bg-border/60 rounded-full animate-pulse" />
+                                            </div>
+                                        </div>
+                                        <div className="h-4 w-full bg-border/30 rounded-full animate-pulse" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : reviewsError ? (
+                            <div className="bg-surface rounded-2xl border border-border p-8 text-center shadow-sm">
+                                <p className="text-sm text-red-500">{reviewsError}</p>
+                                <button
+                                    onClick={() => fetchReviews(id)}
+                                    className="glass-button-secondary !px-4 !py-2 text-sm mt-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        ) : reviews.length === 0 ? (
+                            <div className="bg-surface rounded-2xl border border-border p-8 sm:p-12 text-center shadow-sm">
+                                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-bg-subtle ring-1 ring-border">
+                                    <MessageSquare className="h-7 w-7 text-text-muted" />
+                                </div>
+                                <h3 className="mt-4 font-sans text-lg font-bold text-text">
+                                    No reviews yet
+                                </h3>
+                                <p className="mt-2 text-sm text-text-muted">
+                                    Be the first to share your thoughts about this product.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-5">
+                                {reviews.map((review, idx) => (
+                                    <motion.div
+                                        key={review.id}
+                                        initial={{ opacity: 0, y: 12 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.05, duration: 0.3 }}
+                                        className="bg-surface rounded-2xl border border-border p-5 sm:p-6 shadow-sm"
+                                    >
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">
+                                                    {(review.reviewerName || 'A')[0].toUpperCase()}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-text truncate">
+                                                        {review.reviewerName}
+                                                    </p>
+                                                    <p className="text-xs text-text-muted mt-0.5">
+                                                        {new Date(review.createdAt).toLocaleDateString('en-US', {
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                        })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-0.5 flex-shrink-0">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <Star
+                                                        key={star}
+                                                        size={14}
+                                                        className={star <= review.rating
+                                                            ? 'fill-amber-400 text-amber-400'
+                                                            : 'text-border'
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="mt-3 text-sm leading-relaxed text-text-muted">
+                                            {review.comment}
+                                        </p>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Review Form */}
+                        {isAuthenticated && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-surface rounded-2xl border border-border p-5 sm:p-6 shadow-sm"
+                            >
+                                <h3 className="font-sans text-lg font-semibold text-text mb-4 flex items-center gap-2">
+                                    <MessageSquare size={18} className="text-primary" />
+                                    Write a Review
+                                </h3>
+                                <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                    <div>
+                                        <p className="text-sm font-medium text-text mb-2">Rating</p>
+                                        <div className="flex gap-1">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <button
+                                                    key={star}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setReviewForm((prev) => ({ ...prev, rating: star }));
+                                                        setReviewFormError('');
+                                                    }}
+                                                    onMouseEnter={() => setHoverRating(star)}
+                                                    onMouseLeave={() => setHoverRating(0)}
+                                                    className="p-0.5 transition-transform duration-150 hover:scale-110 active:scale-90"
+                                                    aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                                                >
+                                                    <Star
+                                                        size={22}
+                                                        className={(hoverRating || reviewForm.rating) >= star
+                                                            ? 'fill-amber-400 text-amber-400'
+                                                            : 'text-border'
+                                                        }
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="review-comment" className="text-sm font-medium text-text mb-1.5 block">
+                                            Comment
+                                        </label>
+                                        <textarea
+                                            id="review-comment"
+                                            rows={3}
+                                            value={reviewForm.comment}
+                                            onChange={(e) => {
+                                                setReviewForm((prev) => ({ ...prev, comment: e.target.value }));
+                                                setReviewFormError('');
+                                            }}
+                                            placeholder="Share your experience with this product..."
+                                            maxLength={1000}
+                                            className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text placeholder:text-text-muted outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none min-h-[80px]"
+                                            disabled={isSubmittingReview}
+                                        />
+                                        <p className="mt-1 text-xs text-text-muted text-right">
+                                            {reviewForm.comment.length}/1000
+                                        </p>
+                                    </div>
+
+                                    {reviewFormError && (
+                                        <p className="text-xs font-medium text-red-500">{reviewFormError}</p>
+                                    )}
+
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmittingReview}
+                                            className="glass-button-primary !px-5 !py-2.5 text-sm min-h-[44px] flex items-center gap-2"
+                                        >
+                                            {isSubmittingReview ? (
+                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                            ) : (
+                                                <Send size={14} />
+                                            )}
+                                            {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        )}
+                    </Reveal>
+                </div>
+            </section>
         </>
     );
 }

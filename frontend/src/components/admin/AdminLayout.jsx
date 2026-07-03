@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { notificationService } from '../../services/notificationService';
+import PageBackground from '../PageBackground';
 import {
     Users,
     Shield,
     FolderTree,
     Package,
     ShoppingBag,
+    Bell,
     User,
     Lock,
     LogOut,
@@ -25,6 +28,8 @@ const navItems = [
     { label: 'Roles', to: '/admin/roles', icon: Shield },
     { label: 'Categories', to: '/admin/categories', icon: FolderTree },
     { label: 'Products', to: '/admin/products', icon: Package },
+    { label: 'Orders', to: '/admin/orders', icon: ShoppingBag },
+    { label: 'Notifications', to: '/admin/notifications', icon: Bell },
 ];
 
 const accountItems = [
@@ -33,7 +38,7 @@ const accountItems = [
     { label: 'My Orders', to: '/account/orders', icon: ShoppingBag },
 ];
 
-function SidebarContent({ onNavigate, user, onLogout }) {
+function SidebarContent({ onNavigate, user, onLogout, unreadCount = 0 }) {
     const isAdmin = user?.roles?.includes('Admin');
 
     return (
@@ -44,7 +49,7 @@ function SidebarContent({ onNavigate, user, onLogout }) {
                         <Activity className="h-5 w-5 text-[rgb(var(--color-primary))]" />
                     </div>
                     <span className="font-sans text-lg font-bold text-[rgb(var(--color-text))]">
-                        {isAdmin ? 'Jaya Admin' : 'Jaya'}
+                        {isAdmin ? 'Admin Dashboard' : 'Medical Store'}
                     </span>
                 </NavLink>
                 <button
@@ -83,6 +88,11 @@ function SidebarContent({ onNavigate, user, onLogout }) {
                                             )}
                                             <item.icon size={18} className="transition-transform duration-200 group-hover:scale-110" />
                                             <span>{item.label}</span>
+                                            {item.label === 'Notifications' && unreadCount > 0 && (
+                                                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                                </span>
+                                            )}
                                         </>
                                     )}
                                 </NavLink>
@@ -151,6 +161,21 @@ export default function AdminLayout() {
     const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function fetchUnreadCount() {
+            try {
+                const result = await notificationService.getUnreadCount();
+                if (!cancelled) setUnreadCount(result.count);
+            } catch {
+                // non-critical
+            }
+        }
+        fetchUnreadCount();
+        return () => { cancelled = true; };
+    }, []);
 
     const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
 
@@ -190,7 +215,8 @@ export default function AdminLayout() {
     }, [logout, navigate, closeSidebar]);
 
     return (
-        <div className="flex min-h-screen bg-[rgb(var(--color-bg))]">
+        <div className="relative flex min-h-screen bg-[rgb(var(--color-bg))]">
+            <PageBackground />
             {/* Mobile overlay */}
             <div
                 className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
@@ -202,7 +228,7 @@ export default function AdminLayout() {
 
             {/* Sidebar - Desktop */}
             <aside className="fixed inset-y-0 left-0 z-50 hidden lg:flex w-64 flex-col border-r border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]">
-                <SidebarContent onNavigate={() => {}} user={user} onLogout={handleLogout} />
+                <SidebarContent onNavigate={() => {}} user={user} onLogout={handleLogout} unreadCount={unreadCount} />
             </aside>
 
             {/* Sidebar - Mobile */}
@@ -211,13 +237,13 @@ export default function AdminLayout() {
                     isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
-                <SidebarContent onNavigate={closeSidebar} user={user} onLogout={handleLogout} />
+                <SidebarContent onNavigate={closeSidebar} user={user} onLogout={handleLogout} unreadCount={unreadCount} />
             </aside>
 
             {/* Main content */}
-            <div className="flex flex-1 flex-col min-w-0 overflow-hidden lg:pl-64">
+            <div className="relative z-10 flex flex-1 flex-col min-w-0 overflow-hidden lg:pl-64">
                 {/* Top bar */}
-                <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center gap-3 sm:gap-4 border-b border-[rgb(var(--color-border))] bg-[var(--glass-bg)] backdrop-blur-xl px-3 sm:px-6">
+                <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center gap-3 sm:gap-4 border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-3 sm:px-6">
                     <button
                         onClick={() => setIsSidebarOpen(true)}
                         className="rounded-xl p-2 text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-bg-subtle))] lg:hidden transition-all duration-200 hover:scale-105 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center"

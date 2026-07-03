@@ -73,7 +73,7 @@ export default function Login() {
                 icon={ShieldCheck}
                 title="Your health,"
                 highlightText="our priority."
-                description="Access prescriptions, track orders, and manage your healthcare from one secure place."
+                description="Access your orders and manage your healthcare from one secure place."
             >
                 <div className="grid grid-cols-3 gap-4">
                     {[

@@ -25,9 +25,7 @@ export const createUserSchema = z.object({
         .string()
         .min(1, 'Password is required')
         .regex(PASSWORD_REGEX, 'Password must be at least 8 characters and contain uppercase, lowercase, number and special character'),
-    roles: z
-        .array(z.string())
-        .min(1, 'At least one role is required'),
+    isAdmin: z.boolean().optional(),
 });
 
 export const updateUserSchema = z.object({
@@ -50,7 +48,5 @@ export const updateUserSchema = z.object({
         .min(1, 'Last name is required')
         .min(3, 'Last name must be at least 3 characters')
         .max(100, 'Last name must be at most 100 characters'),
-    roles: z
-        .array(z.string())
-        .min(1, 'At least one role is required'),
+    isAdmin: z.boolean().optional(),
 });

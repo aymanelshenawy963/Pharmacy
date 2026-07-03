@@ -5,86 +5,79 @@
 @layer base {
   :root {
     /* ─── Light Mode Theme Colors (Premium Teal/Gold) ─── */
-    --color-bg: 250 250 248;
-    --color-bg-subtle: 242 242 240;
+    --color-bg: 255 255 255;
+    --color-bg-subtle: 255 255 255;
     --color-text: 15 23 42;
     --color-text-muted: 71 85 105;
-    
+
     --color-primary: 13 148 136;
     --color-primary-light: 45 212 191;
     --color-primary-dark: 15 118 110;
-    
+
     --color-secondary: 217 119 6;
-    
+
     --color-surface: 255 255 255;
     --color-border: 226 232 240;
-    
+
     --color-success: 34 197 94;
     --color-warning: 234 179 8;
     --color-danger: 239 68 68;
     --color-info: 59 130 246;
-    
-    --glass-border: rgba(255, 255, 255, 0.5);
-    --glass-bg: rgba(255, 255, 255, 0.72);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
 
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
-    --shadow-glow: 0 0 20px rgba(13, 148, 136, 0.15);
-    --shadow-glow-lg: 0 0 40px rgba(13, 148, 136, 0.2);
+    /* ─── Structure tokens (this is what changed) ───
+       Real pharmacy / healthcare sites read as solid and precise,
+       not blurred/glassy. Radii are modest, shadows are flat and
+       shallow, and nothing "glows". */
 
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
-    --radius-2xl: 24px;
+    --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 1px 1px 0 rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 2px 6px -1px rgba(15, 23, 42, 0.08), 0 1px 3px -1px rgba(15, 23, 42, 0.05);
+    --shadow-lg: 0 4px 10px -2px rgba(15, 23, 42, 0.10), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+    --shadow-xl: 0 8px 16px -4px rgba(15, 23, 42, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.06);
+    --shadow-2xl: 0 16px 28px -8px rgba(15, 23, 42, 0.16);
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 10px;
+    --radius-2xl: 12px;
   }
 
   .dark {
-    --color-bg: 9 9 11;
-    --color-bg-subtle: 24 24 27;
-    --color-text: 250 250 250;
+    --color-bg: 17 17 20;
+    --color-bg-subtle: 17 17 20;
+    --color-text: 244 244 245;
     --color-text-muted: 161 161 170;
-    
-    --color-primary: 20 184 166;
-    --color-primary-light: 45 212 191;
-    --color-primary-dark: 13 148 136;
-    
-    --color-secondary: 245 158 11;
-    
-    --color-surface: 39 39 42;
-    --color-border: 63 63 70;
-    
+
+    --color-primary: 45 212 191;
+    --color-primary-light: 94 234 212;
+    --color-primary-dark: 20 184 166;
+
+    --color-secondary: 251 191 36;
+
+    --color-surface: 28 28 32;
+    --color-border: 45 45 50;
+
     --color-success: 74 222 128;
     --color-warning: 250 204 21;
     --color-danger: 248 113 113;
     --color-info: 96 165 250;
-    
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-bg: rgba(24, 24, 27, 0.65);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.25), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-    --shadow-glow: 0 0 20px rgba(20, 184, 166, 0.2);
-    --shadow-glow-lg: 0 0 40px rgba(20, 184, 166, 0.3);
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 2px 6px -1px rgba(0, 0, 0, 0.35), 0 1px 3px -1px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+    --shadow-xl: 0 8px 16px -4px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    --shadow-2xl: 0 16px 28px -8px rgba(0, 0, 0, 0.55);
   }
 
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))] font-sans antialiased;
-    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -93,14 +86,15 @@
 
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-[rgb(var(--color-border))] rounded-full;
+    @apply bg-[rgb(var(--color-border))];
+    border-radius: var(--radius-sm);
   }
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-[rgb(var(--color-text-muted))];
@@ -123,39 +117,45 @@
 
   /* Selection */
   ::selection {
-    background-color: rgba(13, 148, 136, 0.2);
+    background-color: rgba(13, 148, 136, 0.18);
     color: rgb(var(--color-text));
   }
 }
 
 @layer components {
-  /* ─── Premium Glass Card System ─── */
-  
+  /* ─── Card System ───
+     No blur, no translucency — a solid surface with a clean hairline
+     border reads as a real, trustworthy interface rather than a
+     marketing-site "glass panel". */
+
   .glass-card {
-    @apply bg-[var(--glass-bg)] backdrop-blur-sm border border-[var(--glass-border)] rounded-2xl;
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-[var(--radius-lg)];
+    box-shadow: var(--shadow-xs);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
   .glass-card-hover {
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
   }
   .glass-card-hover:hover {
-    box-shadow: var(--shadow-lg);
-    border-color: rgba(13, 148, 136, 0.15);
+    box-shadow: var(--shadow-md);
+    border-color: rgba(13, 148, 136, 0.3);
   }
   .dark .glass-card-hover:hover {
-    border-color: rgba(20, 184, 166, 0.2);
+    border-color: rgba(20, 184, 166, 0.35);
   }
 
-  /* ─── Button System ─── */
-  
+  /* ─── Button System ───
+     Removed the lift-and-glow hover (a strong AI-template tell).
+     Buttons here just shift shade/border — the way a pharmacy
+     ordering system or booking form behaves. */
+
   .glass-button {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-sm;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[var(--radius-md)] font-medium text-sm;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .glass-button:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(0.98);
   }
   .glass-button:disabled {
     @apply opacity-40 pointer-events-none;
@@ -163,35 +163,27 @@
   .glass-button:focus-visible {
     @apply outline-2 outline-offset-2 outline-[rgb(var(--color-primary))];
   }
-  
+
   .glass-button-primary {
     @apply glass-button bg-[rgb(var(--color-primary))] text-white;
-    box-shadow: 0 4px 14px 0 rgba(13, 148, 136, 0.35);
   }
   .glass-button-primary:hover:not(:disabled) {
     @apply bg-[rgb(var(--color-primary-dark))];
-    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
-    transform: translateY(-1px);
   }
 
   .glass-button-secondary {
     @apply glass-button bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] border border-[rgb(var(--color-border))];
-    box-shadow: var(--shadow-xs);
   }
   .glass-button-secondary:hover:not(:disabled) {
     @apply bg-[rgb(var(--color-bg-subtle))];
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
+    border-color: rgb(var(--color-text-muted));
   }
 
   .glass-button-danger {
-    @apply glass-button bg-red-500 text-white;
-    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.3);
+    @apply glass-button bg-red-600 text-white;
   }
   .glass-button-danger:hover:not(:disabled) {
-    @apply bg-red-600;
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
-    transform: translateY(-1px);
+    @apply bg-red-700;
   }
 
   .glass-button-ghost {
@@ -202,29 +194,27 @@
   }
 
   .glass-icon-button {
-    @apply inline-flex items-center justify-center h-10 w-10 rounded-xl text-[rgb(var(--color-text-muted))];
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply inline-flex items-center justify-center h-10 w-10 rounded-[var(--radius-md)] text-[rgb(var(--color-text-muted))] border border-transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
   }
   .glass-icon-button:hover {
-    @apply bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text))];
-    box-shadow: var(--shadow-sm);
+    @apply bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text))] border-[rgb(var(--color-border))];
   }
   .glass-icon-button:active {
-    transform: scale(0.93);
+    transform: scale(0.95);
   }
 
   /* ─── Input System ─── */
-  
+
   .glass-input {
-    @apply w-full rounded-xl border bg-[rgb(var(--color-surface))] px-4 py-3 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))];
+    @apply w-full rounded-[var(--radius-md)] border bg-[rgb(var(--color-surface))] px-4 py-2.5 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))];
     border-color: rgb(var(--color-border));
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-xs);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .glass-input:focus {
     @apply outline-none;
     border-color: rgb(var(--color-primary));
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12), var(--shadow-xs);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
   }
   .glass-input:disabled {
     @apply opacity-50 cursor-not-allowed;
@@ -233,52 +223,54 @@
     border-color: rgb(var(--color-danger));
   }
   .glass-input.input-error:focus {
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12), var(--shadow-xs);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
   }
 
   /* ─── Page Layout ─── */
-  
+
   .page-shell {
     @apply min-h-screen pt-24 pb-16;
   }
 
   .section-pad {
-    @apply py-16 md:py-24;
+    @apply py-14 md:py-20;
   }
-  
+
   .kicker {
-    @apply text-xs font-bold tracking-[0.2em] uppercase text-[rgb(var(--color-primary))] mb-3 block;
+    @apply text-xs font-semibold tracking-[0.12em] uppercase text-[rgb(var(--color-primary))] mb-3 block;
   }
 
   .display-heading {
-    @apply text-3xl md:text-4xl lg:text-5xl font-sans font-bold leading-[1.15] mb-6 tracking-tight;
+    @apply text-3xl md:text-4xl font-sans font-bold leading-[1.2] mb-5 tracking-tight;
   }
 
-  /* ─── Badge System ─── */
-  
+  /* ─── Badge System ───
+     Flatter, more label-like — closer to a status tag
+     than a marketing pill. */
+
   .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[var(--radius-sm)] text-xs font-semibold border;
   }
   .badge-primary {
-    @apply badge bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))];
+    @apply badge bg-[rgb(var(--color-primary))]/8 text-[rgb(var(--color-primary))] border-[rgb(var(--color-primary))]/20;
   }
   .badge-success {
-    @apply badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
+    @apply badge bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800;
   }
   .badge-danger {
-    @apply badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+    @apply badge bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800;
   }
   .badge-warning {
-    @apply badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+    @apply badge bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800;
   }
   .badge-info {
-    @apply badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+    @apply badge bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800;
   }
 
   /* ─── Skeleton Loading ─── */
-  
+
   .skeleton {
-    @apply rounded-xl bg-[rgb(var(--color-bg-subtle))];
+    @apply rounded-[var(--radius-md)] bg-[rgb(var(--color-bg-subtle))];
     background: linear-gradient(
       90deg,
       rgb(var(--color-bg-subtle)) 25%,
@@ -289,20 +281,42 @@
     animation: skeleton-shimmer 1.8s ease-in-out infinite;
   }
 
+  /* ─── Navbar Search ─── */
+
+  .navbar-search {
+    @apply flex items-center gap-2 rounded-full border bg-[rgb(var(--color-bg-subtle))] px-3.5 py-2 text-sm;
+    border-color: rgb(var(--color-border));
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+  .navbar-search:focus-within {
+    @apply outline-none;
+    border-color: rgb(var(--color-primary));
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    background-color: rgb(var(--color-surface));
+  }
+
   /* ─── Tooltip ─── */
-  
+
   .tooltip-wrapper {
     @apply relative;
   }
   .tooltip-wrapper .tooltip-content {
-    @apply invisible opacity-0 absolute z-50 px-2.5 py-1.5 text-xs font-medium text-white bg-[rgb(var(--color-text))] rounded-lg whitespace-nowrap;
-    transition: opacity 0.2s, visibility 0.2s;
+    @apply invisible opacity-0 absolute z-50 px-2.5 py-1.5 text-xs font-medium text-white bg-[rgb(var(--color-text))] rounded-[var(--radius-sm)] whitespace-nowrap;
+    transition: opacity 0.15s, visibility 0.15s;
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
   }
   .tooltip-wrapper:hover .tooltip-content {
     @apply visible opacity-100;
+  }
+
+  /* ─── Clinical strip ───
+     A simple, no-nonsense info bar pattern real pharmacy sites use
+     for hours / licensed-pharmacist / delivery notices. */
+
+  .clinical-strip {
+    @apply flex flex-wrap items-center gap-x-6 gap-y-2 border-y border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg-subtle))] px-4 py-2.5 text-xs font-medium text-[rgb(var(--color-text-muted))];
   }
 }
 
@@ -311,13 +325,16 @@
     text-wrap: balance;
   }
 
-  /* Typography Scale */
+  /* Typography Scale — tightened weights/tracking away from
+     "poster hero" marketing type toward a calmer, more clinical
+     editorial scale. */
+
   .type-hero {
-    @apply text-4xl md:text-5xl lg:text-[56px] font-extrabold leading-[1.05] tracking-tight;
+    @apply text-3xl md:text-4xl lg:text-[44px] font-bold leading-[1.15] tracking-tight;
   }
 
   .type-section {
-    @apply text-2xl md:text-3xl lg:text-4xl font-bold leading-tight tracking-tight;
+    @apply text-2xl md:text-3xl font-bold leading-tight tracking-tight;
   }
 
   .type-card {
@@ -337,25 +354,24 @@
   }
 
   .type-label {
-    @apply text-xs font-semibold tracking-widest uppercase;
+    @apply text-xs font-semibold tracking-wide uppercase;
   }
 
-
-
-  /* Gradient Text */
+  /* Gradient text removed on purpose — gradient headline text is one
+     of the clearest "AI landing page" tells. Use a solid primary
+     color for emphasis instead. */
   .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-primary-light)));
+    @apply text-[rgb(var(--color-primary))];
   }
 
-  /* Smooth hover underline */
+  /* Understated hover underline — no easing flourish */
   .hover-underline {
     @apply relative;
   }
   .hover-underline::after {
     content: '';
-    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-[rgb(var(--color-primary))] rounded-full;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    @apply absolute bottom-0 left-0 h-px w-0 bg-[rgb(var(--color-primary))];
+    transition: width 0.15s ease;
   }
   .hover-underline:hover::after {
     @apply w-full;

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Truck, Package, XCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Truck, Package, XCircle, Shield } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { orderService } from '../../services/orderService';
 import { formatPrice } from '../../utils/currency';
 import notify from '../../utils/notifications';
@@ -14,6 +15,8 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 export default function OrderDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isAdmin = user?.roles?.includes('Admin');
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,6 +32,8 @@ export default function OrderDetail() {
         } catch (err) {
             if (err.status === 404) {
                 setError('not_found');
+            } else if (err.status === 403) {
+                setError('access_denied');
             } else {
                 setError('Failed to load order details.');
                 notify.errorFromApi(err, 'Failed to load order details.');
@@ -81,6 +86,34 @@ export default function OrderDetail() {
                         <ArrowLeft className="h-4 w-4 mr-1" />
                         Back to Orders
                     </Link>
+                </div>
+            </motion.div>
+        );
+    }
+
+    // Access denied (Admin trying to access Customer-only endpoint)
+    if (error === 'access_denied') {
+        return (
+            <motion.div variants={pageVariants} initial="hidden" animate="visible">
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg-subtle))] ring-1 ring-[rgb(var(--color-border))] mb-4">
+                        <Shield className="h-8 w-8 text-[rgb(var(--color-text-muted))]" />
+                    </div>
+                    <h2 className="font-sans text-xl font-bold text-[rgb(var(--color-text))]">Access Restricted</h2>
+                    <p className="mt-2 text-sm text-[rgb(var(--color-text-muted))]">
+                        Admin accounts cannot access customer order details. Use the Admin Orders panel instead.
+                    </p>
+                    {isAdmin ? (
+                        <Link to="/admin/orders" className="glass-button-primary mt-6">
+                            <ArrowLeft className="h-4 w-4 mr-1" />
+                            Go to Admin Orders
+                        </Link>
+                    ) : (
+                        <Link to="/account/orders" className="glass-button-primary mt-6">
+                            <ArrowLeft className="h-4 w-4 mr-1" />
+                            Back to Orders
+                        </Link>
+                    )}
                 </div>
             </motion.div>
         );

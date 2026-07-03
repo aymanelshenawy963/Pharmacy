@@ -64,7 +64,7 @@ export default function Register() {
                 icon={UserPlus}
                 title="Join thousands of"
                 highlightText="healthy customers."
-                description="Create your free account to shop prescriptions, track orders, and more."
+                description="Create your free account to shop medicines, track orders, and more."
             >
                 <motion.ul
                     variants={authContainerVariants}
@@ -74,7 +74,6 @@ export default function Register() {
                 >
                     {[
                         'Free same-day delivery on orders over $50',
-                        'Automatic prescription refill reminders',
                         'Personalized health recommendations',
                         'Secure, encrypted health data storage',
                     ].map((benefit) => (

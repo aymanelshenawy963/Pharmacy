@@ -41,7 +41,7 @@ public class ReviewsController(IUnitOfWork unitOfWork, IMapper mapper) : Control
         if (alreadyReviewed)
             return BadRequest(new ResponseAPI(400, "You have already reviewed this product."));
 
-        var product = await _unitOfWork.ReviewRepository
+        var product = await _unitOfWork.ProductRepository
     .GetByIdAsync(dto.ProductId);
 
         if (product is null)
@@ -56,6 +56,7 @@ public class ReviewsController(IUnitOfWork unitOfWork, IMapper mapper) : Control
         };
 
         await _unitOfWork.ReviewRepository.AddAsync(review);
+        await _unitOfWork.SaveAsync();
 
         // Re-query with the Reviewer navigation to populate ReviewerName in the response
         var saved = await _unitOfWork.ReviewRepository

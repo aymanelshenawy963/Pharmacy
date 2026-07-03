@@ -9,6 +9,7 @@ public interface IOrderService
     Task<IReadOnlyList<OrderToReturnDTO>> GetOrdersForUserAsync(string buyerEmail);
     Task<OrderToReturnDTO?> GetOrderByIdAsync(int id, string buyerEmail);
     Task<IReadOnlyList<OrderToReturnDTO>> GetAllOrdersAsync();
+    Task<OrderToReturnDTO?> GetOrderByIdAdminAsync(int id);
     Task<(bool IsSuccess, string? Error)> UpdateOrderStatusAsync(int id, OrderStatus status);
     Task<(bool IsSuccess, string? Error)> CancelOrderAsync(int id, string buyerEmail);
 }

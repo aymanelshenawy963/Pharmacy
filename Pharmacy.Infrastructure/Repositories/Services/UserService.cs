@@ -100,7 +100,7 @@ public class UserService(UserManager<User> userManager, IMapper mapper,
         if (userNameIsExists)
             return (false, "UserName is already exists");
 
-        var allowedRoles = await _roleService.GetAllAsync(cancellationToken:cancellationToken);
+        var allowedRoles = await _roleService.GetAllAsync(cancellationToken:cancellationToken, includeDefault: true);
         if (userDTO.Roles.Except(allowedRoles.Select(x=>x.Name)).Any())
             return (false, "One or more roles are invalid");
 
@@ -130,7 +130,7 @@ public class UserService(UserManager<User> userManager, IMapper mapper,
         if (userNameIsExists)
             return (false, "UserName is already exists");
 
-        var allowedRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken);    
+        var allowedRoles = await _roleService.GetAllAsync(cancellationToken: cancellationToken, includeDefault: true);    
         if (updateUser.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
             return (false, "One or more roles are invalid");
 

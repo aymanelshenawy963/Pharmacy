@@ -10,7 +10,7 @@ const PER_PAGE = 6;
 
 export default function useProducts() {
     const [searchParams] = useSearchParams();
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(searchParams.get('q') || '');
     const [category, setCategory] = useState(searchParams.get('category') || 'All');
     const [sortBy, setSortBy] = useState('');
     const [currentPage, setCurrentPage] = useState(1);

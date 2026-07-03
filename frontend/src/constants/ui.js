@@ -4,6 +4,8 @@ export const PLACEHOLDER_IMG_XS = 'https://placehold.co/80x80/f7fbfa/0d9488?text
 
 export const ORDER_STATUS_STYLES = {
     Pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+    PaymentReceived: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
+    PaymentFailed: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
     Paid: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
     Shipped: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
     Delivered: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',

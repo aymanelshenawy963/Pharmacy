@@ -88,6 +88,19 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         return Ok(orders);
     }
 
+    /// <summary>GET /api/orders/{id}/admin — Admin retrieves any order by ID.</summary>
+    [HttpGet("{id:int}/admin")]
+    [Authorize(Roles = DefaultRoles.Admin)]
+    public async Task<IActionResult> GetOrderByIdAdmin(int id)
+    {
+        var order = await _orderService.GetOrderByIdAdminAsync(id);
+
+        if (order is null)
+            return NotFound(new ResponseAPI(404, $"Order {id} not found"));
+
+        return Ok(order);
+    }
+
     /// <summary>PUT /api/orders/{id}/status — Admin updates the status of any order.</summary>
     [HttpPut("{id:int}/status")]
     [Authorize(Roles = DefaultRoles.Admin)]

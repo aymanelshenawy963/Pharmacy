@@ -1,4 +1,4 @@
-import { apiGet, apiRequest, apiFormData } from './apiClient';
+import { apiGet, apiFormData, apiDelete } from './apiClient';
 
 export const productService = {
     async getAll(params = {}) {
@@ -18,6 +18,6 @@ export const productService = {
     },
 
     async remove(id) {
-        return apiRequest(`/api/Products/${id}`, { method: 'DELETE' });
+        return apiDelete(`/api/Products/${id}`);
     },
 };

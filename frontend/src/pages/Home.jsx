@@ -1,25 +1,38 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Icon from '../components/Icons';
 import Seo from '../components/Seo';
+import ProductCard from '../components/ProductCard';
+import { productService } from '../services/productService';
+import { normalizeProduct } from '../utils/normalizeProduct';
 import notify from '../utils/notifications';
 import { trustBadges, howItWorksSteps, collectionCards } from '../data/store';
 import { staggerContainer, fadeInUp } from '../constants/animations';
-import { buildProductSearchUrl } from '../constants/routes';
 
 export default function Home() {
-    const navigate = useNavigate();
-    const [heroSearch, setHeroSearch] = useState('');
     const [newsletterEmail, setNewsletterEmail] = useState('');
+    const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [loadingProducts, setLoadingProducts] = useState(true);
 
-    const handleHeroSearch = (e) => {
-        e.preventDefault();
-        const query = heroSearch.trim();
-        if (query) {
-            navigate(buildProductSearchUrl(query));
+    useEffect(() => {
+        let cancelled = false;
+        async function loadFeatured() {
+            try {
+                const res = await productService.getAll({ TopSelling: true, PageSize: 8, PageNumber: 1 });
+                if (!cancelled) {
+                    const items = (res.data || []).map(normalizeProduct).slice(0, 8);
+                    setFeaturedProducts(items);
+                }
+            } catch {
+                // Non-critical — silently ignore
+            } finally {
+                if (!cancelled) setLoadingProducts(false);
+            }
         }
-    };
+        loadFeatured();
+        return () => { cancelled = true; };
+    }, []);
 
     const handleSubscribe = (event) => {
         event.preventDefault();
@@ -31,7 +44,7 @@ export default function Home() {
         <>
             <Seo
                 title="Home"
-                description="Jaya Medical Store is a curated medical store experience with medicines, prescription uploads, wellness products, and local delivery support."
+                description="Medical Store is a curated medical store experience with medicines, wellness products, and local delivery support."
             />
 
             {/* Hero Section */}
@@ -48,7 +61,7 @@ export default function Home() {
                         width="1200"
                         height="800"
                     />
-                    <div className="absolute inset-0 bg-[rgb(var(--color-bg))]/75" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--color-bg))]/90 via-[rgb(var(--color-bg))]/50 to-transparent" />
                 </div>
 
                 <div className="relative z-10 mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-10 px-5 py-[60px] md:grid-cols-12 md:px-8 lg:px-16">
@@ -56,111 +69,76 @@ export default function Home() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ staggerChildren: 0.15, delayChildren: 0.2 }}
-                        className="flex flex-col items-start gap-9 md:col-span-12 lg:col-span-9"
+                        className="flex flex-col items-start gap-7 md:col-span-12 lg:col-span-9"
                     >
                         <motion.span
-                            initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-                            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                            className="inline-block rounded-full bg-[rgb(var(--color-primary))]/10 px-4 py-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-[rgb(var(--color-primary-dark))]"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[rgb(var(--color-primary))]/10 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-[rgb(var(--color-primary-dark))]"
                         >
-                            The Curated Sanctuary
+                            <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--color-primary))]" />
+                            Licensed Pharmacy
                         </motion.span>
-                        <div className="space-y-5">
-                            <motion.h1
-                                initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-                                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                                className="max-w-[920px] font-sans text-[68px] font-bold leading-[0.95] text-[rgb(var(--color-text))] lg:text-[76px]"
-                                style={{ letterSpacing: '0.03em', wordSpacing: '0.18em' }}
-                            >
-                                <span className="block whitespace-nowrap">Your Health,</span>
-                                <span className="block whitespace-nowrap italic font-normal text-[rgb(var(--color-primary))]">
-                                    Our Priority.
-                                </span>
-                            </motion.h1>
-                            <motion.div
-                                initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-                                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                                className="max-w-[920px] text-[19px] leading-[1.6] text-[rgb(var(--color-text-muted))] lg:text-[20px]"
-                            >
-                                <p>Experience clinical excellence curated for your well-being.</p>
-                                <p>We blend rigorous medical standards with a sophisticated approach</p>
-                                <p>to personal care, delivering genuine remedies directly to your sanctuary.</p>
-                            </motion.div>
-                        </div>
+
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                            className="max-w-[700px] font-sans text-[44px] font-bold leading-[1.1] text-[rgb(var(--color-text))] md:text-[52px] lg:text-[58px]"
+                        >
+                            Your Health,{' '}
+                            <span className="text-[rgb(var(--color-primary))]">Our Priority</span>
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                            className="max-w-[520px] text-[16px] leading-[1.7] text-[rgb(var(--color-text-muted))] md:text-[17px]"
+                        >
+                            Genuine medicines, expert advice, and same-day delivery.
+                            Order online — we handle the rest.
+                        </motion.p>
+
                         <motion.div
-                            initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-                            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                            className="flex flex-col gap-4 pt-4 sm:flex-row"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                            className="flex flex-col gap-3 pt-2 sm:flex-row"
                         >
                             <Link
                                 to="/products"
-                                className="inline-flex min-w-[208px] items-center justify-center gap-2 rounded-full bg-[rgb(var(--color-secondary))] px-8 py-4 text-[14px] font-medium tracking-[0.05em] text-[rgb(var(--color-text))] transition-all duration-300 hover:bg-[rgb(var(--color-secondary))]/90 hover:shadow-lg hover:shadow-[rgb(var(--color-secondary))]/30 hover:-translate-y-0.5 active:translate-y-0"
+                                className="inline-flex min-w-[180px] items-center justify-center gap-2 rounded-full bg-[rgb(var(--color-primary))] px-7 py-3.5 text-[14px] font-semibold text-white transition-all duration-300 hover:bg-[rgb(var(--color-primary-dark))] active:scale-[0.97]"
                             >
                                 Browse Products
                                 <Icon name="ArrowRight" className="h-4 w-4" />
                             </Link>
-                            <Link
-                                to="/prescription"
-                                className="inline-flex min-w-[230px] items-center justify-center gap-2 rounded-full bg-[rgb(var(--color-surface))]/60 backdrop-blur-md border border-[rgb(var(--color-border))]/40 px-8 py-4 text-[14px] font-medium tracking-[0.05em] text-[rgb(var(--color-text))] transition-all duration-300 hover:bg-[rgb(var(--color-surface))]/80 hover:shadow-lg hover:shadow-[rgb(var(--color-surface))]/20 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                                <Icon name="Upload" className="h-4 w-4" />
-                                Upload Prescription
-                            </Link>
                         </motion.div>
-
-                        <motion.form
-                            initial={{ opacity: 0, y: 30, filter: 'blur(4px)' }}
-                            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                            className="mt-6 w-full md:max-w-none md:mr-[-14%] lg:mr-[-18%]"
-                            style={{ minWidth: '100%' }}
-                            onSubmit={handleHeroSearch}
-                        >
-                            <label htmlFor="hero-search" className="sr-only">Search</label>
-                            <div className="flex items-center gap-3 w-full">
-                                <input
-                                    id="hero-search"
-                                    value={heroSearch}
-                                    onChange={(e) => setHeroSearch(e.target.value)}
-                                    placeholder="Search for medicines, vitamins, baby care and personal care..."
-                                    className="flex-1 min-w-0 bg-[rgb(var(--color-surface))]/80 backdrop-blur-md border border-[rgb(var(--color-border))]/40 shadow-sm rounded-full px-6 py-3.5 text-[15px] outline-none transition-all duration-300 focus:bg-[rgb(var(--color-surface))]/95 focus:shadow-md focus:ring-2 focus:ring-[rgb(var(--color-primary))]/20 placeholder:text-[rgb(var(--color-text-muted))]"
-                                />
-                                <button
-                                    type="submit"
-                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[rgb(var(--color-primary))] px-8 py-3.5 text-[14px] font-medium tracking-[0.05em] text-white transition-all duration-300 hover:bg-[rgb(var(--color-primary-dark))] hover:shadow-lg hover:shadow-[rgb(var(--color-primary-dark))]/30 hover:-translate-y-0.5 active:translate-y-0"
-                                >
-                                    Search
-                                </button>
-                            </div>
-                        </motion.form>
                     </motion.div>
                 </div>
             </section>
 
             {/* Trust Badges */}
-            <section className="border-y border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]/50">
-                <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
+            <section className="border-y border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg))]">
+                <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
                         variants={staggerContainer}
-                        className="grid grid-cols-2 gap-8 md:grid-cols-4"
+                        className="grid grid-cols-2 gap-6 md:grid-cols-4"
                     >
                         {trustBadges.map((badge) => (
                             <motion.div
                                 key={badge.title}
                                 variants={fadeInUp}
-                                className="group flex flex-col items-center gap-4 text-center"
+                                className="group flex flex-col items-center gap-4 rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-6 text-center transition-all duration-300 hover:border-[rgb(var(--color-primary))]/30 hover:shadow-md"
                             >
-                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] shadow-sm text-[rgb(var(--color-primary))] transition-all duration-300 group-hover:scale-110 group-hover:bg-[rgb(var(--color-primary))]/10 group-hover:shadow-md group-hover:shadow-[rgb(var(--color-primary))]/10">
-                                    <Icon name={badge.iconKey} className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] transition-colors duration-300 group-hover:bg-[rgb(var(--color-primary))]/15">
+                                    <Icon name={badge.iconKey} className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-base font-medium text-[rgb(var(--color-text))] transition-colors duration-200 group-hover:text-[rgb(var(--color-primary))]">{badge.title}</h3>
+                                <h3 className="text-[14px] font-semibold text-[rgb(var(--color-text))]">{badge.title}</h3>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -168,7 +146,8 @@ export default function Home() {
             </section>
 
             {/* Collections */}
-            <section className="mx-auto max-w-7xl px-4 py-24 md:px-8">
+            <section className="bg-[rgb(var(--color-bg))]">
+                <div className="mx-auto max-w-7xl px-4 py-24 md:px-8">
                 <motion.div
                     initial="hidden"
                     whileInView="visible"
@@ -243,48 +222,210 @@ export default function Home() {
                         )
                     )}
                 </motion.div>
+                </div>
             </section>
 
+            {/* Featured Products */}
+            {(loadingProducts || featuredProducts.length > 0) && (
+                <section className="bg-[rgb(var(--color-bg))] border-y border-[rgb(var(--color-border))]">
+                    <div className="mx-auto max-w-7xl px-4 py-24 md:px-8">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            variants={fadeInUp}
+                            className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6"
+                        >
+                            <div className="max-w-2xl">
+                                <span className="kicker">Curated for You</span>
+                                <h2 className="display-heading mb-4">Best Sellers</h2>
+                                <p className="text-lg text-[rgb(var(--color-text-muted))]">
+                                    Trusted products our customers keep coming back for.
+                                </p>
+                            </div>
+                            <Link to="/products" className="glass-button-secondary inline-flex w-max">
+                                View All Products
+                                <Icon name="ArrowRight" className="h-4 w-4" />
+                            </Link>
+                        </motion.div>
+
+                        {loadingProducts ? (
+                            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-[rgb(var(--color-surface))] h-[420px] animate-pulse overflow-hidden flex flex-col rounded-2xl border border-[rgb(var(--color-border))] shadow-sm"
+                                    >
+                                        <div className="h-48 bg-gradient-to-r from-[rgb(var(--color-border))]/40 via-[rgb(var(--color-border))]/60 to-[rgb(var(--color-border))]/40" />
+                                        <div className="p-5 space-y-4 flex-grow flex flex-col justify-between">
+                                            <div>
+                                                <div className="h-3 w-16 bg-[rgb(var(--color-border))] rounded-full mb-3" />
+                                                <div className="h-5 w-3/4 bg-[rgb(var(--color-border))]/80 rounded-full mb-2" />
+                                                <div className="h-4 w-1/2 bg-[rgb(var(--color-border))]/60 rounded-full" />
+                                            </div>
+                                            <div className="h-12 w-full bg-[rgb(var(--color-border))]/50 rounded-xl" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <motion.div
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true }}
+                                variants={staggerContainer}
+                                className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                            >
+                                {featuredProducts.map((product) => (
+                                    <motion.div key={product.id} variants={fadeInUp}>
+                                        <ProductCard product={product} />
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </div>
+                </section>
+            )}
+
             {/* Process */}
-            <section className="bg-[rgb(var(--color-surface))] border-y border-[rgb(var(--color-border))] py-24 relative overflow-hidden">
+            <section className="relative overflow-hidden py-24 md:py-32">
+                {/* Background decoration */}
+                <div className="absolute inset-0 bg-[rgb(var(--color-bg))]">
+                    <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-[rgb(var(--color-primary))] opacity-[0.03] blur-3xl" />
+                    <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-[rgb(var(--color-primary))] opacity-[0.03] blur-3xl" />
+                </div>
+
                 <div className="mx-auto max-w-7xl px-4 md:px-8 relative z-10">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
-                        viewport={{ once: true }}
+                        viewport={{ once: true, margin: '-50px' }}
                         variants={fadeInUp}
-                        className="mb-16 text-center max-w-2xl mx-auto"
+                        className="mb-16 md:mb-20 text-center max-w-2xl mx-auto"
                     >
                         <span className="kicker">How it works</span>
-                        <h2 className="display-heading mb-4">A Seamless Process</h2>
+                        <h2 className="display-heading mb-4">Your Journey to Better Health</h2>
                         <p className="text-lg text-[rgb(var(--color-text-muted))]">
-                            Acquiring your essential medications should be as calming as the cure itself. Follow our streamlined three-step approach.
+                            From browsing to doorstep delivery, we've streamlined every step so you can focus on what matters most — your well-being.
                         </p>
                     </motion.div>
 
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        variants={staggerContainer}
-                        className="relative flex flex-col gap-12 md:flex-row md:items-start md:justify-between"
-                    >
-                        <div className="absolute left-1/2 md:left-0 top-0 md:top-10 h-full md:h-px w-px md:w-full -translate-x-1/2 md:translate-x-0 bg-[rgb(var(--color-border))] md:block" />
-
-                        {howItWorksSteps.map((step, index) => (
+                    {/* Desktop: Horizontal timeline */}
+                    <div className="hidden md:block">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, margin: '-50px' }}
+                            variants={staggerContainer}
+                            className="relative"
+                        >
+                            {/* Connecting progress line */}
+                            <div className="absolute top-[40px] left-[10%] right-[10%] h-px bg-[rgb(var(--color-border))]" />
                             <motion.div
-                                variants={fadeInUp}
-                                key={step.title}
-                                className="z-10 flex w-full flex-col items-center bg-[rgb(var(--color-surface))] md:bg-transparent px-4 text-center md:w-1/3 pt-4 md:pt-0 group/step"
-                            >
-                                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[rgb(var(--color-bg))] border border-[rgb(var(--color-border))] shadow-lg text-[rgb(var(--color-primary))] transition-all duration-300 group-hover/step:scale-110 group-hover/step:shadow-xl group-hover/step:shadow-[rgb(var(--color-primary))]/15">
-                                    <Icon name={step.iconKey} className="h-8 w-8 transition-transform duration-300 group-hover/step:scale-110" />
-                                </div>
-                                <h4 className="mb-3 font-sans text-xl font-semibold text-[rgb(var(--color-text))]">{step.title}</h4>
-                                <p className="text-base text-[rgb(var(--color-text-muted))] max-w-xs">{step.text}</p>
-                            </motion.div>
-                        ))}
-                    </motion.div>
+                                initial={{ scaleX: 0 }}
+                                whileInView={{ scaleX: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                                className="absolute top-[40px] left-[10%] right-[10%] h-px bg-gradient-to-r from-[rgb(var(--color-primary))] via-[rgb(var(--color-primary-light))] to-[rgb(var(--color-primary))] origin-left"
+                            />
+
+                            <div className="grid grid-cols-5 gap-4">
+                                {howItWorksSteps.map((step, index) => (
+                                    <motion.div
+                                        variants={fadeInUp}
+                                        key={step.title}
+                                        className="relative flex flex-col items-center text-center group/step"
+                                    >
+                                        {/* Step number badge */}
+                                        <div className="relative z-10 mb-5">
+                                            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-[rgb(var(--color-primary))] bg-[rgb(var(--color-bg))] shadow-lg text-[rgb(var(--color-primary))] transition-all duration-500 group-hover/step:scale-110 group-hover/step:shadow-xl group-hover/step:shadow-[rgb(var(--color-primary))]/20 group-hover/step:bg-[rgb(var(--color-primary))] group-hover/step:text-white">
+                                                <Icon name={step.iconKey} className="h-8 w-8 transition-transform duration-500 group-hover/step:scale-110" />
+                                            </div>
+                                            {/* Number badge */}
+                                            <div className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[rgb(var(--color-primary))] text-xs font-bold text-white shadow-md">
+                                                {String(index + 1).padStart(2, '0')}
+                                            </div>
+                                        </div>
+
+                                        {/* Card */}
+                                        <div className="w-full rounded-2xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-5 shadow-sm transition-all duration-500 group-hover/step:-translate-y-2 group-hover/step:shadow-lg group-hover/step:border-[rgb(var(--color-primary))]/30">
+                                            <h4 className="mb-2 font-sans text-base font-semibold text-[rgb(var(--color-text))] transition-colors duration-300 group-hover/step:text-[rgb(var(--color-primary))]">
+                                                {step.title}
+                                            </h4>
+                                            <p className="text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">
+                                                {step.text}
+                                            </p>
+                                        </div>
+
+                                        {/* Arrow connector */}
+                                        {index < howItWorksSteps.length - 1 && (
+                                            <div className="absolute top-[40px] -right-2 z-20 flex h-5 w-5 items-center justify-center text-[rgb(var(--color-primary))] opacity-60">
+                                                <Icon name="ArrowRight" className="h-4 w-4" />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    {/* Mobile: Vertical timeline */}
+                    <div className="md:hidden">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, margin: '-50px' }}
+                            variants={staggerContainer}
+                            className="relative"
+                        >
+                            {/* Vertical connecting line */}
+                            <div className="absolute left-[38px] top-0 bottom-0 w-px bg-[rgb(var(--color-border))]" />
+                            <motion.div
+                                initial={{ scaleY: 0 }}
+                                whileInView={{ scaleY: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                                className="absolute left-[38px] top-0 bottom-0 w-px bg-gradient-to-b from-[rgb(var(--color-primary))] via-[rgb(var(--color-primary-light))] to-[rgb(var(--color-primary))] origin-top"
+                            />
+
+                            <div className="flex flex-col gap-1">
+                                {howItWorksSteps.map((step, index) => (
+                                    <motion.div
+                                        variants={fadeInUp}
+                                        key={step.title}
+                                        className="relative flex items-start gap-5 group/step"
+                                    >
+                                        {/* Step icon + badge */}
+                                        <div className="relative z-10 flex-shrink-0">
+                                            <div className="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-[rgb(var(--color-primary))] bg-[rgb(var(--color-bg))] shadow-md text-[rgb(var(--color-primary))] transition-all duration-500 group-hover/step:scale-110 group-hover/step:bg-[rgb(var(--color-primary))] group-hover/step:text-white">
+                                                <Icon name={step.iconKey} className="h-6 w-6 transition-transform duration-500 group-hover/step:scale-110" />
+                                            </div>
+                                            <div className="absolute -top-1.5 -right-1.5 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[rgb(var(--color-primary))] text-[10px] font-bold text-white shadow-sm">
+                                                {String(index + 1).padStart(2, '0')}
+                                            </div>
+                                        </div>
+
+                                        {/* Card */}
+                                        <div className="flex-1 rounded-2xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-5 shadow-sm transition-all duration-500 group-hover/step:-translate-y-1 group-hover/step:shadow-md group-hover/step:border-[rgb(var(--color-primary))]/30">
+                                            <h4 className="mb-1.5 font-sans text-base font-semibold text-[rgb(var(--color-text))] transition-colors duration-300 group-hover/step:text-[rgb(var(--color-primary))]">
+                                                {step.title}
+                                            </h4>
+                                            <p className="text-sm leading-relaxed text-[rgb(var(--color-text-muted))]">
+                                                {step.text}
+                                            </p>
+                                        </div>
+
+                                        {/* Arrow connector */}
+                                        {index < howItWorksSteps.length - 1 && (
+                                            <div className="absolute left-[31px] top-[56px] z-20 flex h-5 w-5 items-center justify-center text-[rgb(var(--color-primary))] opacity-60">
+                                                <Icon name="ChevronDown" className="h-3.5 w-3.5" />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -295,23 +436,21 @@ export default function Home() {
                     whileInView="visible"
                     viewport={{ once: true }}
                     variants={staggerContainer}
-                    className="grid grid-cols-1 items-center gap-16 md:grid-cols-2"
+                    className="grid grid-cols-1 items-center gap-4 md:grid-cols-2"
                 >
                     <motion.div
                         variants={fadeInUp}
-                        className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-xl group/owner"
+                        className="relative w-full aspect-[3/4] max-w-md overflow-hidden rounded-2xl shadow-xl group/owner"
                     >
                         <img
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover/owner:scale-105"
-                            alt="Madan Mohan Mishra"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvLR3jdxYJOrAIhUGI00WIuVfHFtqPy3-XgSkwQLQHqugGoqmYpqsZecRw6mhaUfUy71UpewC33x5BM_9ICyj2bK9yHfckn5uAn8wV7XSJDDhnFYIU62S9T-904OxYNG9SLYbLW4SgzbCCBitIPaKB3I6pIaJVlnuZ3nYLzgkmSV4cr70WEfsaxWHNJ-bOPvkjSfn5-8XdRuIN2sGao0AKiWPqInpq6OhlEcYVEPHhoNSC5k86ktriB55v4mmYhpg8nW6pefT14Mw"
+                            className="h-full w-full object-cover object-top transition-transform duration-700 group-hover/owner:scale-105"
+                            alt="James Mitchell"
+                            src={import.meta.env.BASE_URL + 'images/doctor.webp'}
                             loading="lazy"
-                            width="600"
-                            height="750"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-0 left-0 p-8 text-white transition-transform duration-500 group-hover/owner:translate-y-[-4px]">
-                            <p className="font-sans text-2xl font-semibold">Madan Mohan Mishra</p>
+                            <p className="font-sans text-2xl font-semibold">James Mitchell</p>
                             <p className="text-white/80">Founder &amp; Owner</p>
                         </div>
                     </motion.div>
@@ -323,7 +462,7 @@ export default function Home() {
                         </motion.h2>
                         <motion.div variants={fadeInUp} className="h-1 w-16 bg-[rgb(var(--color-primary))] rounded-full" />
                         <motion.p variants={fadeInUp} className="text-lg text-[rgb(var(--color-text-muted))] leading-relaxed">
-                            Founded by Madan Mohan Mishra, Jaya Medical Store was established to elevate the standard of pharmaceutical provision. We view every prescription not merely as a transaction, but as a critical component of your personal health journey.
+                            Founded by James Mitchell, Medical Store was established to elevate the standard of pharmaceutical provision. We are committed to providing quality pharmaceutical care to every customer.
                         </motion.p>
                         <motion.div variants={fadeInUp}>
                             <Link to="/about" className="glass-button-secondary">

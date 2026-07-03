@@ -53,8 +53,6 @@ export default function Cart() {
             <Seo title="Cart" description="Review items and proceed to checkout." />
 
             <div className="min-h-[calc(100vh-72px)] bg-surface relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/2 h-96 bg-primary/10 blur-[100px] pointer-events-none" />
-
                 <div className="mx-auto max-w-7xl px-4 py-12 md:py-20 lg:px-8 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}

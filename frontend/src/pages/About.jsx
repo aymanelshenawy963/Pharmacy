@@ -8,12 +8,9 @@ import { staggerContainer, staggerItem } from '../constants/animations';
 export default function About() {
     return (
         <>
-            <Seo title="About Us" description="Learn the story, values, and owner profile behind Jaya Medical Store." />
+            <Seo title="About Us" description="Learn the story, values, and owner profile behind Medical Store." />
 
             <main className="bg-surface min-h-[calc(100vh-72px)] relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/3 h-[500px] bg-primary/10 blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-1/3 h-[500px] bg-secondary/10 blur-[120px] pointer-events-none" />
-
                 <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 relative z-10">
                     {/* ─── Hero Section ─── */}
                     <motion.div
@@ -27,7 +24,7 @@ export default function About() {
                             A pharmacy shaped around <span className="text-primary italic font-normal">trust</span> and attention.
                         </h1>
                         <p className="mt-6 text-lg leading-relaxed text-text-muted text-balance">
-                            Jaya Medical Store is built to feel like a clean, welcoming pharmacy counter online. The goal is simple: genuine products, careful verification, and a service experience that helps people feel informed rather than rushed.
+                            Medical Store is built to feel like a clean, welcoming pharmacy counter online. The goal is simple: genuine products, careful verification, and a service experience that helps people feel informed rather than rushed.
                         </p>
                     </motion.div>
 
@@ -36,11 +33,11 @@ export default function About() {
                         <Reveal>
                             <div className="bg-surface overflow-hidden group/owner rounded-2xl border border-border shadow-sm">
                                 <div className="grid md:grid-cols-[0.8fr_1.2fr]">
-                                    <div className="relative h-[300px] w-full bg-bg md:h-auto overflow-hidden">
+                                    <div className="relative w-full bg-bg overflow-hidden">
                                         <img
-                                            src="/images/owner.jpg"
-                                            alt="Madan Mohan Mishra"
-                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/owner:scale-105"
+                                            src={import.meta.env.BASE_URL + 'images/doctor.webp'}
+                                            alt="James Mitchell"
+                                            className="h-full w-full object-cover object-top transition-transform duration-700 group-hover/owner:scale-105"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent md:hidden" />
                                         <div className="absolute bottom-6 left-6 md:hidden">
@@ -51,21 +48,21 @@ export default function About() {
                                     <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
                                         <div className="hidden md:block">
                                             <h2 className="font-sans text-3xl font-bold text-text lg:text-4xl">
-                                                Madan Mohan Mishra
+                                                James Mitchell
                                             </h2>
                                             <p className="mt-2 text-xs font-bold uppercase tracking-widest text-primary">
                                                 {ownerProfile.title}
                                             </p>
                                         </div>
                                         <p className="mt-6 text-base leading-relaxed text-text-muted md:mt-8">
-                                            With over {new Date().getFullYear() - 2010} years of retail pharmacy experience, Madan Mohan Mishra has shaped the store around careful counseling, accurate product handling, and consistent follow-up.
+                                            With over {new Date().getFullYear() - 2010} years of retail pharmacy experience, James Mitchell has shaped the store around careful counseling, accurate product handling, and consistent follow-up.
                                         </p>
                                         <blockquote className="mt-8 border-l-2 border-primary pl-6 font-sans text-xl italic leading-relaxed text-text transition-colors duration-300 hover:border-primary/60">
                                             &quot;{ownerProfile.quote}&quot;
                                         </blockquote>
 
                                         <div className="mt-10 flex flex-wrap gap-3">
-                                            {['Retail Experience', 'Prescription Review', 'Patient Support'].map((badge) => (
+                                            {['Retail Experience', 'Quality Assurance', 'Patient Support'].map((badge) => (
                                                 <motion.span
                                                     key={badge}
                                                     whileHover={{ scale: 1.05, y: -2 }}

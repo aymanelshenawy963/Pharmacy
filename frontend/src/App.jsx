@@ -4,18 +4,21 @@ import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
-import FloatingWhatsApp from './components/FloatingWhatsApp';
+
 import PageLoader from './components/PageLoader';
 import AuthHeader from './components/AuthHeader';
 import ErrorBoundary from './components/ErrorBoundary';
 import RouteErrorBoundary from './components/RouteErrorBoundary';
+import PageBackground from './components/PageBackground';
 
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
-const Prescription = lazy(() => import('./pages/Prescription'));
+const Payment = lazy(() => import('./pages/Payment'));
+const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const PaymentFailed = lazy(() => import('./pages/PaymentFailed'));
 const Contact = lazy(() => import('./pages/Contact'));
 const About = lazy(() => import('./pages/About'));
 const FAQ = lazy(() => import('./pages/FAQ'));
@@ -39,6 +42,9 @@ const AdminUsers = lazy(() => import('./pages/admin/Users'));
 const AdminRoles = lazy(() => import('./pages/admin/Roles'));
 const AdminCategories = lazy(() => import('./pages/admin/Categories'));
 const AdminProducts = lazy(() => import('./pages/admin/Products'));
+const AdminOrders = lazy(() => import('./pages/admin/Orders'));
+const AdminOrderDetail = lazy(() => import('./pages/admin/OrderDetail'));
+const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const ProfileSettings = lazy(() => import('./pages/account/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/account/SecuritySettings'));
 const Orders = lazy(() => import('./pages/account/Orders'));
@@ -67,8 +73,10 @@ function ScrollToTop() {
 // ── Full site layout (with Navbar + Footer) ───────────────────────────────────
 function Layout() {
     const location = useLocation();
+    const isPayment = location.pathname.startsWith('/payment');
     return (
-        <div className="min-h-screen bg-hero-gradient text-slate-900">
+        <div className="relative min-h-screen bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
+            <PageBackground />
             <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg"
@@ -76,10 +84,10 @@ function Layout() {
                 Skip to content
             </a>
             <ScrollToTop />
-            <Navbar />
-            <FloatingWhatsApp />
+            {!isPayment && <Navbar />}
+
             <BackToTop />
-            <main id="main-content">
+            <main id="main-content" className="relative z-10">
                 <ErrorBoundary>
                     <Suspense fallback={<PageLoader />}>
                         <RouteErrorBoundary>
@@ -95,7 +103,7 @@ function Layout() {
                     </Suspense>
                 </ErrorBoundary>
             </main>
-            <Footer />
+            {!isPayment && <Footer />}
         </div>
     );
 }
@@ -104,7 +112,8 @@ function Layout() {
 function AuthLayout() {
     const location = useLocation();
     return (
-        <div className="min-h-screen bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
+        <div className="relative min-h-screen bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))]">
+            <PageBackground />
             <ScrollToTop />
             <AuthHeader />
             <ErrorBoundary>
@@ -116,6 +125,7 @@ function AuthLayout() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                            className="relative z-10"
                         >
                             <Outlet />
                         </motion.div>
@@ -154,7 +164,9 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                     <Route path="cart" element={<Cart />} />
                     <Route path="checkout" element={<Checkout />} />
-                    <Route path="prescription" element={<Prescription />} />
+                    <Route path="payment" element={<Payment />} />
+                    <Route path="payment/success" element={<PaymentSuccess />} />
+                    <Route path="payment/failed" element={<PaymentFailed />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
@@ -181,6 +193,9 @@ export default function App() {
                     <Route path="roles" element={<AdminRoles />} />
                     <Route path="categories" element={<AdminCategories />} />
                     <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="orders/:id" element={<AdminOrderDetail />} />
+                    <Route path="notifications" element={<AdminNotifications />} />
                 </Route>
             </Route>
 

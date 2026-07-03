@@ -58,12 +58,10 @@ export default function Contact() {
         <>
             <Seo
                 title="Contact"
-                description="Contact Jaya Medical Store for orders, prescription support, and store information."
+                description="Contact Medical Store for orders, support, and store information."
             />
 
             <main className="min-h-[calc(100vh-72px)] bg-surface relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/2 h-[500px] bg-primary/10 blur-[120px] pointer-events-none" />
-
                 <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 relative z-10">
                     {/* Header */}
                     <motion.div
@@ -75,7 +73,7 @@ export default function Contact() {
                         <span className="kicker">Get in touch</span>
                         <h1 className="display-heading !mb-4">Contact Us</h1>
                         <p className="max-w-2xl text-lg leading-relaxed text-text-muted">
-                            Experience clinical excellence and personalized care. Reach out to us for prescription inquiries, wellness advice, or general information.
+                            Experience clinical excellence and personalized care. Reach out to us for wellness advice, order inquiries, or general information.
                         </p>
                     </motion.div>
 
@@ -160,7 +158,7 @@ export default function Contact() {
                                                 value={form.subject}
                                                 onChange={onChange}
                                                 required
-                                                placeholder="Prescription Inquiry"
+                                                placeholder="How can we help?"
                                                 className={inputClass}
                                             />
                                         </motion.div>
@@ -241,7 +239,7 @@ export default function Contact() {
                                 <div className="flex items-center gap-6">
                                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-border shadow-sm transition-transform duration-300 hover:scale-105">
                                         <img
-                                            src="/images/owner.jpg"
+                                            src={import.meta.env.BASE_URL + 'images/owner.jpg'}
                                             alt={ownerProfile.name}
                                             className="h-full w-full object-cover"
                                             loading="lazy"
@@ -272,7 +270,7 @@ export default function Contact() {
                         className="bg-surface overflow-hidden mt-16 h-[400px] w-full relative rounded-2xl border border-border shadow-sm"
                     >
                         <iframe
-                            title="Jaya Medical Store location"
+                            title="Medical Store location"
                             src={storeInfo.mapEmbedUrl}
                             className="h-full w-full border-0 absolute inset-0 z-10 opacity-90 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-700"
                             loading="lazy"

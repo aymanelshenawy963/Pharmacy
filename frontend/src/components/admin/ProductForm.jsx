@@ -82,13 +82,6 @@ export default function ProductForm({
 
             <div className="flex flex-wrap gap-4 sm:gap-6">
                 <FormField
-                    label="Requires Prescription"
-                    name="requiresPrescription"
-                    type="checkbox"
-                    value={form.requiresPrescription}
-                    onChange={onFormChange}
-                />
-                <FormField
                     label="Has Strips"
                     name="hasStrips"
                     type="checkbox"

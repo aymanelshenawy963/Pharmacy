@@ -1,5 +1,5 @@
 export const featuredCategories = [
-    { name: 'Medicines', iconKey: 'Pill', slug: 'Medicines', description: 'Prescription and everyday care from trusted brands.' },
+    { name: 'Medicines', iconKey: 'Pill', slug: 'Medicines', description: 'Everyday care from trusted brands.' },
     { name: 'Vitamins & Supplements', iconKey: 'Sparkles', slug: 'Vitamins & Supplements', description: 'Daily wellness support for energy, immunity, and recovery.' },
     { name: 'Personal Care', iconKey: 'Sparkles', slug: 'Personal Care', description: 'Skin, hygiene, and grooming essentials for the whole family.' },
     { name: 'Baby Care', iconKey: 'Baby', slug: 'Baby Care', description: 'Gentle products selected for infants and young children.' },
@@ -16,36 +16,46 @@ export const trustBadges = [
 
 export const howItWorksSteps = [
     {
-        title: 'Browse or search',
-        text: 'Find medicines, wellness essentials, and daily care products with live filters.',
+        title: 'Browse Products',
+        text: 'Explore our wide range of medicines, healthcare products, and wellness essentials with smart filters.',
         iconKey: 'Search',
     },
     {
-        title: 'Upload prescription',
-        text: 'Share a prescription when required and add any quick notes for the pharmacist.',
-        iconKey: 'Upload',
+        title: 'Choose Your Items',
+        text: 'Select products, compare options, and add them to your cart with confidence.',
+        iconKey: 'ShoppingCart',
     },
     {
-        title: 'Receive doorstep delivery',
-        text: 'We prepare the order carefully and coordinate delivery to your address.',
+        title: 'Secure Checkout',
+        text: 'Enter your shipping details and complete payment securely with multiple options.',
+        iconKey: 'ShieldCheck',
+    },
+    {
+        title: 'Order Confirmation',
+        text: 'Receive instant confirmation and track your order status in real time.',
+        iconKey: 'ClipboardList',
+    },
+    {
+        title: 'Fast Delivery',
+        text: 'Your order is carefully packed and delivered directly to your doorstep.',
         iconKey: 'Truck',
     },
 ];
 
 export const ownerProfile = {
-    name: 'Madan Mohan Mishra',
-    title: 'Proprietor, Jaya Medical Store',
+    name: 'James Mitchell',
+    title: 'Proprietor, Medical Store',
     quote: 'Serving your family with steady advice, authentic products, and careful attention to every order.',
     years: 15,
     bio:
-        'Madan Mohan Mishra has built Jaya Medical Store around one simple idea: a pharmacy should feel accurate, calm, and human. The store balances quick service with careful verification so every customer can order with confidence.',
-    qualifications: ['Retail pharmacy experience', 'Prescription handling', 'Product guidance and counseling'],
+        'James Mitchell has built Medical Store around one simple idea: a pharmacy should feel accurate, calm, and human. The store balances quick service with careful verification so every customer can order with confidence.',
+    qualifications: ['Retail pharmacy experience', 'Product guidance and counseling'],
 };
 
 export const storeInfo = {
-    address: 'Jaya Medical Store, Dhawari, Satna, Lamtara, Madhya Pradesh 485001',
+    address: 'Medical Store, Dhawari, Satna, Lamtara, Madhya Pradesh 485001',
     phone: '+91 97528 80806',
-    email: 'support@jayamedicalstore.in',
+    email: 'support@medicalstore.in',
     whatsapp: 'https://wa.me/919752880806',
     hours: 'Monday to Sunday, 8:00 AM to 10:00 PM',
     mapEmbedUrl: 'https://www.google.com/maps?q=24.5556833,80.8192739&z=18&output=embed',
@@ -61,16 +71,15 @@ export const socialLinks = [
 export const footerLinks = [
     { label: 'Home', to: '/' },
     { label: 'Products', to: '/products' },
-    { label: 'Prescription', to: '/prescription' },
     { label: 'About', to: '/about' },
     { label: 'FAQ', to: '/faq' },
     { label: 'Contact', to: '/contact' },
 ];
 
 export const milestones = [
-    { year: '2010', title: 'Store opened', text: 'Jaya Medical Store began serving the neighborhood with a small, dependable pharmacy counter.' },
+    { year: '2010', title: 'Store opened', text: 'Medical Store began serving the neighborhood with a small, dependable pharmacy counter.' },
     { year: '2016', title: 'Home delivery added', text: 'The store expanded delivery support for recurring medicines and urgent requests.' },
-    { year: '2020', title: 'Digital ordering', text: 'Prescription uploads and WhatsApp ordering became part of the daily workflow.' },
+    { year: '2020', title: 'Digital ordering', text: 'WhatsApp ordering became part of the daily workflow.' },
     { year: '2026', title: 'Modern online storefront', text: 'The pharmacy now ships with a polished multi-page shopping experience.' },
 ];
 
@@ -85,7 +94,7 @@ export const testimonialItems = [
     {
         name: 'Priya Sharma',
         rating: 5,
-        text: 'The prescription upload process was simple and the order reached us the same evening. The packaging was neat and reassuring.',
+        text: 'The order reached us the same evening. The packaging was neat and reassuring.',
     },
     {
         name: 'Amit Verma',
@@ -103,10 +112,6 @@ export const faqItems = [
     {
         question: 'How fast is delivery?',
         answer: 'Orders are prepared as quickly as possible and same-day delivery is available in select local areas when stock and timing allow.',
-    },
-    {
-        question: 'Do I need a prescription for every order?',
-        answer: 'Only for medicines marked as prescription required. OTC and wellness items can be ordered directly.',
     },
     {
         question: 'Can I return medicines?',
@@ -129,7 +134,6 @@ export const faqItems = [
 export const contactSubjects = [
     'General inquiry',
     'Order status',
-    'Prescription help',
     'Product availability',
     'Delivery support',
     'Other',

@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiRequest } from './apiClient';
+import { apiGet, apiPost, apiPut } from './apiClient';
 import { authStorage } from './authStorage';
 import { AUTH_ENDPOINTS } from '../constants/auth';
 

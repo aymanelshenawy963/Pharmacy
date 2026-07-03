@@ -11,6 +11,9 @@
     "dependencies": {
         "@emailjs/browser": "^4.4.1",
         "@hookform/resolvers": "^5.4.0",
+        "@stripe/react-stripe-js": "^6.7.0",
+        "@stripe/stripe-js": "^9.9.0",
+        "axios": "^1.18.1",
         "clsx": "^2.1.1",
         "framer-motion": "^11.11.17",
         "lucide-react": "^0.493.0",

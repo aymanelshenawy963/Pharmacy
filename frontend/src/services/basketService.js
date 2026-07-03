@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiRequest } from './apiClient';
+import { apiGet, apiPost, apiDelete } from './apiClient';
 
 const BASKET_ID_KEY = 'pharmacy-basket-id';
 const BASKET_DATA_KEY = 'pharmacy-basket-data';
@@ -107,7 +107,7 @@ export const basketService = {
         const basketId = getBasketId();
         if (!basketId) return;
         try {
-            await apiRequest(`/api/Baskets/${basketId}`, { method: 'DELETE' });
+            await apiDelete(`/api/Baskets/${basketId}`);
         } catch {
             // Ignore errors on delete
         }

@@ -9,7 +9,6 @@ export function normalizeProduct(p) {
         category: p.categoryName,
         categoryId: p.categoryId,
         image: p.photos?.[0] || null,
-        requiresPrescription: p.requiresPrescription,
         topSelling: p.topSelling,
     };
 }

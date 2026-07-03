@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { userService } from '../services/userService';
-import { roleService } from '../services/roleService';
 import { createUserSchema, updateUserSchema } from '../validation/admin';
 import { parseZodError } from '../utils/validation';
 import notify from '../utils/notifications';
@@ -12,7 +11,7 @@ const INITIAL_CREATE_FORM = {
     firstName: '',
     lastName: '',
     password: '',
-    roles: [],
+    isAdmin: false,
 };
 
 const INITIAL_EDIT_FORM = {
@@ -20,12 +19,7 @@ const INITIAL_EDIT_FORM = {
     userName: '',
     firstName: '',
     lastName: '',
-    roles: [],
-};
-
-const getRoleName = (role) => {
-    if (typeof role === 'string') return role;
-    return role?.name || role?.roleName || '';
+    isAdmin: false,
 };
 
 const filterUsers = (user, q) =>
@@ -34,14 +28,25 @@ const filterUsers = (user, q) =>
     (user.userName || '').toLowerCase().includes(q) ||
     (user.email || '').toLowerCase().includes(q);
 
+function buildRolesPayload(isAdmin) {
+    const roles = ['Customer'];
+    if (isAdmin) roles.push('Admin');
+    return roles;
+}
+
+function hasAdminRole(user) {
+    return (user.roles || []).some((r) => {
+        const name = typeof r === 'string' ? r : r?.name || r?.roleName || '';
+        return name === 'Admin';
+    });
+}
+
 export default function useUserCrud() {
     const fetchFn = useCallback(() => userService.getAll(), []);
-    const { data: users, setData: setUsers, filtered: filteredUsers, isLoading, error, search, setSearch, refetch } = useAdminCrud(fetchFn, {
+    const { data: users, filtered: filteredUsers, isLoading, error, search, setSearch, refetch } = useAdminCrud(fetchFn, {
         errorMessage: 'Failed to load users',
         filterFn: filterUsers,
     });
-
-    const [availableRoles, setAvailableRoles] = useState([]);
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createForm, setCreateForm] = useState(INITIAL_CREATE_FORM);
@@ -66,19 +71,6 @@ export default function useUserCrud() {
     const [unlockTarget, setUnlockTarget] = useState(null);
     const [isUnlocking, setIsUnlocking] = useState(false);
 
-    const fetchRoles = useCallback(async () => {
-        try {
-            const data = await roleService.getAll();
-            setAvailableRoles(Array.isArray(data) ? data : []);
-        } catch {
-            // Roles are optional
-        }
-    }, []);
-
-    useEffect(() => {
-        fetchRoles();
-    }, [fetchRoles]);
-
     const openCreateModal = () => {
         setCreateForm(INITIAL_CREATE_FORM);
         setCreateErrors({});
@@ -97,20 +89,8 @@ export default function useUserCrud() {
         }
     };
 
-    const handleCreateRoleToggle = (roleName) => {
-        setCreateForm((prev) => {
-            const roles = prev.roles.includes(roleName)
-                ? prev.roles.filter((r) => r !== roleName)
-                : [...prev.roles, roleName];
-            return { ...prev, roles };
-        });
-        if (createErrors.roles) {
-            setCreateErrors((prev) => {
-                const next = { ...prev };
-                delete next.roles;
-                return next;
-            });
-        }
+    const handleCreateAdminToggle = () => {
+        setCreateForm((prev) => ({ ...prev, isAdmin: !prev.isAdmin }));
     };
 
     const handleCreateSubmit = async (e) => {
@@ -124,7 +104,12 @@ export default function useUserCrud() {
 
         setIsCreating(true);
         try {
-            await userService.create(createForm);
+            const payload = {
+                ...createForm,
+                roles: buildRolesPayload(createForm.isAdmin),
+            };
+            delete payload.isAdmin;
+            await userService.create(payload);
             notify.success('User created successfully');
             setShowCreateModal(false);
             refetch();
@@ -137,14 +122,12 @@ export default function useUserCrud() {
 
     const openEditModal = (user) => {
         setEditUserId(user.id);
-        const userRoleNames = (user.roles || []).map(getRoleName);
-        const availableRoleNames = availableRoles.map(getRoleName);
         setEditForm({
             email: user.email || '',
             userName: user.userName || '',
             firstName: user.firstName || '',
             lastName: user.lastName || '',
-            roles: userRoleNames.filter((r) => availableRoleNames.includes(r)),
+            isAdmin: hasAdminRole(user),
         });
         setEditErrors({});
         setShowEditModal(true);
@@ -162,20 +145,8 @@ export default function useUserCrud() {
         }
     };
 
-    const handleEditRoleToggle = (roleName) => {
-        setEditForm((prev) => {
-            const roles = prev.roles.includes(roleName)
-                ? prev.roles.filter((r) => r !== roleName)
-                : [...prev.roles, roleName];
-            return { ...prev, roles };
-        });
-        if (editErrors.roles) {
-            setEditErrors((prev) => {
-                const next = { ...prev };
-                delete next.roles;
-                return next;
-            });
-        }
+    const handleEditAdminToggle = () => {
+        setEditForm((prev) => ({ ...prev, isAdmin: !prev.isAdmin }));
     };
 
     const handleEditSubmit = async (e) => {
@@ -189,7 +160,12 @@ export default function useUserCrud() {
 
         setIsEditing(true);
         try {
-            await userService.update(editUserId, editForm);
+            const payload = {
+                ...editForm,
+                roles: buildRolesPayload(editForm.isAdmin),
+            };
+            delete payload.isAdmin;
+            await userService.update(editUserId, payload);
             notify.success('User updated successfully');
             setShowEditModal(false);
             refetch();
@@ -250,7 +226,7 @@ export default function useUserCrud() {
             setShowUnlockDialog(false);
             refetch();
         } catch (err) {
-            notify.errorFromApi(err, 'Failed to unlock user');
+            notify.errorFromApi(err, 'Failed to unlock user account');
         } finally {
             setIsUnlocking(false);
         }
@@ -263,8 +239,6 @@ export default function useUserCrud() {
         search,
         setSearch,
         refetch,
-        availableRoles,
-        getRoleName,
         showCreateModal,
         setShowCreateModal,
         openCreateModal,
@@ -272,7 +246,7 @@ export default function useUserCrud() {
         createErrors,
         isCreating,
         handleCreateChange,
-        handleCreateRoleToggle,
+        handleCreateAdminToggle,
         handleCreateSubmit,
         showEditModal,
         setShowEditModal,
@@ -281,7 +255,7 @@ export default function useUserCrud() {
         editErrors,
         isEditing,
         handleEditChange,
-        handleEditRoleToggle,
+        handleEditAdminToggle,
         handleEditSubmit,
         showViewModal,
         setShowViewModal,

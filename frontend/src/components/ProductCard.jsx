@@ -12,9 +12,13 @@ function ProductCard({ product }) {
     const mrp = product.mrp ?? 0;
     const discount = calculateDiscount(price, mrp);
     const image = product.image || PLACEHOLDER_IMG;
+    const stock = product.stock ?? 0;
+    const inStock = stock > 0;
+    const rating = product.rating ?? null;
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
+        if (!inStock) return;
         const added = await addToCart(product);
         if (added) {
             notify.success(
@@ -30,7 +34,7 @@ function ProductCard({ product }) {
 
     return (
         <article className="h-full group">
-            <div className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md hover:border-[rgb(var(--color-primary))]/20">
+            <div className="bg-[rgb(var(--color-surface))] rounded-2xl border border-[rgb(var(--color-border))] shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md hover:shadow-[rgb(var(--color-primary))]/5 hover:border-[rgb(var(--color-primary))]/20 hover:-translate-y-1">
                 <Link to={`/products/${product.id}`} className="flex flex-col flex-grow">
                     {/* Image Section */}
                     <div className="relative overflow-hidden bg-[rgb(var(--color-bg-subtle))] aspect-square sm:aspect-[4/3] flex-shrink-0">
@@ -48,9 +52,9 @@ function ProductCard({ product }) {
                                     {discount}% OFF
                                 </span>
                             )}
-                            {product.requiresPrescription && (
-                                <span className="rounded-lg bg-[rgb(var(--color-secondary))] px-2.5 py-1 text-xs font-bold text-white shadow-md">
-                                    Rx
+                            {!inStock && (
+                                <span className="rounded-lg bg-red-500 px-2.5 py-1 text-xs font-bold text-white shadow-md">
+                                    Out of Stock
                                 </span>
                             )}
                         </div>
@@ -75,6 +79,24 @@ function ProductCard({ product }) {
                             {product.description}
                         </p>
 
+                        {/* Rating */}
+                        {rating != null && (
+                            <div className="flex items-center gap-1.5 mb-2">
+                                <div className="flex items-center gap-0.5">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <Icon
+                                            key={i}
+                                            name="Star"
+                                            className={`w-3.5 h-3.5 ${i < Math.round(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-[11px] font-medium text-[rgb(var(--color-text-muted))]">
+                                    {rating}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Price */}
                         <div className="flex items-end justify-between gap-2 mt-auto">
                             <div>
@@ -85,25 +107,39 @@ function ProductCard({ product }) {
                                     </p>
                                 )}
                             </div>
-                            {product.category && (
-                                <span className="rounded-lg bg-[rgb(var(--color-bg-subtle))] border border-[rgb(var(--color-border))] px-2 py-0.5 text-[10px] font-medium text-[rgb(var(--color-text-muted))]">
-                                    {product.category}
+                            {/* Stock status */}
+                            {inStock ? (
+                                <span className="text-[10px] font-semibold text-green-600 dark:text-green-400">
+                                    In Stock
+                                </span>
+                            ) : (
+                                <span className="text-[10px] font-semibold text-red-500 dark:text-red-400">
+                                    Out of Stock
                                 </span>
                             )}
                         </div>
                     </div>
                 </Link>
 
-                {/* Add to cart */}
-                <div className="p-3 pt-0">
+                {/* Actions */}
+                <div className="p-3 pt-0 flex flex-col gap-2">
                     <button
                         type="button"
                         onClick={handleAddToCart}
-                        className="w-full glass-button-primary !rounded-xl !py-2.5 !text-sm justify-center active:scale-[0.97] transition-transform duration-150"
+                        disabled={!inStock}
+                        className="w-full glass-button-primary !rounded-xl !py-2.5 !text-sm justify-center active:scale-[0.97] transition-transform duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
                     >
                         <Icon name="ShoppingCart" className="h-3.5 w-3.5" />
-                        Add to Cart
+                        {inStock ? 'Add to Cart' : 'Out of Stock'}
                     </button>
+                    <Link
+                        to={`/products/${product.id}`}
+                        className="w-full glass-button-secondary !rounded-xl !py-2.5 !text-sm justify-center active:scale-[0.97] transition-transform duration-150"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Icon name="Eye" className="h-3.5 w-3.5" />
+                        View Details
+                    </Link>
                 </div>
             </div>
         </article>

@@ -7,7 +7,7 @@ export default function NotFound() {
     return (
         <>
             <Seo title="Page not found" description="The requested page could not be found." />
-            <section className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-16 bg-surface">
+            <section className="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-16 bg-bg">
                 <motion.div
                     initial={{ opacity: 0, y: 30, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -46,7 +46,7 @@ export default function NotFound() {
                         >
                             <Link
                                 to="/"
-                                className="glass-button text-primary-dark"
+                                className="glass-button text-[rgb(var(--color-primary-dark))]"
                             >
                                 Go home
                                 <Icon name="ArrowRight" className="h-4 w-4" />
@@ -67,7 +67,7 @@ export default function NotFound() {
                                     animate={{ y: [0, -8, 0] }}
                                     transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                                 >
-                                    <Icon name="PackageSearch" className="mx-auto h-14 w-14 text-primary-light" />
+                                    <Icon name="PackageSearch" className="mx-auto h-14 w-14 text-teal-300" />
                                 </motion.div>
                                 <p className="mt-5 font-sans text-4xl">Page not found</p>
                                 <p className="mt-3 text-sm leading-6 text-white/70">Try the home page or browse products instead.</p>

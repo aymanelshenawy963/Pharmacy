@@ -65,7 +65,7 @@ export default function TestimonialSlider({ testimonials }) {
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">Reviewer</p>
                             <p className="mt-2 font-sans text-xl font-bold">{current.name}</p>
                             <p className="mt-2 text-sm text-white/60">
-                                Trusted customer of Jaya Medical Store
+                                Trusted customer of Medical Store
                             </p>
                         </div>
                         <div className="hidden rounded-xl border border-white/10 bg-white/5 p-3 text-white/30 lg:block">

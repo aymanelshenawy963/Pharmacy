@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 
 const errorVariants = {
     hidden: { opacity: 0, y: -4, height: 0 },
@@ -50,24 +50,26 @@ export default function FormField({
 
         if (type === 'select') {
             return (
-                <select
-                    id={name}
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    disabled={disabled}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    className={clsx(baseInputClass, 'appearance-none bg-no-repeat bg-[right_12px_center] bg-[length:16px]')}
-                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")` }}
-                >
-                    <option value="">{placeholder || 'Select...'}</option>
-                    {options?.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                        </option>
-                    ))}
-                </select>
+                <div className="relative">
+                    <select
+                        id={name}
+                        name={name}
+                        value={value}
+                        onChange={onChange}
+                        disabled={disabled}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        className={clsx(baseInputClass, 'appearance-none pr-10')}
+                    >
+                        <option value="">{placeholder || 'Select...'}</option>
+                        {options?.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[rgb(var(--color-text-muted))]" />
+                </div>
             );
         }
 
