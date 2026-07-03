@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pharmacy.Core.Entities;
 using Pharmacy.Core.Entities.Enums;
@@ -14,11 +15,13 @@ public class PaymentService : IPaymentService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly AppDbContext _context;
+    private readonly ILogger<PaymentService> _logger;
 
-    public PaymentService(IUnitOfWork unitOfWork, AppDbContext context, IOptions<StripeSettings> stripeOptions)
+    public PaymentService(IUnitOfWork unitOfWork, AppDbContext context, IOptions<StripeSettings> stripeOptions, ILogger<PaymentService> logger)
     {
         _unitOfWork = unitOfWork;
         _context    = context;
+        _logger     = logger;
         StripeConfiguration.ApiKey = stripeOptions.Value.SecretKey;
     }
 
@@ -76,27 +79,41 @@ public class PaymentService : IPaymentService
         return (updatedBasket, null);
     }
 
-    public async Task<Order> UpdateOrderPaymentSucceeded(string paymentIntentId)
+    public async Task<Order?> UpdateOrderPaymentSucceeded(string paymentIntentId)
     {
         var order = await _context.Orders
-            .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId)
-            ?? throw new KeyNotFoundException(
-                $"No order found for PaymentIntent '{paymentIntentId}'.");
+            .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+
+        if (order is null)
+        {
+            _logger.LogWarning(
+                "Order not yet created for PaymentIntent {Id} — webhook arrived before order creation",
+                paymentIntentId);
+            return null;
+        }
 
         order.Status = OrderStatus.Paid;
         await _unitOfWork.SaveAsync();
+        _logger.LogInformation("Order {OrderId} marked as Paid", order.Id);
         return order;
     }
 
-    public async Task<Order> UpdateOrderPaymentFailed(string paymentIntentId)
+    public async Task<Order?> UpdateOrderPaymentFailed(string paymentIntentId)
     {
         var order = await _context.Orders
-            .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId)
-            ?? throw new KeyNotFoundException(
-                $"No order found for PaymentIntent '{paymentIntentId}'.");
+            .FirstOrDefaultAsync(o => o.PaymentIntentId == paymentIntentId);
+
+        if (order is null)
+        {
+            _logger.LogWarning(
+                "Order not yet created for PaymentIntent {Id} — webhook arrived before order creation",
+                paymentIntentId);
+            return null;
+        }
 
         order.Status = OrderStatus.PaymentFailed;
         await _unitOfWork.SaveAsync();
+        _logger.LogInformation("Order {OrderId} marked as PaymentFailed", order.Id);
         return order;
     }
 
