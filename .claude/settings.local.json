@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l \"IOrderRepository\\\\|IProductRepository\\\\|IBasketRepository\")",
+      "Bash(git rebase *)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "mcp__visualize__show_widget",
+      "Read(//c/Users/AYMANE~1/AppData/Local/Temp/claude/D--programming-Grad-Project-Code-Pharmacy/a65418a3-bbc4-4152-bb97-a243d9493786/scratchpad/deck/**)",
+      "Bash(node gen.js \"Pharmacy_Presentation.pptx\")",
+      "Bash(python scripts/office/soffice.py --headless --convert-to pdf Pharmacy_Presentation.pptx)",
+      "Bash(soffice --headless --convert-to pdf Pharmacy_Presentation.pptx)",
+      "Read(//c/Program Files/LibreOffice/program/**)",
+      "Read(//c/Program Files \\(x86\\)/LibreOffice/program/**)",
+      "Bash(sed -i 's/pageNum\\(s,8\\);/pageNum\\(s,10\\);/; s/pageNum\\(s,9\\);/pageNum\\(s,11\\);/; s/pageNum\\(s,10\\);/pageNum\\(s,12\\);/' gen.js)",
+      "Bash(sed -i '265s/pageNum\\(s,12\\);/pageNum\\(s,8\\);/; 305s/pageNum\\(s,11\\);/pageNum\\(s,9\\);/; 341s/pageNum\\(s,12\\);/pageNum\\(s,10\\);/' gen.js)",
+      "Bash(cp \"Pharmacy_Presentation.pptx\" \"/c/Users/Ayman Elshenawy/Desktop/Pharmacy_Presentation.pptx\")",
+      "Bash(cp \"/c/Users/AYMANE~1/AppData/Local/Temp/claude/D--programming-Grad-Project-Code-Pharmacy/a65418a3-bbc4-4152-bb97-a243d9493786/scratchpad/deck/Pharmacy_Presentation.pptx\" \"/c/Users/Ayman Elshenawy/Desktop/Pharmacy_Presentation_v2.pptx\" && echo \"SAVED as Pharmacy_Presentation_v2.pptx\")"
+    ]
+  }
+}
