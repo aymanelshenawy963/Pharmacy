@@ -1,51 +1,133 @@
+<div align="center">
+
 # 💊 Pharmacy E-Commerce Platform
 
-A production-oriented **online pharmacy** system built with **ASP.NET Core (.NET 10)** following **Clean Architecture**. It provides a complete e-commerce experience — product catalog, basket, Stripe payments, and order management — plus an **automated low-stock monitoring system** powered by Hangfire.
+**A full-stack online pharmacy built with ASP.NET Core (.NET 10) & React, following Clean Architecture.**
+
+Product catalog · Stripe payments · Order management · Automated low-stock monitoring
+
+<br/>
+
+![.NET](https://img.shields.io/badge/.NET_10-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-626CD9?style=for-the-badge&logo=stripe&logoColor=white)
+![Hangfire](https://img.shields.io/badge/Hangfire-BE1E2D?style=for-the-badge)
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [Overview](#-overview)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Configuration](#-configuration)
+- [API Reference](#-api-reference)
+- [Low-Stock Monitoring](#-low-stock-monitoring-system)
+- [Security](#-security)
+- [Roadmap](#-roadmap)
+
+---
+
+## 📖 Overview
+
+The **Pharmacy E-Commerce Platform** digitizes pharmacy retail from end to end. Customers browse a medicine catalog, build a basket, pay securely through Stripe, and track their orders. Administrators manage the catalog, users, and orders — and are **automatically alerted when any product runs low on stock**, thanks to a recurring Hangfire background job.
+
+The backend is designed around **Clean Architecture** principles for a maintainable, testable, and scalable codebase.
 
 ---
 
 ## ✨ Features
 
-- 🛒 **Product Catalog** — browse, search & filter medicines by category, with prescription flags and multiple images
-- 🧺 **Shopping Basket** — fast Redis-backed basket persisted per user
-- 💳 **Secure Payments** — Stripe PaymentIntents with webhook-driven order updates
-- 📦 **Order Management** — customers track orders; admins update status (Pending → Paid → Shipped → Delivered)
-- ⭐ **Product Reviews** — authenticated customers rate and comment on products
-- 🔔 **Low-Stock Monitoring** — a Hangfire job scans inventory every minute and emails admins when stock runs low, auto-resolving alerts when restocked
-- 🔐 **Security** — JWT authentication, refresh tokens, role-based authorization, and OTP email confirmation
+### 👤 Customer
+- 🔍 Browse, search & filter products by category
+- 💊 View product details, prescription requirements & reviews
+- 🧺 Add items to a fast, Redis-backed basket
+- 💳 Pay securely via Stripe
+- 📦 Place orders and track their status
+- ⭐ Rate and review purchased products
+
+### 🛡️ Admin
+- 📦 Manage products, categories & stock
+- 👥 Manage users and roles (enable/disable accounts)
+- 📋 View all orders and update their status
+- 🔔 Receive & manage automated low-stock notifications
+
+### ⚙️ System
+- ⏱️ Hangfire job scans inventory **every minute**
+- 📧 Emails **all admins** when stock is low
+- ♻️ Auto-resolves alerts once stock recovers
 
 ---
 
 ## 🏗️ Architecture
 
-The solution follows **Clean Architecture** — dependencies point inward, and the core has zero external dependencies.
+Built on **Clean Architecture** — dependencies always point inward, and `Pharmacy.Core` has **zero** external dependencies.
 
 ```
-Pharmacy.API              → Controllers, Hangfire Jobs, Middleware, JWT pipeline
-   ↓ depends on
-Pharmacy.Infrastructure   → EF Core, Repositories, Services, Email, Stripe, Redis
-   ↓ depends on
-Pharmacy.Core             → Entities, Interfaces, DTOs, Enums, business contracts
+┌─────────────────────────────────────────────────────────┐
+│  Pharmacy.API                                            │
+│  Controllers · Hangfire Jobs · Middleware · JWT Pipeline │
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│  Pharmacy.Infrastructure                                 │
+│  EF Core · Repositories · Services · Email · Stripe·Redis│
+└───────────────────────────┬─────────────────────────────┘
+                            │ depends on
+┌───────────────────────────▼─────────────────────────────┐
+│  Pharmacy.Core                          (stable center)  │
+│  Entities · Interfaces · DTOs · Enums · Contracts        │
+└──────────────────────────────────────────────────────────┘
 ```
 
-- **Repository + Unit of Work** patterns for data access
-- **AutoMapper** for entity ↔ DTO mapping
-- **FluentValidation** for request validation
+**Patterns used:** Repository · Unit of Work · Dependency Injection · DTO mapping (AutoMapper) · FluentValidation
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
+| Category | Technologies |
+|----------|--------------|
 | **Backend** | ASP.NET Core (.NET 10), Entity Framework Core, ASP.NET Identity |
-| **Frontend** | React, Axios |
+| **Frontend** | React, Vite, Axios, Tailwind CSS |
 | **Database** | SQL Server |
 | **Cache** | Redis (basket storage) |
-| **Background Jobs** | Hangfire (SQL Server storage) |
-| **Payments** | Stripe.NET |
+| **Background Jobs** | Hangfire (SQL Server storage + dashboard) |
+| **Payments** | Stripe.NET (PaymentIntents + Webhooks) |
 | **Email** | MailKit (SMTP) |
-| **Auth** | JWT Bearer + Refresh Tokens |
+| **Auth** | JWT Bearer + Refresh Tokens + OTP confirmation |
+| **Validation** | FluentValidation |
+| **Mapping** | AutoMapper |
+
+---
+
+## 📂 Project Structure
+
+```
+Pharmacy/
+├── Pharmacy.API/              # Presentation layer
+│   ├── Controllers/           # REST endpoints
+│   ├── BackgroundJobs/        # Hangfire job definitions
+│   └── Program.cs             # App bootstrap & DI
+├── Pharmacy.Core/             # Domain layer
+│   ├── Entities/              # Domain models
+│   ├── Interfaces/            # Repository & service contracts
+│   ├── DTO/                   # Data transfer objects
+│   └── Mapping/               # AutoMapper profiles
+├── Pharmacy.Infrastructure/   # Data & external services
+│   ├── Data/                  # DbContext, configs, migrations
+│   ├── Repositories/          # EF Core implementations
+│   └── Services/              # Email, Payment, Auth, etc.
+└── frontend/                  # React application
+```
 
 ---
 
@@ -56,44 +138,36 @@ Pharmacy.Core             → Entities, Interfaces, DTOs, Enums, business contra
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - SQL Server
 - Redis
-- Node.js (for the frontend)
+- Node.js 18+
 - A [Stripe](https://dashboard.stripe.com) account (test mode)
 
-### 1. Clone the repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/aymanelshenawy963/Pharmacy.git
 cd Pharmacy
 ```
 
-### 2. Configure secrets
+### 2. Configure secrets — see [Configuration](#-configuration)
 
-Sensitive values are stored in **User Secrets** (never committed). From the `Pharmacy.API` folder:
-
-```bash
-dotnet user-secrets set "StripeSettings:SecretKey"    "sk_test_your_key"
-dotnet user-secrets set "StripeSettings:WebhookSecret" "whsec_your_secret"
-dotnet user-secrets set "MailSettings:Password"        "your_app_password"
-```
-
-> `appsettings.json` ships with placeholder values for these keys.
-
-### 3. Apply database migrations
+### 3. Apply migrations
 
 ```bash
 dotnet ef database update --project Pharmacy.Infrastructure --startup-project Pharmacy.API
 ```
 
-### 4. Run the API
+### 4. Run the backend
 
 ```bash
 cd Pharmacy.API
 dotnet run
 ```
 
-The API will be available at `https://localhost:7293`, with:
-- **Swagger UI** → `https://localhost:7293/swagger`
-- **Hangfire Dashboard** → `https://localhost:7293/hangfire`
+| Service | URL |
+|---------|-----|
+| API | `https://localhost:7293` |
+| Swagger UI | `https://localhost:7293/swagger` |
+| Hangfire Dashboard | `https://localhost:7293/hangfire` |
 
 ### 5. Run the frontend
 
@@ -105,39 +179,118 @@ npm run dev
 
 ---
 
-## 🔑 Key API Endpoints
+## 🔧 Configuration
 
+Sensitive values live in **User Secrets** (never committed); `appsettings.json` ships with safe placeholders. From the `Pharmacy.API` folder:
+
+```bash
+# Stripe
+dotnet user-secrets set "StripeSettings:SecretKey"     "sk_test_your_key"
+dotnet user-secrets set "StripeSettings:PublishableKey" "pk_test_your_key"
+dotnet user-secrets set "StripeSettings:WebhookSecret"  "whsec_your_secret"
+
+# Email (Gmail app password if 2FA is on)
+dotnet user-secrets set "MailSettings:Password"         "your_app_password"
+
+# Hangfire dashboard credentials
+dotnet user-secrets set "HangfireSettings:UserName"     "admin"
+dotnet user-secrets set "HangfireSettings:Password"     "strong_password"
+```
+
+> 💡 To obtain your Stripe secret key: **Stripe Dashboard → Developers → API keys** (with Test mode enabled).
+
+---
+
+## 📡 API Reference
+
+### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/Auth/register` | Register a new account |
-| `POST` | `/Auth/login` | Login and receive a JWT |
-| `GET`  | `/api/products` | List products |
+| `POST` | `/Auth/confirm-email` | Confirm email with OTP |
+| `POST` | `/Auth/login` | Login → JWT + refresh token |
+| `POST` | `/Auth/refresh-token` | Rotate access token |
+| `POST` | `/Auth/forgot-password` | Send reset code |
+| `POST` | `/Auth/reset-password` | Reset password |
+
+### Catalog & Basket
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET`  | `/api/products` | List / filter products |
 | `POST` | `/api/baskets` | Create / update basket (Redis) |
-| `POST` | `/api/payments` | Create Stripe PaymentIntent |
+| `GET`  | `/api/baskets/{id}` | Get basket |
+
+### Payments & Orders
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/payments` | Create / update Stripe PaymentIntent |
 | `POST` | `/api/payments/webhook` | Stripe webhook receiver |
 | `POST` | `/api/orders` | Place an order |
-| `GET`  | `/api/orders/all` | List all orders (Admin) |
-| `GET`  | `/api/notifications` | Low-stock notifications (Admin) |
-| `PUT`  | `/api/notifications/{id}/read` | Mark notification as read (Admin) |
+| `GET`  | `/api/orders` | Customer's own orders |
+| `PUT`  | `/api/orders/{id}/cancel` | Cancel a pending order |
+| `GET`  | `/api/orders/all` | **Admin** — all orders |
+| `PUT`  | `/api/orders/{id}/status` | **Admin** — update status |
+
+### Notifications *(Admin)*
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET`  | `/api/notifications` | List low-stock notifications |
+| `GET`  | `/api/notifications/count` | Unread count (badge) |
+| `PUT`  | `/api/notifications/{id}/read` | Mark as read |
 
 ---
 
-## 🔔 Low-Stock Monitoring Flow
+## 🔔 Low-Stock Monitoring System
+
+An automated **Hangfire recurring job** keeps inventory under watch — the platform's flagship feature.
 
 ```
-Hangfire (every minute)
-        ↓
-Scan all products
-        ↓
-Stock ≤ 3 ?  ── yes ──► Create Active notification (no duplicates) ──► Email all admins
+Hangfire Job (every minute)
         │
-        └── stock recovered ──► Auto-resolve the notification
+        ▼
+  Scan all products
+        │
+   Stock ≤ 3 ?
+        │
+   ┌────┴─────────────────────────┐
+   │ YES                          │ NO (recovered)
+   ▼                              ▼
+Active notification exists?    Active notification exists?
+   │ no ──► Create notification    │ yes ──► Auto-resolve
+   │        + Email all admins     │
+   │ yes ─► do nothing (no dupes)  │
 ```
 
-Notifications follow a lifecycle: **Active → Read → Resolved**.
+**Notification lifecycle:** `Active` → `Read` → `Resolved`
+
+- ✅ **No duplicate alerts** — one active notification per product
+- ✅ **Self-healing** — resolves automatically when stock is replenished
+- ✅ **Separation of concerns** — the job only triggers; all logic lives in `NotificationService`
 
 ---
 
-## 📄 License
+## 🔐 Security
 
-This project was developed as a graduation project.
+- **JWT Authentication** — stateless bearer tokens, validated per request
+- **Refresh Tokens** — rotating tokens for silent re-authentication
+- **Role-Based Authorization** — `Admin` vs `Customer` gate every endpoint
+- **Email Confirmation (OTP)** — accounts activate only after verification
+- **Password Reset (OTP)** — secure forgotten-password flow
+- **Account Lockout** — admins can disable compromised accounts
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Real-time admin dashboard (SignalR)
+- [ ] Sales analytics & reporting
+- [ ] Delivery tracking
+- [ ] Mobile application
+
+---
+
+<div align="center">
+
+Developed as a **Graduation Project** 🎓
+
+</div>

@@ -1,0 +1,86 @@
+### Pharmacy — Payment / Stripe backend test script
+### Use the VS Code "REST Client" extension, or copy into Postman.
+### Base URL — adjust the port if yours differs.
+@baseUrl = https://localhost:7293
+@basketId = test-basket-001
+@deliveryMethodId = 1
+
+########################################################################
+# STEP 1 — Login as a CUSTOMER to get a JWT
+########################################################################
+# @name login
+POST {{baseUrl}}/Auth/login
+Content-Type: application/json
+
+{
+  "email": "customer@example.com",
+  "password": "YourPassword123"
+}
+
+### Capture the token from the response above
+@token = {{login.response.body.token}}
+
+########################################################################
+# STEP 2 — Create a basket in Redis (must contain items)
+########################################################################
+POST {{baseUrl}}/api/baskets
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": "{{basketId}}",
+  "items": [
+    {
+      "productId": 1,
+      "productName": "Aspirin",
+      "price": 9.99,
+      "quantity": 2,
+      "image": "",
+      "category": "Pain Relief"
+    }
+  ]
+}
+
+########################################################################
+# STEP 3 — Create / update the Stripe PaymentIntent  (THE MAIN TEST)
+# Expected 200 with a clientSecret + paymentIntentId on the basket.
+########################################################################
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "basketId": "{{basketId}}",
+  "deliveryMethodId": {{deliveryMethodId}}
+}
+
+########################################################################
+# STEP 4 — Call it again with the SAME basket
+# Should UPDATE the existing intent (same id), not create a new one.
+########################################################################
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "basketId": "{{basketId}}",
+  "deliveryMethodId": {{deliveryMethodId}}
+}
+
+########################################################################
+# ERROR CASES — should each return 400 with a clear message
+########################################################################
+
+### 4a. Non-existent basket → "Basket is empty or not found"
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "basketId": "does-not-exist", "deliveryMethodId": 1 }
+
+### 4b. Bad delivery method → "Delivery method not found"
+POST {{baseUrl}}/api/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "basketId": "{{basketId}}", "deliveryMethodId": 99999 }

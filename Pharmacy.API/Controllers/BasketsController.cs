@@ -6,7 +6,7 @@ using Pharmacy.API.Helpers;
 using Pharmacy.Core.Consts;
 using Pharmacy.Core.interfaces;
 
-[Authorize(Roles = DefaultRoles.Customer)]
+[Authorize()]
 public class BasketsController : BaseController
 {
     public BasketsController(IUnitOfWork unitOfWork, IMapper mapper)
@@ -17,8 +17,6 @@ public class BasketsController : BaseController
     [HttpGet("{id}")]
     public async Task<ActionResult<Basket>> GetBasketById(string id)
     {
-        //if (string.IsNullOrWhiteSpace(id))
-        //    return BadRequest(new ResponseAPI(400, "Invalid basket id"));
 
         var basket = await _unitOfWork.BasketRepository.GetBasketAsync(id);
 
