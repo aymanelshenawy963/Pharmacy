@@ -83,7 +83,7 @@ public class PaymentService : IPaymentService
             ?? throw new KeyNotFoundException(
                 $"No order found for PaymentIntent '{paymentIntentId}'.");
 
-        order.Status = OrderStatus.PaymentReceived;
+        order.Status = OrderStatus.Paid;
         await _unitOfWork.SaveAsync();
         return order;
     }

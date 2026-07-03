@@ -9,12 +9,11 @@ import notify from '../../utils/notifications';
 import { ORDER_STATUS_STYLES, formatDate } from '../../constants/ui';
 import { pageVariants, itemVariants } from '../../constants/animations';
 import PageHeader from '../../components/admin/PageHeader';
-import SearchInput from '../../components/admin/SearchInput';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 import EmptyState from '../../components/admin/EmptyState';
 
-const STATUS_OPTIONS = ['All', 'Pending', 'Paid', 'Shipped', 'Delivered', 'Cancelled'];
+const STATUS_OPTIONS = ['All', 'Pending', 'Paid', 'Cancelled'];
 
 export default function Orders() {
     const { user } = useAuth();
@@ -22,7 +21,6 @@ export default function Orders() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
 
     const fetchOrders = async () => {
@@ -51,24 +49,11 @@ export default function Orders() {
         let result = orders;
 
         if (statusFilter !== 'All') {
-            result = result.filter((o) =>
-                statusFilter === 'Paid'
-                    ? o.status === 'Paid' || o.status === 'PaymentReceived'
-                    : o.status === statusFilter
-            );
-        }
-
-        if (search.trim()) {
-            const q = search.toLowerCase();
-            result = result.filter(
-                (o) =>
-                    String(o.id).includes(q) ||
-                    o.deliveryMethod?.toLowerCase().includes(q)
-            );
+            result = result.filter((o) => o.status === statusFilter);
         }
 
         return result;
-    }, [orders, search, statusFilter]);
+    }, [orders, statusFilter]);
 
     if (error === 'access_denied') {
         return (
@@ -107,28 +92,20 @@ export default function Orders() {
             {error && error !== 'access_denied' && <ErrorBanner message={error} onRetry={fetchOrders} />}
 
             {!loading && !error && (
-                <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                    <SearchInput
-                        value={search}
-                        onChange={setSearch}
-                        placeholder="Search by order ID..."
-                        className="flex-1"
-                    />
-                    <div className="flex gap-1.5 flex-wrap">
-                        {STATUS_OPTIONS.map((status) => (
-                            <button
-                                key={status}
-                                onClick={() => setStatusFilter(status)}
-                                className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 min-h-[44px] ${
-                                    statusFilter === status
-                                        ? 'bg-[rgb(var(--color-primary))] text-white shadow-sm'
-                                        : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-border))]'
-                                }`}
-                            >
-                                {status}
-                            </button>
-                        ))}
-                    </div>
+                <div className="flex gap-1.5 flex-wrap mt-6">
+                    {STATUS_OPTIONS.map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 min-h-[44px] ${
+                                statusFilter === status
+                                    ? 'bg-[rgb(var(--color-primary))] text-white shadow-sm'
+                                    : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-border))]'
+                            }`}
+                        >
+                            {status}
+                        </button>
+                    ))}
                 </div>
             )}
 
@@ -139,16 +116,16 @@ export default function Orders() {
             ) : filtered.length === 0 ? (
                 <EmptyState
                     icon={Package}
-                    title={search || statusFilter !== 'All' ? 'No orders match your filters' : 'No orders yet'}
+                    title={statusFilter !== 'All' ? 'No orders match your filters' : 'No orders yet'}
                     description={
-                        search || statusFilter !== 'All'
-                            ? 'Try adjusting your search or filter criteria.'
+                        statusFilter !== 'All'
+                            ? 'Try adjusting your filter criteria.'
                             : 'When you place an order, it will appear here.'
                     }
                     action={
-                        search || statusFilter !== 'All' ? (
+                        statusFilter !== 'All' ? (
                             <button
-                                onClick={() => { setSearch(''); setStatusFilter('All'); }}
+                                onClick={() => setStatusFilter('All')}
                                 className="glass-button-primary w-full sm:w-auto justify-center"
                             >
                                 Clear Filters

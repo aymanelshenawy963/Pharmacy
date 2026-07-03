@@ -10,13 +10,11 @@ import { pageVariants, itemVariants } from '../../constants/animations';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 import ErrorBanner from '../../components/admin/ErrorBanner';
 
-const ORDER_STATUSES = ['Pending', 'PaymentReceived', 'Paid', 'Shipped', 'Delivered', 'Cancelled'];
+const ORDER_STATUSES = ['Pending', 'Paid', 'Shipped', 'Delivered', 'Cancelled'];
 
 function getStatusTransitions(currentStatus) {
     switch (currentStatus) {
         case 'Pending':
-            return ['Paid', 'Cancelled'];
-        case 'PaymentReceived':
             return ['Paid', 'Cancelled'];
         case 'Paid':
             return ['Shipped', 'Cancelled'];

@@ -92,7 +92,7 @@ public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext c
             var piStatus = await _paymentService.GetPaymentIntentStatusAsync(order.PaymentIntentId);
             if (piStatus == "succeeded" && order.Status == OrderStatus.Pending)
             {
-                order.Status = OrderStatus.PaymentReceived;
+                order.Status = OrderStatus.Paid;
                 await _unitOfWork.SaveAsync();
             }
         }

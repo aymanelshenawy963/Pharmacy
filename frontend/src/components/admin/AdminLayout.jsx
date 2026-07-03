@@ -105,7 +105,9 @@ function SidebarContent({ onNavigate, user, onLogout, unreadCount = 0 }) {
                     Account
                 </p>
                 <div className="flex flex-col gap-1">
-                    {accountItems.map((item) => (
+                    {accountItems
+                        .filter((item) => item.label !== 'My Orders' || !isAdmin)
+                        .map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}

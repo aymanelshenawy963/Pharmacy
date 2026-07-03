@@ -9,17 +9,15 @@ import { ORDER_STATUS_STYLES, formatDate } from '../../constants/ui';
 import { pageVariants } from '../../constants/animations';
 import PageHeader from '../../components/admin/PageHeader';
 import DataTable from '../../components/admin/DataTable';
-import SearchInput from '../../components/admin/SearchInput';
 import LoadingSpinner from '../../components/admin/LoadingSpinner';
 
-const STATUS_OPTIONS = ['All', 'Pending', 'PaymentReceived', 'PaymentFailed', 'Paid', 'Shipped', 'Delivered', 'Cancelled'];
+const STATUS_OPTIONS = ['All', 'Pending', 'Paid', 'Cancelled'];
 
 export default function AdminOrders() {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
 
     const fetchOrders = async () => {
@@ -44,26 +42,11 @@ export default function AdminOrders() {
         let result = orders;
 
         if (statusFilter !== 'All') {
-            result = result.filter((o) =>
-                statusFilter === 'Paid'
-                    ? o.status === 'Paid' || o.status === 'PaymentReceived'
-                    : o.status === statusFilter
-            );
-        }
-
-        if (search.trim()) {
-            const q = search.toLowerCase();
-            result = result.filter(
-                (o) =>
-                    String(o.id).includes(q) ||
-                    o.buyerEmail?.toLowerCase().includes(q) ||
-                    o.shippingAddress?.firstName?.toLowerCase().includes(q) ||
-                    o.shippingAddress?.lastName?.toLowerCase().includes(q)
-            );
+            result = result.filter((o) => o.status === statusFilter);
         }
 
         return result;
-    }, [orders, search, statusFilter]);
+    }, [orders, statusFilter]);
 
     const columns = [
         {
@@ -149,28 +132,20 @@ export default function AdminOrders() {
             />
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <SearchInput
-                    value={search}
-                    onChange={setSearch}
-                    placeholder="Search by order ID, email, or name..."
-                    className="flex-1"
-                />
-                <div className="flex gap-1.5 flex-wrap">
-                    {STATUS_OPTIONS.map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setStatusFilter(status)}
-                            className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 min-h-[44px] ${
-                                statusFilter === status
-                                    ? 'bg-[rgb(var(--color-primary))] text-white shadow-sm'
-                                    : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-border))]'
-                            }`}
-                        >
-                            {status}
-                        </button>
-                    ))}
-                </div>
+            <div className="flex gap-1.5 flex-wrap">
+                {STATUS_OPTIONS.map((status) => (
+                    <button
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 min-h-[44px] ${
+                            statusFilter === status
+                                ? 'bg-[rgb(var(--color-primary))] text-white shadow-sm'
+                                : 'bg-[rgb(var(--color-bg-subtle))] text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-border))]'
+                        }`}
+                    >
+                        {status}
+                    </button>
+                ))}
             </div>
 
             {loading ? (
@@ -186,7 +161,7 @@ export default function AdminOrders() {
                     onRetry={fetchOrders}
                     emptyTitle="No orders found"
                     emptyDescription={
-                        search || statusFilter !== 'All'
+                        statusFilter !== 'All'
                             ? 'No orders match your filters.'
                             : 'No orders have been placed yet.'
                     }
