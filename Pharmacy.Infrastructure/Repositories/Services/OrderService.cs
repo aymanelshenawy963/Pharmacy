@@ -75,15 +75,18 @@ public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, AppDbContext c
             basket.PaymentIntentId ?? string.Empty
         );
 
-        // 8. Stage the order (no DB write yet)
-        await _unitOfWork.OrderRepository.AddAsync(order);
-
-        // 9. Single atomic commit — order insert + all stock decrements in one transaction
-        var rowsAffected = await _unitOfWork.SaveAsync();
-        if (rowsAffected <= 0)
+        // 8. Persist the order + all stock decrements in a single transaction.
+        //    AddAsync calls SaveChanges internally, so this one write is the atomic commit.
+        try
+        {
+            await _unitOfWork.OrderRepository.AddAsync(order);
+        }
+        catch (DbUpdateException)
+        {
             return (null, "Failed to save the order. Please try again");
+        }
 
-        // 10. Delete the basket from Redis — best-effort; the order is already persisted
+        // 9. Delete the basket from Redis — best-effort; the order is already persisted
         await _unitOfWork.BasketRepository.DeleteBasketAsync(dto.BasketId);
 
         // 11. Re-query to populate navigation properties needed by the mapper
